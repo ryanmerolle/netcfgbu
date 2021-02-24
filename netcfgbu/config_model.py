@@ -90,6 +90,7 @@ class DefaultCredential(Credential, BaseSettings):
 
 class Defaults(NoExtraBaseModel, BaseSettings):
     configs_dir: Optional[EnvExpand] = Field(..., env=("NETCFGBU_CONFIGSDIR", "PWD"))
+    plugins_dir: Optional[EnvExpand] = Field(..., env=("NETCFGBU_PLUGINSDIR", "PWD"))
     inventory: EnvExpand = Field(..., env="NETCFGBU_INVENTORY")
     credentials: DefaultCredential
 
@@ -101,6 +102,12 @@ class Defaults(NoExtraBaseModel, BaseSettings):
 
     @validator("configs_dir")
     def _configs_dir(cls, value):  # noqa
+        return Path(value).absolute()
+
+    @validator("plugins_dir")
+    def _plugins_dir(cls, value):  # noqa
+        if value == os.getenv("PWD") and "/plugins" not in value:
+            value = value + "/plugins"
         return Path(value).absolute()
 
 
