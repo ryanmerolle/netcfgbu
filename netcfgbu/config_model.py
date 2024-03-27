@@ -112,7 +112,7 @@ class Defaults(NoExtraBaseModel, BaseSettings):
 
 
 class FilePathEnvExpand(FilePath):
-    """ A FilePath field whose value can interpolated from env vars """
+    """A FilePath field whose value can interpolated from env vars"""
 
     @classmethod
     def __get_validators__(cls):

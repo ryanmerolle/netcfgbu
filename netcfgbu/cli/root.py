@@ -97,7 +97,7 @@ opt_config_file = click.option(
     "--config",
     envvar="NETCFGBU_CONFIG",
     type=click.File(),
-    callback=check_for_default
+    callback=check_for_default,
     # required=True,
     # default="netcfgbu.toml",
 )

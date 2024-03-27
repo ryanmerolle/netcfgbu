@@ -69,16 +69,16 @@ class JumpHost(object):
 
     @property
     def name(self):
-        """ Returns the string-name of the jump host"""
+        """Returns the string-name of the jump host"""
         return self._spec.name
 
     @property
     def is_active(self):
-        """ Return True if the jumphost is connected, False otherwise """
+        """Return True if the jumphost is connected, False otherwise"""
         return bool(self._conn)
 
     def _init_filters(self, field_names):
-        """ Called only by init, prepares the jump host filter functions to later use """
+        """Called only by init, prepares the jump host filter functions to later use"""
         include, exclude = self._spec.include, self._spec.exclude
         if include:
             self.filters.append(
@@ -109,7 +109,7 @@ class JumpHost(object):
             conn_args["port"] = proxy_parts.port
 
         async def connect_to_jh():
-            """ obtain the SSH client connection """
+            """obtain the SSH client connection"""
             self._conn = await asyncssh.connect(**conn_args)
 
         await asyncio.wait_for(connect_to_jh(), timeout=self._spec.timeout)

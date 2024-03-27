@@ -43,7 +43,7 @@ def rec_to_csv(rec):
 
 
 def cli():
-    """ Create CLI option parser, parse User inputs and return results """
+    """Create CLI option parser, parse User inputs and return results"""
     options_parser = argparse.ArgumentParser()
     options_parser.add_argument("--site", action="store", help="limit devices to site")
     options_parser.add_argument(

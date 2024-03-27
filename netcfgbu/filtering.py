@@ -4,6 +4,7 @@ This file contains the filtering functions that are using to process the
 not specific to the netcfgbu inventory column names, can could be re-used for
 other CSV related tools and use-cases.
 """
+
 import ipaddress
 import operator
 import re
@@ -38,7 +39,7 @@ class Filter(ABC):
 
 
 class RegexFilter(Filter):
-    """ Filter an inventory record field with a given regex """
+    """Filter an inventory record field with a given regex"""
 
     def __init__(self, fieldname: str, expr: str) -> None:
         self.fieldname = fieldname
