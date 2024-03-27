@@ -14,6 +14,7 @@ from invoke import task
 
 @task
 def precheck(ctx):
+    """Run pre-checks on the project."""
     ctx.run("black .")
     ctx.run("flake8 .")
     ctx.run("pre-commit run -a")
@@ -22,7 +23,14 @@ def precheck(ctx):
 
 @task
 def clean(ctx):
+    """Clean up the project."""
     ctx.run("python setup.py clean")
     ctx.run("rm -rf netcfgbu.egg-info")
     ctx.run("rm -rf .pytest_cache .pytest_tmpdir .coverage")
     ctx.run("rm -rf htmlcov")
+
+
+@task
+def install(ctx):
+    """Install the package locally."""
+    ctx.run("pip install .")
