@@ -8,10 +8,10 @@ Example:
 
 ```toml
 [[inventory]]
-    script = "$PROJ_DIR/netcfgbu/examples/netbox_inventory.py --output inventory.csv"
+    script = "$PROJ_DIR/netcfgbu/netbox/netbox_inventory.py --output inventory.csv"
 ```
 
-You can find the Netbox code example [here](../examples/netbox_inventory.py).
+You can find the Netbox code example [here](../netbox/netbox_inventory.py).
 
 You invoke the script by:
 

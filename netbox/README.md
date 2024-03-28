@@ -30,7 +30,7 @@ To use the `netbox_inventory.py` script you will need to export two environment 
 
 #### NETBOX_ADDR
 
-The URL to your netbox server, for example: "<https://netbox.mycorp.com>"
+The URL to your netbox server, for example: "<https://demo.netbox.dev>"
 
 #### NETBOX_TOKEN
 
