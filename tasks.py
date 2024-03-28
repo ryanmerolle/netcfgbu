@@ -33,4 +33,4 @@ def clean(ctx):
 @task
 def install(ctx):
     """Install the package locally."""
-    ctx.run("pip install .")
+    ctx.run("pip install . --force")
