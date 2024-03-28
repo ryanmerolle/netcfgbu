@@ -178,9 +178,9 @@ that we can get to the actual work of steps 2 and 3.  Consider the difference
 in User experience it would mean if step-1 took 60 minutes vs. 60 seconds.
 
 With that design goal in mind I chose to take advantage of the modern Python
-3.8 asyncio features rather than using a traditional threading approach.  In my
+3.9 asyncio features rather than using a traditional threading approach.  In my
 many years dealing with multi-threaded applications, my net-net from all of it
-is to avoid when possible :-)  Python 3.8 asyncio feature maturity coupled with
+is to avoid when possible :-)  Python 3.9 asyncio feature maturity coupled with
 the maturity of the asyncssh package allowed me to implement `netcfgbu` to
 maximize speed, reduce user friction, and increase reliability by avoiding
 threading.

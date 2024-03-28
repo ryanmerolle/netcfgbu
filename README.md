@@ -1,4 +1,4 @@
-[![Python 3.8](https://img.shields.io/badge/python-3.8-blue.svg)](https://www.python.org/downloads/release/python-380/)
+[![Python 3.9](https://img.shields.io/badge/python-3.9-blue.svg)](https://www.python.org/downloads/release/python-380/)
 [![Code Style](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/ambv/black)
 
 ![version](docs/version.svg)
@@ -117,7 +117,7 @@ configuration file, this would be used:
 
 ### System Requirements and Installation
 
-This tool requires the use of Python3.8.<br/>
+This tool requires the use of Python3.9.<br/>
 Installation available via PyPI:
 
 ```shell script
