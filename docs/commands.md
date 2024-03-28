@@ -14,16 +14,18 @@ The `inventory ls` command is used to list the contents of the current inventory
 is useful for when you want to test your filtering expressions before you try to run a backup.
 
 Example:
+
 ```shell script
-$ netcfgbu inventory ls --limit os_name=eos --brief
+netcfgbu inventory ls --limit os_name=eos --brief
 ```
 
 The `inventory build` command is used to invoke your inventory script that will create the inventory
 file.
 
 Example:
+
 ```shell script
-$ netcfgbu inventory build --name netbox
+netcfgbu inventory build --name netbox
 ```
 
 **probe**<br/>
@@ -32,7 +34,7 @@ is a useful first step before attempting to run a backup.  This probe does **not
 login / authenticate with SSH.
 
 ```shell script
-$ netcfgbu probe
+netcfgbu probe
 ```
 
 **login**<br/>
@@ -42,7 +44,7 @@ ensure that not only is the device reachable with SSH open, but the that `netcfg
 with the correct credentials to allow a connection.
 
 ```shell script
-$ netcfgbu probe
+netcfgbu probe
 ```
 
 **backup**<br/>
@@ -55,6 +57,7 @@ directory, or the directory designated by the `config_dir` value in the
 [configuration file](configuration-file.md#Changing-Storage-Directory)
 
 Example:
+
 ```shell script
-$ netcfgbu backup --exclude @failures.csv
+netcfgbu backup --exclude @failures.csv
 ```

@@ -26,6 +26,7 @@ section](inventory.md) for details.
 
 **OS-name specific credentials**<br/>
 Example:
+
 ```toml
 [os_name.asa]
     disable_paging = 'terminal pager 0'
@@ -39,11 +40,11 @@ NOTE: The indentation here is only for human-eyeballs.  If you were to add a
 variable after the credentials section it would **not** be part of the
 `[os_name.asa]` section, but rather a new global variable.
 
-
 **Default credentials**<br/>
 Defined in the `[defaults]` section.
 
 Example:
+
 ```toml
 [defaults]
     credentials.username = 'nwkautomaniac'
@@ -55,6 +56,7 @@ Example:
 configuration file.
 
 Example:
+
 ```toml
 [[credentials]]
     username = "superadmin"

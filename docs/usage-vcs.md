@@ -16,7 +16,7 @@ This command will run the necessary command to initialize the directory for
 git usage and fetch the current git repository files.
 
 ```shell script
-$ netcfgbu vcs prepare
+netcfgbu vcs prepare
 ```
 
 If you have more than one `[[git]]` configuraiton section defined, you can
@@ -26,7 +26,7 @@ For example, if you have a configuraiton with `name = "firewalls"` defined you
 would run:
 
 ```shell script
-$ netcfgbu vcs prepare --name firewalls
+netcfgbu vcs prepare --name firewalls
 ```
 
 ## Saving to Git
@@ -46,25 +46,24 @@ then the `save` command will not make any updates to git.
 
 ---
 
-
-### Examples:
+### Examples
 
 Save using the first `[[git]]` configuration and the default tag-name
 
 ```shell script
-$ netcfgbu vcs save
+netcfgbu vcs save
 ```
 
 Save the configs using the tag-name "pre-change-ticket12345"
 
 ```shell script
-$ netcfgbu vcs save --tag-name pre-change-ticket12345
+netcfgbu vcs save --tag-name pre-change-ticket12345
 ```
 
 Save using the git configuraiton named "firewalls"
 
 ```shell script
-$ netcfgbu vcs save --name firewalls
+netcfgbu vcs save --name firewalls
 ```
 
 ## Checking the Status of Changes before You Save
@@ -74,6 +73,7 @@ would be made to your git platform you can run the `status` command. The output 
 command is the same as if you ran `git status` in the `configs_dir`.
 
 Example when no changes / differences in `configs_dir`:
+
 ```shell script
 $ netcfgbu vcs status
 2020-06-12 11:32:22,722 INFO:
@@ -85,6 +85,7 @@ nothing to commit, working tree clean
 ```
 
 Example when changes in `configs_dir`
+
 ```shell script
 $ netcfgbu vcs status
 2020-06-12 11:34:27,786 INFO:
@@ -95,8 +96,8 @@ On branch master
 Changes not staged for commit:
   (use "git add <file>..." to update what will be committed)
   (use "git restore <file>..." to discard changes in working directory)
-	modified:   switch01.cfg
-	modified:   switch02.cfg
+ modified:   switch01.cfg
+ modified:   switch02.cfg
 
 no changes added to commit (use "git add" and/or "git commit -a")
 ```

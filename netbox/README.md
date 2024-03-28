@@ -24,16 +24,19 @@ optional arguments:
 
 ## Setup
 
-#### Environment
+### Environment
+
 To use the `netbox_inventory.py` script you will need to export two environment variables:
 
-**NETBOX_ADDR**<br/>
-The URL to your netbox server, for example: "https://netbox.mycorp.com"
+#### NETBOX_ADDR
 
-**NETBOX_TOKEN**<br/>
+The URL to your netbox server, for example: "<https://netbox.mycorp.com>"
+
+#### NETBOX_TOKEN
+
 The Netbox API token that has read access to the system.
 
-#### Configuration File
+### Configuration File
 
 Ensure your `netcfgbu.toml` file includes an `[inventory]` definition to execute the script to generate
 the inventory.csv file.
@@ -43,6 +46,7 @@ any device that has a tag "no-backup", and will save the contents to the file
 "inventory.csv"
 
 Example:
+
 ```toml
 [[inventory]]
     name = 'netbox'
@@ -54,10 +58,11 @@ Example:
 To build the inventory run the following command:
 
 ```shell script
-$ netcfgbu inventory build --name netbox
+netcfgbu inventory build --name netbox
 ```
 
 As output you will see similar:
+
 ```shell script
 2020-06-09 20:03:35,412 INFO: Executing script: [/usr/local/bin/netbox_inventory.py --exclude-tag no-backup --output inventory.csv]
 ```
@@ -65,7 +70,8 @@ As output you will see similar:
 When the build completes you can get a summary of the inventory:
 
 ```shell script
-$ netcfgbu inventory ls --brief
+netcfgbu inventory ls --
+ief
 ```
 
 ## Limitations

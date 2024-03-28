@@ -1,4 +1,5 @@
 # Custom Connections
+
 You may encounter network devices that require additional steps beyond the
 standard login process.  For example, the Cisco WLC Aireos v8.5 requires the
 Username and Password values to be provided, even after the SSH connection was
@@ -14,6 +15,7 @@ To use a custom connector type you can add the `connection` value in
 the OS section of your [configuration file](configuration-file.md).
 
 Example for Cisco WLC:
+
 ```toml
 [os_name.aireos]
     show_running = "show run-config commands"

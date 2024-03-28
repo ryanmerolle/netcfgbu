@@ -1,19 +1,19 @@
 # Git VCS Configuration
+
 When you want to store your configuration files in a git based version control system you
 will need to define at least one `[[git]]` section in your configuration file.
  You must use one of the following git authentication methods:
 
-  * Git Token
-  * Git SSH deployment key without passphrase
-  * Git SSH deployment key with passphrase
+* Git Token
+* Git SSH deployment key without passphrase
+* Git SSH deployment key with passphrase
 
 ___
 
 :question: If you are not certain which method you want to use, refer to the document
-links in the [References](#References) below.
+links in the [References](#references) below.
 
 ___
-
 
 You can define more than one `[[git]]` section in your configuration file
 so that you can use different repositories or credential methods.
@@ -22,6 +22,7 @@ For inforamtion on using the `netcfgbu vcs` subcommands, see [Using VCS
 Subcommands](usage-vcs.md).
 
 ## Configuration Options
+
 Each `[[git]]` section supports the following options:
 
 **name**<br/>
@@ -61,6 +62,7 @@ This option is required if your deployment key was created with a passphrase.
 This option supports the use of Enviornment variables.
 
 ## Examples
+
 ```toml
 [[git]]
     # the first entry does not require a name and it will be treated
@@ -83,6 +85,7 @@ This option supports the use of Enviornment variables.
 ```
 
 ## References
+
 For more information about the tradeoffs of using Tokens vs. Deployment Keys
 see [this document](https://developer.github.com/v3/guides/managing-deploy-keys/).
 

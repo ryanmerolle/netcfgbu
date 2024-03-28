@@ -1,9 +1,11 @@
 # Motivation for Netcfgbu
+
 I hope to share some of my design goals and considerations for creating
 `netcfgbu`.  We are all on this network automation journey, and this is a bit
 of story-time-around-the-campfire.  Please enjoy.
 
-### Preface
+## Preface
+
 As the lead network automation software engineer responsible for building and
 maintaining tools and systems in support of a multi-vendor network, I need a
 reliable and simple to use tool to perform network configuration backups and
@@ -20,7 +22,8 @@ open-source products in many languages, including Perl (Rancid) and Ruby
 I find myself working with Python as the de-facto programming language promoted
 and presented as "The Next Thing".
 
-### Guiding Principles
+## Guiding Principles
+
 As a member of the network automation community every tool or system that I
 build is done with the following two principles in mind.  First and foremost is
 to make decisions that will increase reliability so that Users will build trust
@@ -29,12 +32,14 @@ operator friction in installing, configuring, and using the tool.  Ideally a
 User should be able to install and start using the tool very quickly so they
 get that first "Ah ha!" experience with little to no effort.
 
-### Influences
+## Influences
+
 There are many tools that I've used over the years that have influenced the design
 and implementation decisions put into `netcfgbu`.  There are many experiences
 that I have had working with open-source projects that have been influences.
 
-#### Limit Dependencies
+### Limit Dependencies
+
 I wanted to build `netcfgbu` with the minimum number of dependencies in terms
 of 3rd-party packages.  There are many network device driver libraries out
 there, such as [Netmiko](https://github.com/ktbyers/netmiko),
@@ -50,7 +55,8 @@ some point you end up in a "dependency Hellscape" sorting out conflicting
 package requirements.  As a means to reduce complexity and increase reliability
 the `netcfgbu` is built upon a single SSH library, [asyncssh](https://github.com/ronf/asyncssh).
 
-#### Simplifying Constraints
+### Simplifying Constraints
+
 A simplifying constraint is a "rule" that allows you to make an implementation
 decision that results in less complex code.  For example, the `netcfgbu` tool
 requires that any credential you use **MUST** allow the necessary `get_config`
@@ -65,7 +71,8 @@ you should create a specific login account to perform the config backup service,
 required by the `get_config` and `pre_get_config` commands to ensure that this
 account could do nothing more than perform network backups.
 
-#### Decouple the What from the How
+### Decouple the What from the How
+
 A tool like `netcfgbu` needs to process a list of devices.  This inventory
 needs to originate from somewhere whether it is a CSV file or a source of truth
 system like Netbox.  In any case a User's inventory system(s) is going to
@@ -114,7 +121,8 @@ configuration file would be:
     get_config = 'show running-config | no-more'
 ```
 
-#### Filtering Choice and Control
+### Filtering Choice and Control
+
 One of the features that I really like with Ansible is the `--limit` option
 that allows you to target specific devices in your inventory so that you have
 fine-grain control over which devices you want to apply the command.  Using
@@ -127,7 +135,7 @@ result you can then use those fields in your `--limit` and `--exclude` options,
 for example:
 
 ```shell script
-$ netcfgbu login --limit site=dc1 --exclude role=leaf
+netcfgbu login --limit site=dc1 --exclude role=leaf
 ```
 
 The `netcfgbu` also supports the @<filename> construct again borrowed from
@@ -135,10 +143,11 @@ Ansible so that you can filter based on host names present in the file.  The
 example of retry-last-failed devices would look like this:
 
 ```shell script
-$ netcfgbu login --limit @failures.csv
+netcfgbu login --limit @failures.csv
 ```
 
-#### Troubleshooting
+### Troubleshooting
+
 I wanted `netcfgbu` to assist in the troubleshooting processes to determine
 that a device SSH port was open (probe) and that the configured credentials
 (login) would work.  These two subcommands `probe` and `login` are provided for
@@ -150,7 +159,8 @@ for them according.  As such the `netcfgbu` includes a `--debug-ssh=[1-3]` optio
 that will provide very detailed information about the SSH exchange so you can
 determine the root cause of any SSH login failure.
 
-#### Credentials
+### Credentials
+
 Once of the more esoteric issues with network login is having to deal with the
 potential of having to try different credentials for login.  You may find
 yourself at times with devices that, for some reason or another, cannot access
@@ -161,15 +171,16 @@ designed so that you can configure many different credentials that will be
 attempted in a specific order; see [Credentials](config-credentials.md) for
 further details.
 
-#### Speed
+### Speed
+
 Execution speed was a factor in the design decision as applied to the goal
 of reducing User friction.  There are automation use-cases that follow
 a general pattern:
 
-   * step-1: take snapshot of network configs before making changes to network
-   * step-2: make network config changes
-   * step-3: validate network is working as expected
-   * step-4: take snapshot of network configs
+* step-1: take snapshot of network configs before making changes to network
+* step-2: make network config changes
+* step-3: validate network is working as expected
+* step-4: take snapshot of network configs
 
 And if step-3 should fail we can revert to the configs in step-1.
 
@@ -186,6 +197,7 @@ maximize speed, reduce user friction, and increase reliability by avoiding
 threading.
 
 ## Fin
+
 I do hope this document sheds some light on my motivations for creating
 `netcfgbu`. My purpose in building this tool is in no way to diminish the work
 of tools such as Rancid and Oxidized.  If you are using those tools and they

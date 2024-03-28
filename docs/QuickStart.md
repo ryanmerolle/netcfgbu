@@ -10,18 +10,17 @@ for details.
 If you are storing your configuration backups in a Git Version Control System, refer to the [Git
 Configuration](config-vcs-git.md) and [Git Usage](usage-vcs.md) sections.
 
-
 ---
-
 
 If you want to run a probe test to verify SSH access to all your devices
 you can run:
 
 ```shell script
-$ netcfgbu probe
+netcfgbu probe
 ```
 
 When the command completes you will see a report similar:
+
 ```shell script
 # ------------------------------------------------------------------------------
 Summary: TOTAL=1463, OK=1463, FAIL=0
@@ -34,10 +33,11 @@ If you want to run a login test to verify that your configured credentials
 are working you can run:
 
 ```shell script
-$ netcfgbu login
+netcfgbu login
 ```
 
 When the command completes you will see a report similar:
+
 ```shell script
 # ------------------------------------------------------------------------------
 Summary: TOTAL=1463, OK=1462, FAIL=1
@@ -55,20 +55,18 @@ switch01           iosxe      ConnectionLost: Connection lost
 Any errors will be logged to a file called `failures.csv`, which you can then
 use to exclude on future commands.
 
-
 ---
-
 
 When you want to run a backup of your configs you can run:
 
 ```shell script
-$ netcfgbu backup
+netcfgbu backup
 ```
 
 Or to exclude any devices that failed the login test:
 
 ```shell script
-$ netcfgbu backup --exclude @failures.csv
+netcfgbu backup --exclude @failures.csv
 ````
 
 When the backup completes you will see a report similar:

@@ -1,6 +1,6 @@
 # Troubleshooting
 
-#### Too many open files (EMFILE)
+## Too many open files (EMFILE)
 
 If you see an error that includes the word `EMFILE` it means that netcfgbu
 is attempting to open more files than your system is currently allowed.  If you
@@ -23,10 +23,10 @@ $ ulimit -a
 Change the `file descriptors` value to a larger value, for example 4096:
 
 ```shell script
-$ ulimit -n 4096
+ulimit -n 4096
 ```
 
-#### Unable to SSH due to mismatch SSH-configs
+## Unable to SSH due to mismatch SSH-configs
 
 You may encouter a failure to SSH login/backup a device due to the
 fact that the device requires the use of legacy SSH config settings, and modern

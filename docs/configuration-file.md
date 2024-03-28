@@ -38,6 +38,7 @@ The default login password.  You should always use environment variables here,
 but you are not required to do so.
 
 Example:
+
 ```toml
 [defaults]
     inventory = "$PROJ_DIR/inventory.csv"
@@ -46,6 +47,7 @@ Example:
 ```
 
 ## Changing Storage Directory
+
 To change where the configuration files are stored you add the `config_dir`
 variable to the defaults section, for example:
 
@@ -55,6 +57,7 @@ configs_dir = "$PROJ_DIR/configs"
 ```
 
 ## Plugins Directory
+
 To change where the plugin files are stores you add the `plugins_dir` variable to the defaults section, for example:
 
 ```toml
@@ -63,6 +66,7 @@ plugins_dir = "$PROJ_DIR/plugins"
 ```
 
 ## Logging
+
 To enable logging you can defined the `[logging]` section in the configuration
 file. The format of this section is the standard Python logging module, as
 documented [here]( https://docs.python.org/3/library/logging.config.html).

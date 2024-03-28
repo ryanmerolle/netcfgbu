@@ -1,4 +1,5 @@
 ## OS Specifications
+
 Most devices will require you to disable paging before getting the running
 config.  To account for this, you need to define OS specification sections. For
 each `[os_name.$name]` section you can configure the following variables:
@@ -16,13 +17,14 @@ declaring a timeout error.  Default is 60 seconds.
 
 ***`linter`***<br/>
 Identifies the Linter specification to apply to the configuration once it
-has been retrieved.  See [Linters](#Linters) in next section.
+has been retrieved.  See [Linters](#linters) in next section.
 
 **`prompt_pattern`**<br/>
 Allows the User to define a custom prompt match regular expression pattern.
 Please be careful to ensure any special characters such as dash (-) are escaped.
 
 Examples:
+
 ```toml
 [os_name.ios]
    pre_get_config = "terminal length 0"
@@ -46,6 +48,7 @@ If you need to provide multiple commands, define a list of commands, as describe
 [TOML Array](https://github.com/toml-lang/toml#user-content-array).
 
 ## Linters
+
 Linters post-process the configuration once it has been retrieved from the device.
 At present there are two variables you can define:
 

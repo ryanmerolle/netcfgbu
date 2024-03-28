@@ -9,13 +9,15 @@ As a network engineer I need to backup my network configuration files into a
 version control system, and I need a tool to automate this process.  My primary
 means of accessing the devices is SSH.
 
-**Supported Devices**<br/>
+## Supported Devices
+
 The `netcfgbu` tool was built specifically to backup network operating system (NOS)
 configurations that are monolithic in nature.  That is to say the entire
 configuration can be captured using a command such as "show running-config".  Any
 NOS that provides a monolithic configuration should be supported by `netcfgbu`.
 
-**Primary Considerations**
+## Primary Considerations
+
 * I have a multi-vendor environment. I need to account for the different commands
 that are used to obtain the running configuration and disable paging if
 required.
@@ -33,13 +35,12 @@ advantage of any and all techniques that reduce the total amount of time.
 
 ---
 
-
 The general approach to `netcfgbu` is a configuration based methodology so as
 to not hardcode the tool to work with specific network device drivers
 and avoid the complexity and dependency of including a collection of 3rd-party
 libraries specific to network devices.
 
-Read the Documenttion [here](docs/TOC.md).<br/>
+Read the Documention [here](docs/TOC.md).<br/>
 Read the Quick Start [here](docs/QuickStart.md)<br/>
 [Example netcfgbu.toml configuration](netcfgbu.toml)<br/>
 
@@ -50,7 +51,7 @@ Once you've setup the [configuration](docs/configuration-file.md) file and
 using the command:
 
 ```shell script
-$ netcfgbu backup
+netcfgbu backup
 ```
 
 At the end of the run, you will see a report, for example:
@@ -80,7 +81,7 @@ Commands:
   vcs        Version Control System subcommands.
 ```
 
-# Setup
+## Setup
 
 The `netcfgbu` tool does not require you to create a configuration file, but
 for practical purposes you will generally need one.  The file is
@@ -95,6 +96,7 @@ stored in the current working directory, or as specified in the `defaults.config
 option.  The configuration-file supports the use of environment variables.
 
 Example:
+
 ```toml
 [defaults]
     inventory = "$PROJ_DIR/inventory.csv"
@@ -121,7 +123,7 @@ This tool requires the use of Python3.9.<br/>
 Installation available via PyPI:
 
 ```shell script
-$ pip install netcfgbu
+pip install netcfgbu
 ```
 
 ### Questions or Suggestions?
