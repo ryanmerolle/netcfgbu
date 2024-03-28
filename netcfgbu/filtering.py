@@ -100,7 +100,7 @@ def mk_file_filter(filepath, key):
         filter_hostnames = [rec[key] for rec in CommentedCsvReader(open(filepath))]
     else:
         raise ValueError(
-            f"File '{filepath}' not a CSV. Only CSV files are supported at this time"
+            f"File '{filepath}' not a CSV file. Only CSV files are supported."
         )
 
     def op_filter(rec):
