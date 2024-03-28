@@ -200,7 +200,8 @@ class GitAuthRunner(GitRunner):
     Git Runner that is used for either User/Password or Token cases
     """
 
-    PASSWORD_PROMPT = "Password for"
+    #
+    PASSWORD_PROMPT = "Password for"  # nosec
 
     def _get_secret(self):
         return self.config.token.get_secret_value()
@@ -243,7 +244,7 @@ class GitSecuredDeployKeyRunner(GitDeployKeyRunner, GitAuthRunner):
     Git Runner used when deployment key has passphrase configured
     """
 
-    PASSWORD_PROMPT = "Enter passphrase for key"
+    PASSWORD_PROMPT = "Enter passphrase for key"  # nosec
 
     def _get_secret(self):
         return self.config.deploy_passphrase.get_secret_value()
