@@ -7,7 +7,6 @@ the netcfgbu tool.
 # -----------------------------------------------------------------------------
 # System Imports
 # -----------------------------------------------------------------------------
-
 from typing import Optional, List, Dict, AnyStr
 import asyncio
 from urllib.parse import urlparse
@@ -15,14 +14,12 @@ from urllib.parse import urlparse
 # -----------------------------------------------------------------------------
 # Public Imports
 # -----------------------------------------------------------------------------
-
 import asyncssh
 from first import first
 
 # -----------------------------------------------------------------------------
 # Private Imports
 # -----------------------------------------------------------------------------
-
 from .config_model import JumphostSpec
 from .filtering import create_filter
 from .logger import get_logger
