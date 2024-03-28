@@ -12,6 +12,6 @@
 python -m pybadges \
   --left-color="red" \
   --left-text="alpha" \
-  --right-text="$(cat ../VERSION")" \
+  --right-text="$(cat ../VERSION)" \
   --right-color="red" \
   --whole-link="https://www.python.org/" > version.svg
