@@ -1,4 +1,4 @@
-## OS Specifications
+# OS Specifications
 
 Most devices will require you to disable paging before getting the running
 config.  To account for this, you need to define OS specification sections. For
