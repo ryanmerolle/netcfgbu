@@ -72,7 +72,7 @@ def setup_logging(app_cfg):
 
 
 def stop_aiologging():
-    _g_quelgr_listener.stop()
+    _g_quelgr_listener.stop()  # noqa
     sys.stdout.flush()
 
 
