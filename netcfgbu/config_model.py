@@ -112,7 +112,7 @@ class Defaults(NoExtraBaseModel, BaseSettings):
 
 
 class FilePathEnvExpand(FilePath):
-    """A FilePath field whose value can interpolated from env vars"""
+    """A FilePath field whose value can be interpolated from env vars"""
 
     @classmethod
     def __get_validators__(cls):
@@ -121,14 +121,14 @@ class FilePathEnvExpand(FilePath):
 
 
 class GitSpec(NoExtraBaseModel):
-    name: Optional[str]
+    name: Optional[str] = None
     repo: EnvExpand
-    email: Optional[str]
-    username: Optional[EnvExpand]
-    password: Optional[EnvExpand]
-    token: Optional[EnvSecretStr]
-    deploy_key: Optional[FilePathEnvExpand]
-    deploy_passphrase: Optional[EnvSecretStr]
+    email: Optional[str] = None
+    username: Optional[EnvExpand] = None
+    password: Optional[EnvExpand] = None
+    token: Optional[EnvSecretStr] = None
+    deploy_key: Optional[FilePathEnvExpand] = None
+    deploy_passphrase: Optional[EnvSecretStr] = None
 
     @validator("repo")
     def validate_repo(cls, repo):  # noqa
@@ -159,23 +159,23 @@ class GitSpec(NoExtraBaseModel):
 
 
 class OSNameSpec(NoExtraBaseModel):
-    credentials: Optional[List[Credential]]
-    pre_get_config: Optional[Union[str, List[str]]]
-    get_config: Optional[str]
-    connection: Optional[str]
-    linter: Optional[str]
+    credentials: Optional[List[Credential]] = None
+    pre_get_config: Optional[Union[str, List[str]]] = None
+    get_config: Optional[str] = None
+    connection: Optional[str] = None
+    linter: Optional[str] = None
     timeout: PositiveInt = Field(consts.DEFAULT_GETCONFIG_TIMEOUT)
-    ssh_configs: Optional[Dict]
-    prompt_pattern: Optional[str]
+    ssh_configs: Optional[Dict] = None
+    prompt_pattern: Optional[str] = None
 
 
 class LinterSpec(NoExtraBaseModel):
-    config_starts_after: Optional[str]
-    config_ends_at: Optional[str]
+    config_starts_after: Optional[str] = None
+    config_ends_at: Optional[str] = None
 
 
 class InventorySpec(NoExtraBaseModel):
-    name: Optional[str]
+    name: Optional[str] = None
     script: EnvExpand
 
     @validator("script")
@@ -192,9 +192,9 @@ class InventorySpec(NoExtraBaseModel):
 
 class JumphostSpec(NoExtraBaseModel):
     proxy: str
-    name: Optional[str]
-    include: Optional[List[str]]
-    exclude: Optional[List[str]]
+    name: Optional[str] = None
+    include: Optional[List[str]] = None
+    exclude: Optional[List[str]] = None
     timeout: PositiveInt = Field(consts.DEFAULT_LOGIN_TIMEOUT)
 
     @validator("name", always=True)
@@ -204,14 +204,14 @@ class JumphostSpec(NoExtraBaseModel):
 
 class AppConfig(NoExtraBaseModel):
     defaults: Defaults
-    credentials: Optional[List[Credential]]
-    linters: Optional[Dict[str, LinterSpec]]
-    os_name: Optional[Dict[str, OSNameSpec]]
-    inventory: Optional[List[InventorySpec]]
-    logging: Optional[Dict]
-    ssh_configs: Optional[Dict]
-    git: Optional[List[GitSpec]]
-    jumphost: Optional[List[JumphostSpec]]
+    credentials: Optional[List[Credential]] = None
+    linters: Optional[Dict[str, LinterSpec]] = None
+    os_name: Optional[Dict[str, OSNameSpec]] = None
+    inventory: Optional[List[InventorySpec]] = None
+    logging: Optional[Dict] = None
+    ssh_configs: Optional[Dict] = None
+    git: Optional[List[GitSpec]] = None
+    jumphost: Optional[List[JumphostSpec]] = None
 
     @validator("os_name")
     def _linters(cls, v, values):  # noqa
