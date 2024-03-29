@@ -10,3 +10,4 @@ asynctest
 tox
 pre-commit
 interrogate
+bump-pydantic

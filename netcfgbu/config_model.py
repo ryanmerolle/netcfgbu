@@ -140,16 +140,16 @@ class GitSpec(NoExtraBaseModel):
         return repo
 
     @root_validator
-    def enure_proper_auth(cls, values):
+    def ensure_proper_auth(cls, values):
         req = ("token", "deploy_key", "password")
         auth_vals = list(filter(None, (values.get(auth) for auth in req)))
-        auth_c = len(auth_vals)
-        if not auth_c:
+        auth_count = len(auth_vals)
+        if auth_count == 0:
             raise ValueError(
                 f'Missing one of required auth method fields: {"|".join(req)}'
             )
 
-        if auth_c > 1:
+        if auth_count > 1:
             raise ValueError(f'Only one of {"|".join(req)} allowed')
 
         if values.get("deploy_passphrase") and not values.get("deploy_key"):
@@ -216,9 +216,10 @@ class AppConfig(NoExtraBaseModel):
     @validator("os_name")
     def _linters(cls, v, values):  # noqa
         linters = values.get("linters") or {}
-        for os_name, os_spec in v.items():
-            if os_spec.linter and os_spec.linter not in linters:
-                raise ValueError(
-                    f'OS spec "{os_name}" using undefined linter "{os_spec.linter}"'
-                )
+        if v:  # Added check to ensure field_value is not None
+            for os_name, os_spec in v.items():
+                if os_spec.linter and os_spec.linter not in linters:
+                    raise ValueError(
+                        f'OS spec "{os_name}" using undefined linter "{os_spec.linter}"'
+                    )
         return v
