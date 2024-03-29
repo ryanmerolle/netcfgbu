@@ -33,7 +33,6 @@ class WithConfigCommand(click.Command):
 
 class WithInventoryCommand(click.Command):
     def invoke(self, ctx):
-
         try:
             app_cfg = ctx.obj["app_cfg"] = _config.load(fileio=ctx.params["config"])
 

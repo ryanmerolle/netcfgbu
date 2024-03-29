@@ -95,7 +95,6 @@ def create_filter_function(op_filters, optest_fn):
 
 
 def mk_file_filter(filepath, key):
-
     if filepath.endswith(".csv"):
         filter_hostnames = [rec[key] for rec in CommentedCsvReader(open(filepath))]
     else:
@@ -148,7 +147,6 @@ def create_filter(
 
     op_filters: List[Filter] = []
     for filter_expr in constraints:
-
         # check for the '@<filename>' filtering use-case first.
 
         if mo := file_reg.match(filter_expr):

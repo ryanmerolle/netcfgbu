@@ -47,7 +47,6 @@ def test_cli_vcs_fail_missingconfig_file():
 
 
 def test_cli_vcs_fail_missingconfig_section(files_dir, monkeypatch):
-
     # select a test inventory file that does not contain any vcs configuration
     cfg_file = files_dir.joinpath("test-config-logging.toml")
 
@@ -64,7 +63,6 @@ def test_cli_vcs_fail_missingconfig_section(files_dir, monkeypatch):
 
 
 def test_cli_vcs_pass_status(mock_git: Mock, config_file, monkeypatch):
-
     runner = CliRunner()
     res = runner.invoke(vcs.cli_vcs_status, obj={}, args=["-C", str(config_file)])
 

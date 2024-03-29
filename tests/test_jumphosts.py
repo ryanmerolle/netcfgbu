@@ -30,7 +30,6 @@ def mock_asyncssh_connect(monkeypatch):
 
 
 def test_jumphosts_pass_noused(inventory):
-
     # without an include or exclude, this jump host will not be used
     # TODO: consider this an error in config-model validation?
 
@@ -83,7 +82,6 @@ def test_jumphosts_pass_exlallused(inventory):
 
 @pytest.mark.asyncio
 async def test_jumphosts_pass_connect(inventory, mock_asyncssh_connect, monkeypatch):
-
     jh_spec = config_model.JumphostSpec(
         proxy="dummy-user@1.2.3.4:8022", exclude=["os_name=eos"]
     )
@@ -107,7 +105,6 @@ async def test_jumphosts_pass_connect(inventory, mock_asyncssh_connect, monkeypa
 async def test_jumphosts_fail_connect(
     netcfgbu_envars, log_vcr, inventory, mock_asyncssh_connect, monkeypatch
 ):
-
     monkeypatch.setattr(jumphosts, "get_logger", Mock(return_value=log_vcr))
 
     jh_spec = config_model.JumphostSpec(

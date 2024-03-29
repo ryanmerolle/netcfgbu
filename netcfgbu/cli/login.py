@@ -25,7 +25,6 @@ from netcfgbu.consts import DEFAULT_LOGIN_TIMEOUT
 
 
 def exec_test_login(app_cfg: AppConfig, inventory_recs, cli_opts):
-
     timeout = cli_opts["timeout"] or DEFAULT_LOGIN_TIMEOUT
 
     login_tasks = {

@@ -273,7 +273,6 @@ def test_config_jumphost_name(netcfgbu_envars, request):
 
 
 def test_vcs_fail_config(tmpdir):
-
     fake_key = tmpdir.join("fake-key")
     fake_key.ensure()
     fake_key = str(fake_key)

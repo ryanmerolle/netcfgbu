@@ -9,7 +9,6 @@ from .config_model import AppConfig, InventorySpec
 
 
 def load(app_cfg: AppConfig, limits=None, excludes=None):
-
     inventory_file = Path(app_cfg.defaults.inventory)
     if not inventory_file.exists():
         raise FileNotFoundError(

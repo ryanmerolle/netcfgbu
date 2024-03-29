@@ -303,7 +303,6 @@ class BasicSSHConnector(object):
                     }
                 )
                 async with self.__class__._max_startups_sem4:
-
                     login_msg = (
                         f"LOGIN: {self.name} ({self.os_name}) timeout={timeout}s "
                         f"as {self.conn_args['username']}"
