@@ -80,7 +80,7 @@ $ netcfgbu vcs status
 VCS diffs git: https://github.mycorp.com/jschulman/test-network-configs.git
              dir: /home/jschulman/Projects/NetworkBackup/configs
 
-On branch master
+On branch main
 nothing to commit, working tree clean
 ```
 
@@ -92,7 +92,7 @@ $ netcfgbu vcs status
 VCS diffs git: https://github.mycorp.com/jschulman/test-network-configs.git
              dir: /home/jschulman/Projects/NetworkBackup/configs
 
-On branch master
+On branch main
 Changes not staged for commit:
   (use "git add <file>..." to update what will be committed)
   (use "git restore <file>..." to discard changes in working directory)

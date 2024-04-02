@@ -176,7 +176,7 @@ class GitRunner(object):
         self.git_config()
 
     def git_pull(self):
-        self.run("pull origin master", authreq=True)
+        self.run("pull origin main", authreq=True)
 
     def git_config(self):
         config = self.config

@@ -39,7 +39,7 @@ def test_vcs_pass_prepare_token(mock_pexpect, tmpdir, monkeypatch):
         "git config --local user.email dummy-user",
         "git config --local user.name dummy-user",
         "git config --local push.default matching",
-        "git pull origin master",
+        "git pull origin main",
     ]
 
     assert len(calls) == len(expected_commands)
@@ -69,7 +69,7 @@ def test_vcs_pass_prepare_deploykey(mock_pexpect, tmpdir, monkeypatch):
         "git config --local user.name dummy-user",
         "git config --local push.default matching",
         f"git config --local core.sshCommand 'ssh -i {key_file} -o StrictHostKeyChecking=no'",
-        "git pull origin master",
+        "git pull origin main",
     ]
 
     assert len(calls) == len(expected_commands)
@@ -105,7 +105,7 @@ def test_vcs_pass_prepare_deploykey_passphrase(mock_pexpect, tmpdir, monkeypatch
         "git config --local user.name dummy-user",
         "git config --local push.default matching",
         f"git config --local core.sshCommand 'ssh -i {key_file} -o StrictHostKeyChecking=no'",
-        "git pull origin master",
+        "git pull origin main",
     ]
 
     assert len(calls) == len(expected_commands)
