@@ -1,3 +1,57 @@
+[tool.poetry]
+name = "netcfgbu"
+version = "0.8.0"
+description = "Network Configuration Backup"
+authors = ["Jeremy Schulman", "Ryan Merolle"]
+license = "Apache Software License"
+readme = "README.md"
+repository = "https://github.com/ryanmerolle/netcfgbu"
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3.9",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: System :: Networking"
+]
+
+[project.scripts]
+netcfgbu = "bin/netcfgbu"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+aiofiles = "*"
+asyncssh = "*"
+toml = "*"
+invoke = "*"
+pydantic = "1.*"
+pydantic-settings = "*"
+tabulate = "*"
+click = "*"
+first = "*"
+pexpect = "*"
+PyYAML = "*"
+
+[tool.poetry.group.dev.dependencies]
+asynctest = "*"
+black = "*"
+bump-pydantic = "*"
+flake8 = "*"
+flake8-breakpoint = "*"
+interrogate = "*"
+invoke = "*"
+pre-commit = "*"
+pytest = "*"
+pytest-asyncio = "*"
+pytest-cov = "*"
+requests = "*"
+ruff = "*"
+tox = "*"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
 [tool.black]
 target-version = ['py39']
 
