@@ -15,10 +15,12 @@ from invoke import task
 @task
 def precheck(ctx):
     """Run pre-checks on the project."""
-    ctx.run("black .")
-    ctx.run("flake8 .")
-    ctx.run("pre-commit run -a")
-    ctx.run("interrogate -c pyproject.toml --exclude=build --exclude tests", pty=True)
+    # ctx.run("black .")
+    # ctx.run("flake8 .")
+    ctx.run("poetry run ruff check . --fix")
+    ctx.run("poetry run ruff format .")
+    ctx.run("poetry run pre-commit run -a")
+    ctx.run("poetry run interrogate -c pyproject.toml --exclude=build --exclude tests", pty=True)
 
 
 @task
