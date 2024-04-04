@@ -40,34 +40,34 @@
 # --name option.
 # -----------------------------------------------------------------------------
 
-[[git]]
-    # the first entry does not require a name and it will be treated
-    # as a default; i.e. when the --name option is omitted.
-    repo = "https://github.mycorp.com/jschulman/test-network-configs.git"
-    token = "$GIT_TOKEN"
-
-[[git]]
-    # example of using a deployment key that does not use a passphrase
-    name = "ssh"
-    repo = "git@gitlab.com:jschulman/test-network-configs.git"
-    deploy_key = "$HOME/test-config-backups"
-
-[[git]]
-    # example of using a deployment key that uses a passphrase
-    name = "ssh-pw"
-    repo = "git@github.mlbam.net:jschulman/test-network-configs.git"
-    deploy_key = "$HOME/pwtest-backups"
-    deploy_passphrase = "$GITKEY_PASSWORD"
+#[[git]]
+#    # the first entry does not require a name and it will be treated
+#    # as a default; i.e. when the --name option is omitted.
+#    repo = "https://github.mycorp.com/jschulman/test-network-configs.git"
+#    token = "$GIT_TOKEN"
+#
+#[[git]]
+#    # example of using a deployment key that does not use a passphrase
+#    name = "ssh"
+#    repo = "git@gitlab.com:jschulman/test-network-configs.git"
+#    deploy_key = "$HOME/test-config-backups"
+#
+#[[git]]
+#    # example of using a deployment key that uses a passphrase
+#    name = "ssh-pw"
+#    repo = "git@github.mlbam.net:jschulman/test-network-configs.git"
+#    deploy_key = "$HOME/pwtest-backups"
+#    deploy_passphrase = "$GITKEY_PASSWORD"
 
 # -----------------------------------------------------------------------------
 #                           Inventory Integrations
 # -----------------------------------------------------------------------------
 
-[[inventory]]
-    name = 'netbox'
-    script = '''$PROJ_DIR/netcfgbu/netbox/netbox_inventory.py \
-        --exclude-tag no-backup --exclude-tag no-ssh \
-        --output inventory.csv'''
+#[[inventory]]
+#    name = 'netbox'
+#    script = '''$PROJ_DIR/netcfgbu/netbox/netbox_inventory.py \
+#        --exclude-tag no-backup --exclude-tag no-ssh \
+#        --output inventory.csv'''
 
 # -----------------------------------------------------------------------------
 #                           Global Credentials
@@ -97,6 +97,10 @@
 # -----------------------------------------------------------------------------
 # Cisco switchs, routers, and firewalls
 # -----------------------------------------------------------------------------
+
+[os_name.eos]
+    get_config = "show run | no-more"
+    #linter = "ios"
 
 [os_name.ios]
     pre_get_config = "terminal length 0"
@@ -146,9 +150,9 @@
 
 # NOTE: if you do not have these devices in your inventory, delete this section
 # otherwise you will get an error if the environment variables are not defined
-    [[os_name.aireos8_10.credentials]]
-        username = "$WLC_USERNAME"
-        password = "$WLC_PASSWORD"
+    #[[os_name.aireos8_10.credentials]]
+    #    username = "$WLC_USERNAME"
+    #    password = "$WLC_PASSWORD"
 
 # -----------------------------------------------------------------------------
 # Palo Alto PANOS Firewalls
@@ -222,9 +226,9 @@
 # --name option.
 # -----------------------------------------------------------------------------
 
-[[vcs]]
-    repo = "https://github.mycorp.com/jschulman/test-network-configs.git"
-    token = "$GIT_TOKEN"
+#[[vcs]]
+#    repo = "https://github.mycorp.com/jschulman/test-network-configs.git"
+#    token = "$GIT_TOKEN"
 
 # -----------------------------------------------------------------------------
 # Logging - follows Python format as described
