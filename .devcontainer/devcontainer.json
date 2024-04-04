@@ -5,7 +5,10 @@
 	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
 	"image": "mcr.microsoft.com/devcontainers/python:1-3.9-bullseye",
 	"features": {
-		"ghcr.io/devcontainers-contrib/features/poetry:2": {}
+		"ghcr.io/devcontainers-contrib/features/poetry": {},
+		"ghcr.io/devcontainers-contrib/features/invoke": {},
+		"ghcr.io/devcontainers-contrib/features/ruff": {},
+		"ghcr.io/devcontainers-contrib/features/pre-commit": {},
 	},
 
 	// Features to add to the dev container. More info: https://containers.dev/features.
