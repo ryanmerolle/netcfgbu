@@ -24,9 +24,8 @@ def precheck(ctx):
 @task
 def clean(ctx):
     """Clean up the project."""
-    ctx.run("python setup.py clean")
     ctx.run("rm -rf netcfgbu.egg-info")
-    ctx.run("rm -rf .pytest_cache .pytest_tmpdir .coverage")
+    ctx.run("rm -rf .pytest_cache .pytest_tmpdir .coverage .ruff_cache")
     ctx.run("rm -rf htmlcov")
 
 
