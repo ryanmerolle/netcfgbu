@@ -46,10 +46,12 @@ def load(*, filepath=None, fileio=None) -> AppConfig:
 
     app_defaults = app_cfg.get("defaults")
     if not app_defaults:
+        print("NO DEFAULTS")
         app_cfg["defaults"] = dict(credentials={})
+    print(app_cfg)
 
     try:
-        cfg_obj = AppConfig.parse_obj(app_cfg)
+        cfg_obj = AppConfig.model_validate(app_cfg)
     except ValidationError as exc:
         filepath = fileio.name if fileio else ""
         raise RuntimeError(validation_errors(filepath=filepath, errors=exc.errors()))

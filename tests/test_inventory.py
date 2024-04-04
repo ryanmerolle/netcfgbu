@@ -83,4 +83,4 @@ def test_inventory_fail_build_noscript(request, netcfgbu_envars):
     exc_errmsgs = excinfo.value.args[0].splitlines()
     found = first([line for line in exc_errmsgs if "inventory.0.script" in line])
     assert found
-    assert "field required" in found
+    assert "Field required" in found
