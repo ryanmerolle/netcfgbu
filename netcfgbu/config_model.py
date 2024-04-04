@@ -6,13 +6,17 @@ from itertools import chain
 from pathlib import Path
 
 from pydantic import (
-    AliasChoices, ValidationInfo, field_validator, ConfigDict, BaseModel,
+    AliasChoices,
+    ValidationInfo,
+    field_validator,
+    ConfigDict,
+    BaseModel,
     SecretStr,
     PositiveInt,
     FilePath,
     Field,
-    validator,
-    model_validator)
+    model_validator,
+)
 
 from pydantic.functional_validators import AfterValidator, BeforeValidator
 
@@ -36,6 +40,7 @@ _var_re = re.compile(
 
 class NoExtraBaseModel(BaseModel):
     model_config = ConfigDict(extra="forbid")
+
 
 def expand_env_str(v):
     """
@@ -63,8 +68,10 @@ def expand_env_str(v):
 
     return v
 
+
 EnvExpand = Annotated[str, AfterValidator(expand_env_str)]
 EnvSecretStr = Annotated[SecretStr, BeforeValidator(expand_env_str)]
+
 
 class Credential(NoExtraBaseModel):
     username: EnvExpand
@@ -86,9 +93,12 @@ class DefaultCredential(DefaultBaseSettings):
 
 
 class Defaults(DefaultBaseSettings):
-
-    configs_dir: Optional[EnvExpand] = Field(validation_alias=AliasChoices("NETCFGBU_CONFIGSDIR", "PWD"))
-    plugins_dir: Optional[EnvExpand] = Field(validation_alias=AliasChoices("NETCFGBU_PLUGINSDIR", "PWD"))
+    configs_dir: Optional[EnvExpand] = Field(
+        validation_alias=AliasChoices("NETCFGBU_CONFIGSDIR", "PWD")
+    )
+    plugins_dir: Optional[EnvExpand] = Field(
+        validation_alias=AliasChoices("NETCFGBU_PLUGINSDIR", "PWD")
+    )
     inventory: EnvExpand = Field(validation_alias="NETCFGBU_INVENTORY")
     credentials: DefaultCredential
 
@@ -111,8 +121,10 @@ class Defaults(DefaultBaseSettings):
             value = value + "/plugins"
         return Path(value).absolute()
 
+
 """A FilePath field whose value can be interpolated from env vars"""
 FilePathEnvExpand = Annotated[FilePath, BeforeValidator(expand_env_str)]
+
 
 class GitSpec(NoExtraBaseModel):
     name: Optional[str] = None

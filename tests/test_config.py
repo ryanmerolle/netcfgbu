@@ -52,7 +52,9 @@ def test_config_onlyenvars_fail_bad_noinventory(monkeypatch):
         load()
 
     exc_errmsgs = excinfo.value.args[0].splitlines()
-    found = first([line for line in exc_errmsgs if "defaults.NETCFGBU_INVENTORY" in line])
+    found = first(
+        [line for line in exc_errmsgs if "defaults.NETCFGBU_INVENTORY" in line]
+    )
     assert found
     assert "inventory empty value not allowed" in found
 
