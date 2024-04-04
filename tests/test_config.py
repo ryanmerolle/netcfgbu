@@ -36,9 +36,9 @@ def test_config_onlyenvars_fail_missing():
 
     exc_errmsg = excinfo.value.args[0]
 
-    assert "defaults.inventory" in exc_errmsg
-    assert "defaults.credentials.username" in exc_errmsg
-    assert "defaults.credentials.password" in exc_errmsg
+    assert "defaults.NETCFGBU_INVENTORY" in exc_errmsg
+    assert "defaults.credentials.NETCFGBU_DEFAULT_USERNAME" in exc_errmsg
+    assert "defaults.credentials.NETCFGBU_DEFAULT_PASSWORD" in exc_errmsg
 
 
 def test_config_onlyenvars_fail_bad_noinventory(monkeypatch):
@@ -52,7 +52,9 @@ def test_config_onlyenvars_fail_bad_noinventory(monkeypatch):
         load()
 
     exc_errmsgs = excinfo.value.args[0].splitlines()
-    found = first([line for line in exc_errmsgs if "defaults.inventory" in line])
+    found = first(
+        [line for line in exc_errmsgs if "defaults.NETCFGBU_INVENTORY" in line]
+    )
     assert found
     assert "inventory empty value not allowed" in found
 
@@ -283,16 +285,16 @@ def test_vcs_fail_config(tmpdir):
         )
 
     errs = excinfo.value.errors()
-    assert errs[0]["msg"] == "deploy_key required when using deploy_passphrase"
+    assert "deploy_key required when using deploy_passphrase" in errs[0]["msg"]
 
     with pytest.raises(ValidationError) as excinfo:
         config_model.GitSpec(repo="git@dummy.git")
 
     errs = excinfo.value.errors()
-    assert errs[0]["msg"].startswith("Missing one of required auth method fields")
+    assert "Missing one of required auth method fields" in errs[0]["msg"]
 
     with pytest.raises(ValidationError) as excinfo:
         config_model.GitSpec(repo="git@dummy.git", token="token", deploy_key=fake_key)
 
     errs = excinfo.value.errors()
-    assert errs[0]["msg"].startswith("Only one of")
+    assert "Only one of" in errs[0]["msg"]

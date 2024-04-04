@@ -1,23 +1,27 @@
 import re
 import os
-from typing import Optional, Union, List, Dict
+from typing import Optional, Union, List, Dict, Annotated
 from os.path import expandvars
 from itertools import chain
 from pathlib import Path
 
 from pydantic import (
+    AliasChoices,
+    ValidationInfo,
+    field_validator,
+    ConfigDict,
     BaseModel,
     SecretStr,
-    BaseSettings,
     PositiveInt,
     FilePath,
     Field,
-    validator,
-    root_validator,
+    model_validator,
 )
 
+from pydantic.functional_validators import AfterValidator, BeforeValidator
 
 from . import consts
+from pydantic_settings import BaseSettings
 
 __all__ = [
     "AppConfig",
@@ -35,11 +39,10 @@ _var_re = re.compile(
 
 
 class NoExtraBaseModel(BaseModel):
-    class Config:
-        extra = "forbid"
+    model_config = ConfigDict(extra="forbid")
 
 
-class EnvExpand(str):
+def expand_env_str(v):
     """
     When a string value contains a reference to an environment variable, use
     this type to expand the contents of the variable using os.path.expandvars.
@@ -53,29 +56,21 @@ class EnvExpand(str):
         foo_password -> "boo!_foo"
     """
 
-    @classmethod
-    def __get_validators__(cls):
-        yield cls.validate
+    if found_vars := list(filter(len, chain.from_iterable(_var_re.findall(v)))):
+        for var in found_vars:
+            if (var_val := os.getenv(var)) is None:
+                raise ValueError(f'Environment variable "{var}" missing.')
 
-    @classmethod
-    def validate(cls, v):
-        if found_vars := list(filter(len, chain.from_iterable(_var_re.findall(v)))):
-            for var in found_vars:
-                if (var_val := os.getenv(var)) is None:
-                    raise ValueError(f'Environment variable "{var}" missing.')
+            if not len(var_val):
+                raise ValueError(f'Environment variable "{var}" empty.')
 
-                if not len(var_val):
-                    raise ValueError(f'Environment variable "{var}" empty.')
+        return expandvars(v)
 
-            return expandvars(v)
-
-        return v
+    return v
 
 
-class EnvSecretStr(EnvExpand, SecretStr):
-    @classmethod
-    def validate(cls, v):
-        return SecretStr.validate(EnvExpand.validate(v))
+EnvExpand = Annotated[str, AfterValidator(expand_env_str)]
+EnvSecretStr = Annotated[SecretStr, BeforeValidator(expand_env_str)]
 
 
 class Credential(NoExtraBaseModel):
@@ -83,41 +78,52 @@ class Credential(NoExtraBaseModel):
     password: EnvSecretStr
 
 
-class DefaultCredential(Credential, BaseSettings):
-    username: EnvExpand = Field(..., env="NETCFGBU_DEFAULT_USERNAME")
-    password: EnvSecretStr = Field(..., env="NETCFGBU_DEFAULT_PASSWORD")
+# TODO: extra='ignore' is a workaround as specified here
+# https://github.com/pydantic/pydantic-settings/issues/178#issuecomment-2037795239
+# but may be fixed in a future pydantic v2 release
+class DefaultBaseSettings(BaseSettings):
+    model_config = ConfigDict(extra="ignore", populate_by_name=True)
 
 
-class Defaults(NoExtraBaseModel, BaseSettings):
-    configs_dir: Optional[EnvExpand] = Field(..., env=("NETCFGBU_CONFIGSDIR", "PWD"))
-    plugins_dir: Optional[EnvExpand] = Field(..., env=("NETCFGBU_PLUGINSDIR", "PWD"))
-    inventory: EnvExpand = Field(..., env="NETCFGBU_INVENTORY")
+class DefaultCredential(DefaultBaseSettings):
+    model_config = ConfigDict(extra="ignore", populate_by_name=True)
+
+    username: EnvExpand = Field(validation_alias="NETCFGBU_DEFAULT_USERNAME")
+    password: EnvSecretStr = Field(validation_alias="NETCFGBU_DEFAULT_PASSWORD")
+
+
+class Defaults(DefaultBaseSettings):
+    configs_dir: Optional[EnvExpand] = Field(
+        validation_alias=AliasChoices("NETCFGBU_CONFIGSDIR", "PWD")
+    )
+    plugins_dir: Optional[EnvExpand] = Field(
+        validation_alias=AliasChoices("NETCFGBU_PLUGINSDIR", "PWD")
+    )
+    inventory: EnvExpand = Field(validation_alias="NETCFGBU_INVENTORY")
     credentials: DefaultCredential
 
-    @validator("inventory")
+    @field_validator("inventory")
+    @classmethod
     def _inventory_provided(cls, value):  # noqa
         if not len(value):
             raise ValueError("inventory empty value not allowed")
         return value
 
-    @validator("configs_dir")
+    @field_validator("configs_dir")
+    @classmethod
     def _configs_dir(cls, value):  # noqa
         return Path(value).absolute()
 
-    @validator("plugins_dir")
+    @field_validator("plugins_dir", mode="after")
+    @classmethod
     def _plugins_dir(cls, value):  # noqa
         if value == os.getenv("PWD") and "/plugins" not in value:
             value = value + "/plugins"
         return Path(value).absolute()
 
 
-class FilePathEnvExpand(FilePath):
-    """A FilePath field whose value can be interpolated from env vars"""
-
-    @classmethod
-    def __get_validators__(cls):
-        yield from EnvExpand.__get_validators__()
-        yield from FilePath.__get_validators__()
+"""A FilePath field whose value can be interpolated from env vars"""
+FilePathEnvExpand = Annotated[FilePath, BeforeValidator(expand_env_str)]
 
 
 class GitSpec(NoExtraBaseModel):
@@ -130,7 +136,8 @@ class GitSpec(NoExtraBaseModel):
     deploy_key: Optional[FilePathEnvExpand] = None
     deploy_passphrase: Optional[EnvSecretStr] = None
 
-    @validator("repo")
+    @field_validator("repo")
+    @classmethod
     def validate_repo(cls, repo):  # noqa
         expected = ("https:", "git@")
         if not repo.startswith(expected):
@@ -139,7 +146,8 @@ class GitSpec(NoExtraBaseModel):
             )
         return repo
 
-    @root_validator
+    @model_validator(mode="before")
+    @classmethod
     def ensure_proper_auth(cls, values):
         req = ("token", "deploy_key", "password")
         auth_vals = list(filter(None, (values.get(auth) for auth in req)))
@@ -178,7 +186,8 @@ class InventorySpec(NoExtraBaseModel):
     name: Optional[str] = None
     script: EnvExpand
 
-    @validator("script")
+    @field_validator("script")
+    @classmethod
     def validate_script(cls, script_exec):  # noqa
         script_bin, *script_vargs = script_exec.split()
         if not os.path.isfile(script_bin):
@@ -197,9 +206,11 @@ class JumphostSpec(NoExtraBaseModel):
     exclude: Optional[List[str]] = None
     timeout: PositiveInt = Field(consts.DEFAULT_LOGIN_TIMEOUT)
 
-    @validator("name", always=True)
-    def _default_name(cls, value, values):  # noqa
-        return values["proxy"] if not value else value
+    @model_validator(mode="after")
+    def default_name(self):  # noqa
+        if not self.name:
+            self.name = self.proxy
+        return self
 
 
 class AppConfig(NoExtraBaseModel):
@@ -213,10 +224,14 @@ class AppConfig(NoExtraBaseModel):
     git: Optional[List[GitSpec]] = None
     jumphost: Optional[List[JumphostSpec]] = None
 
-    @validator("os_name")
-    def _linters(cls, v, values):  # noqa
-        linters = values.get("linters") or {}
-        if v:  # Added check to ensure field_value is not None
+    @field_validator("os_name")
+    @classmethod
+    def _linters(cls, v, info: ValidationInfo):  # noqa
+        if (linters := info.data.get("linters")) is None:
+            # sometimes it's still None
+            # see tests/test_config.py::test_config_linter_fail
+            linters = dict()
+        if v is not None:
             for os_name, os_spec in v.items():
                 if os_spec.linter and os_spec.linter not in linters:
                     raise ValueError(
