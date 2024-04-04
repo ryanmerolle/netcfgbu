@@ -95,7 +95,6 @@ class Defaults(DefaultBaseSettings):
     @field_validator("inventory")
     @classmethod
     def _inventory_provided(cls, value):  # noqa
-        print("inventory validate", value)
         if not len(value):
             raise ValueError("inventory empty value not allowed")
         return value

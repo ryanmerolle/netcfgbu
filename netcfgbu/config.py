@@ -46,9 +46,7 @@ def load(*, filepath=None, fileio=None) -> AppConfig:
 
     app_defaults = app_cfg.get("defaults")
     if not app_defaults:
-        print("NO DEFAULTS")
         app_cfg["defaults"] = dict(credentials={})
-    print(app_cfg)
 
     try:
         cfg_obj = AppConfig.model_validate(app_cfg)

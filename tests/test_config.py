@@ -246,7 +246,6 @@ def test_config_pass_asfilepath(request):
     Test use-case where the config is provided as a filepath, and the file exists.
     """
     abs_filepath = f"{request.fspath.dirname}/files/test-just-defaults.toml"
-    print(abs_filepath)
     load(filepath=abs_filepath)
 
 
