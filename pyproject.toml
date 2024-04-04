@@ -15,8 +15,8 @@ classifiers = [
     "Topic :: System :: Networking"
 ]
 
-[project.scripts]
-netcfgbu = "bin/netcfgbu"
+[tool.poetry.scripts]
+netcfgbu = "netcfgbu.main:main"
 
 [tool.poetry.dependencies]
 python = "^3.9"
