@@ -35,7 +35,6 @@ PyYAML = "*"
 [tool.poetry.group.dev.dependencies]
 asynctest = "*"
 black = "*"
-bump-pydantic = "*"
 flake8 = "*"
 flake8-breakpoint = "*"
 interrogate = "*"
