@@ -138,7 +138,7 @@ for example:
 netcfgbu login --limit site=dc1 --exclude role=leaf
 ```
 
-The `netcfgbu` also supports the @<filename> construct again borrowed from
+The `netcfgbu` also supports the `@<filename>` construct again borrowed from
 Ansible so that you can filter based on host names present in the file.  The
 example of retry-last-failed devices would look like this:
 
@@ -207,7 +207,10 @@ giants](https://en.wikipedia.org/wiki/Standing_on_the_shoulders_of_giants). If
 you are looking for a network backup configuration tool please give `netcfgbu`
 a try.  I'm here to help if you get stuck or need any assistance.
 
-Cheers,<br/>
--- Jeremy Schulman<br/>
-Twitter: @nwkautomaniac<br/>
-Slack: @nwkautomaniac on networktocode.slack.com
+Cheers
+
+-- Jeremy Schulman
+
+Twitter: [@nwkautomaniac](https://twitter.com/nwkautomaniac)
+
+Slack: @nwkautomaniac on [networktocode.slack.com](https://networktocode.herokuapp.com)

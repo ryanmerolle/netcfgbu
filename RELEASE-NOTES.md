@@ -17,7 +17,7 @@
 
 ## v0.5.0 (2020-Jun-28)
 
-* BREAKING Change: removed support of non-CSV files for filtering "@<file>".  Only
+* BREAKING Change: removed support of non-CSV files for filtering `@<file>`.  Only
    CSV files are currently supported.
 * Addes support for SSH jumphost proxy, see [Using Jumphosts](docs/config-ssh-jumphost.md)
 * Added CI/CD tooling - tox & friends, github actions, pre-commit

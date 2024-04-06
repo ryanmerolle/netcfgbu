@@ -25,4 +25,4 @@
 
 * [Environment Variables](environment_variables.md)
 
-* [OS Custom Connectors](custom-connectors.md)
+* OS Custom Connectors (placeholder)

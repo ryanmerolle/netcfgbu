@@ -1,14 +1,11 @@
 import click
 import shutil
-import os
 from pathlib import Path
 import pkg_resources
 
-from netcfgbu.logger import get_logger, stop_aiologging
 
 from .root import (
     cli,
-    WithInventoryCommand,
 )
 
 
@@ -17,9 +14,11 @@ def copy_example_files():
     Copy all files from the 'netcfgbu/examples/' directory within the package
     to the current working directory.
     """
-    package_name = 'netcfgbu'
-    examples_dir_name = 'examples'
-    examples_path = Path(pkg_resources.resource_filename(package_name, examples_dir_name))
+    package_name = "netcfgbu"
+    examples_dir_name = "examples"
+    examples_path = Path(
+        pkg_resources.resource_filename(package_name, examples_dir_name)
+    )
 
     # Check if the examples directory exists
     if not examples_path.exists():

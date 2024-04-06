@@ -1,9 +1,9 @@
+# Network Configuration Backup
+
 [![Python 3.9](https://img.shields.io/badge/python-3.9-blue.svg)](https://www.python.org/downloads/release/python-390/)
 [![Code Style](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/ambv/black)
 
 ![version](docs/version.svg)
-
-# Network Configuration Backup
 
 As a network engineer I need to backup my network configuration files into a
 version control system, and I need a tool to automate this process.  My primary
@@ -40,11 +40,11 @@ to not hardcode the tool to work with specific network device drivers
 and avoid the complexity and dependency of including a collection of 3rd-party
 libraries specific to network devices.
 
-Read the Documention [here](docs/TOC.md).<br/>
-Read the Quick Start [here](docs/QuickStart.md)<br/>
-[Example netcfgbu.toml configuration](netcfgbu.toml)<br/>
+* Read the Documention [here](docs/TOC.md).
+* Read the Quick Start [here](docs/QuickStart.md).
+* [Example netcfgbu.toml configuration](./examples/netcfgbu.toml).
 
-# Introduction
+## Introduction
 
 Once you've setup the [configuration](docs/configuration-file.md) file and
 [inventory](docs/inventory.md) file you can backup all of your configurations
@@ -119,8 +119,7 @@ configuration file, this would be used:
 
 ### System Requirements and Installation
 
-This tool requires the use of Python3.9.<br/>
-Installation available via PyPI:
+This tool requires the use of Python3.9.  Installation available via PyPI:
 
 ```shell script
 pip install netcfgbu

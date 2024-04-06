@@ -1,8 +1,6 @@
 # Configuration for Use with Jump Hosts
 
-*Added in 0.5.0*
-
-You can configure one or more jump host proxy servers.  Each ``[jumphost]]``
+You can configure one or more jump host proxy servers.  Each `[jumphost]]`
 section supports the following fields:
 
 * `proxy` - Defines the jump host proxy destination.  This string value can

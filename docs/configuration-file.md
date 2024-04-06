@@ -2,7 +2,7 @@
 
 `netcfgbu` requires you to setup a TOML configuration file.  The default
 file name is `netcfgbu.toml` and is searched for in the current working directory.
-You can override this location using the -C <filepath> option or setting your
+You can override this location using the `-C <filepath>` option or setting your
 environment variable `NETCFGBU_CONFIG`.
 
 (See [example config file](../examples/netcfgbu.toml))
@@ -27,13 +27,16 @@ All of the default values support the use of environment variables as shown
 in the example below.  All of these defaults also support the use
 of `NETCFGBU_` environment variables as described [here](environment_variables.md).
 
-**`inventory`**<br/>
+### `inventory`
+
 File path to the inventory CSV.
 
-**`credentials.username`**<br/>
+### `credentials.username`
+
 The default login user-name
 
-**`credentials.password`**<br/>
+### `credentials.password`
+
 The default login password.  You should always use environment variables here,
 but you are not required to do so.
 
@@ -69,7 +72,7 @@ plugins_dir = "$PROJ_DIR/plugins"
 
 To enable logging you can defined the `[logging]` section in the configuration
 file. The format of this section is the standard Python logging module, as
-documented [here]( https://docs.python.org/3/library/logging.config.html).
+documented [here](https://docs.python.org/3/library/logging.config.html).
 
 The logger name for `netcfgbu` is "netcfgbu".
 See the [sample netcfgbu.toml](../examples/netcfgbu.toml) for further details.

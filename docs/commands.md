@@ -9,7 +9,8 @@ using the `--limit @failures.csv`.  Or you can use this file to exclude these
 devices using `--exlcude @failures.csv`.  For more details see
 [filtering](usage-filtering.md)
 
-**example**<br/>
+## example
+
 The `example` command is used to generate an example configuration and inventory file.  This is useful
 for getting started with the `netcfgbu` tool.
 
@@ -21,7 +22,8 @@ netcfgbu example
 
 The files `example_inventory.csv` & `example_netcfgbu.toml` will be placed to the directory this is run from.
 
-**inventory**<br/>
+## inventory
+
 The `inventory ls` command is used to list the contents of the current inventory file.  This
 is useful for when you want to test your filtering expressions before you try to run a backup.
 
@@ -40,7 +42,8 @@ Example:
 netcfgbu inventory build --name netbox
 ```
 
-**probe**<br/>
+## probe
+
 The `probe` command is used to determine if the SSH port is available on the target device.  This
 is a useful first step before attempting to run a backup.  This probe does **not** attempt to
 login / authenticate with SSH.
@@ -49,7 +52,8 @@ login / authenticate with SSH.
 netcfgbu probe
 ```
 
-**login**<br/>
+## login
+
 The `login` command is used to determine if the `netcfgbu` is able to authenticate with the
 device SSH, and reports the credential username value that was used.  This is useful to
 ensure that not only is the device reachable with SSH open, but the that `netcfgbu` is configured
@@ -59,7 +63,8 @@ with the correct credentials to allow a connection.
 netcfgbu probe
 ```
 
-**backup**<br/>
+## backup
+
 This `backup` command is used to login to the device via SSH, extract the
 running configuration, and save it to a file called $host.cfg, where $host is
 the value defined in the inventory item.  For example if an inventory item has

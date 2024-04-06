@@ -20,15 +20,22 @@ def precheck(ctx):
     ctx.run("poetry ruff check . --fix")
     ctx.run("poetry ruff format .")
     ctx.run("poetry pre-commit run -a")
-    ctx.run("poetry run interrogate -c pyproject.toml --exclude=build --exclude tests", pty=True)
+    ctx.run(
+        "poetry run interrogate -c pyproject.toml --exclude=build --exclude tests",
+        pty=True,
+    )
 
 
 @task
 def clean(ctx):
     """Clean up the project."""
     ctx.run("rm -rf netcfgbu.egg-info")
-    ctx.run("rm -rf .pytest_cache .pytest_tmpdir .coverage .ruff_cache tests/__pycache__ netcfgbu/__pycache__")
-    ctx.run("rm -rf netcfgbu/cli/__pycache__ netcfgbu/connectors/__pycache__ netcfgbu/vcs/__pycache__ tests/files/plugins/__pycache__")
+    ctx.run(
+        "rm -rf .pytest_cache .pytest_tmpdir .coverage .ruff_cache tests/__pycache__ netcfgbu/__pycache__"
+    )
+    ctx.run(
+        "rm -rf netcfgbu/cli/__pycache__ netcfgbu/connectors/__pycache__ netcfgbu/vcs/__pycache__ tests/files/plugins/__pycache__"
+    )
     ctx.run("rm -rf htmlcov")
 
 

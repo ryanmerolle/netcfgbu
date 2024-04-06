@@ -117,7 +117,7 @@
         #'write memory', # Useful if you want to ensure running-config is saved.
         'terminal length 0'
     ]
-    get_config: 'show running-config'
+    get_config = 'show running-config'
     linter = "ios"
 
 [os_name.iosxe]

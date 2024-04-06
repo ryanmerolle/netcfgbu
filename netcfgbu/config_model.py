@@ -99,8 +99,8 @@ class Defaults(DefaultBaseSettings):
     plugins_dir: Optional[EnvExpand] = Field(
         validation_alias=AliasChoices("NETCFGBU_PLUGINSDIR", "PWD")
     )
-    #configs_dir: Optional[EnvExpand] = Field(validation_alias="NETCFGBU_CONFIGSDIR")
-    #plugins_dir: Optional[EnvExpand] = Field(validation_alias="NETCFGBU_PLUGINSDIR")
+    # configs_dir: Optional[EnvExpand] = Field(validation_alias="NETCFGBU_CONFIGSDIR")
+    # plugins_dir: Optional[EnvExpand] = Field(validation_alias="NETCFGBU_PLUGINSDIR")
     inventory: EnvExpand = Field(validation_alias="NETCFGBU_INVENTORY")
     credentials: DefaultCredential
 

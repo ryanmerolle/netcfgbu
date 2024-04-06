@@ -14,12 +14,21 @@ repos:
       - id: check-toml
       - id: check-added-large-files
       - id: flake8
-  - repo: https://github.com/psf/black
-    rev: 24.3.0
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    # Ruff version.
+    rev: v0.3.5
     hooks:
-      - id: black
-        args: ["."]
+      # Run the linter.
+      - id: ruff
+        args: [ --fix ]
+      # Run the formatter.
+      - id: ruff-format
   - repo: https://github.com/igorshubovych/markdownlint-cli
     rev: v0.39.0
     hooks:
       - id: markdownlint-fix
+  - repo: https://github.com/tcort/markdown-link-check
+    rev: v3.12.1
+    hooks:
+      - id: markdown-link-check
+        args: [-q]

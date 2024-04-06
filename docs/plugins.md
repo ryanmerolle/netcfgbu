@@ -1,8 +1,10 @@
 # NETCFGBU Plugins
 
-This page shows how to hook into key `netcfgbu` lifecycle events to enable users to write arbitrary Python code to be executed when different `netcfgbu` commands are executed.
+This page shows how to hook into key `netcfgbu` lifecycle events to enable users to write arbitrary Python code to be
+executed when different `netcfgbu` commands are executed.
 
-An example of this in use could be to notify a slack channel of the status of device backups. This could also be used to kick off an Ansible workflow to validate the backed up configurations using [Batfish](https://github.com/batfish/batfish).
+An example of this in use could be to notify a slack channel of the status of device backups. This could also be used to
+kick off an Ansible workflow to validate the backed up configurations using [Batfish](https://github.com/batfish/batfish).
 
 ## Lifecycle Hooks
 
@@ -17,7 +19,9 @@ The following table describes the possible lifecycle hooks:
 
 ## Implementing Plugins
 
-Firstly to use `netcfgbu` a `plugins` directory needs to be identified within the `netcfgbu` configuration file or by using the environment variables. Please see [environment_variables](environment_variables.md) and [configuration-file](configuration-file.md) for the specifics.
+Firstly to use `netcfgbu` a `plugins` directory needs to be identified within the `netcfgbu` configuration file or by
+using the environment variables. Please see [environment_variables](environment_variables.md) and [configuration-file]
+(configuration-file.md) for the specifics.
 
 Within the `plugins` directory Python files can be created which subclass the `netcfgbu` Plugin class like so...
 
@@ -37,7 +41,8 @@ class ScienceLogic(Plugin):
         print("Backup Report")
 ```
 
-Any number of Python files and classes can be created and they will all be executed within `netcfbu`. Please see the [table](#lifecycle-hooks) for the number of hooks that are available.
+Any number of Python files and classes can be created and they will all be executed within `netcfbu`.
+Please see the [table](#lifecycle-hooks) for the number of hooks that are available.
 
 ## Example Output
 

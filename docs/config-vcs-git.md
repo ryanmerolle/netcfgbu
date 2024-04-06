@@ -25,39 +25,46 @@ Subcommands](usage-vcs.md).
 
 Each `[[git]]` section supports the following options:
 
-**name**<br/>
+## name
+
 When your configuration file contains multiple `[git]` sections you can
 assign a name so that you can use the `--name` option when running the
 `netcfgbu vcs` subcommands.
 
-**repo**<br/>
+## repo
+
 This is the git repository git URL that is found on the git repository
 page when you select "Clone or Download".  The value will begin either with "http://"
 when using HTTPS mode or or "git@" when using SSH mode.
 
-**username** (Optional)<br/>
+## username (Optional)
+
 When provided this value will be used to indicate the user-name
 when files are stored into the git repo.  If you do not configure
 this option then the environment `$USER` value is used.  This
 option supports the use of Enviornment variables.
 
-**email** (Optional)<br/>
+## email (Optional)
+
 When provided this value will be used to indcate the user email
 address with files are stored into the git repo.  If you do not
 configure this option then the `username` value is used.
 
-**token** (Optional)<br/>
+## token (Optional)
+
 If you configure this value then `netcfgbu` will use this token
 to access your git repository as the credential method.  This
 option supports the use of Enviornment variables.  Use this
 option if your `repo` field begins with "https://".
 
-**deploy_key** (Optional)<br/>
+## deploy_key (Optional)
+
 This option indicates the filepath to the SSH private-key file.  Use
 this option if your `repo` field begins with "git@".  This
 option supports the use of Enviornment variables.
 
-**deploy_passphrase** (Optional)<br/>
+## deploy_passphrase (Optional)
+
 This option is required if your deployment key was created with a passphrase.
 This option supports the use of Enviornment variables.
 
@@ -87,8 +94,8 @@ This option supports the use of Enviornment variables.
 ## References
 
 For more information about the tradeoffs of using Tokens vs. Deployment Keys
-see [this document](https://developer.github.com/v3/guides/managing-deploy-keys/).
+see [this document](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/managing-deploy-keys).
 
 For more information about using Github/Gitlab Tokens see [Github](https://help.github.com/en/github/authenticating-to-github/creating-a-personal-access-token-for-the-command-line)/[Gitlab](https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html).
 
-For more information about using Github/Gitlab deployment keys see [Github](https://developer.github.com/v3/guides/managing-deploy-keys/#deploy-keys)/[Gitlab](https://docs.gitlab.com/ee/user/project/deploy_keys/).
+For more information about using Github/Gitlab deployment keys see [Github](hhttps://docs.github.com/en/authentication/connecting-to-github-with-ssh/managing-deploy-keys#deploy-keys)/[Gitlab](https://docs.gitlab.com/ee/user/project/deploy_keys/).

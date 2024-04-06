@@ -19,12 +19,14 @@ Tables](https://github.com/toml-lang/toml#user-content-array-of-tables) syntax.
 When multiple credentials are supplied in a given section `netcfgbu` will use
 these credentials in the order that they are defined.
 
-**Host specific credentials**<br/>
+## Host specific credentials
+
 Host specific credentials must be provided in the inventory file using the
 `username` and `password` field-columns. See the [inventory
 section](inventory.md) for details.
 
-**OS-name specific credentials**<br/>
+## OS-name specific credentials
+
 Example:
 
 ```toml
@@ -40,7 +42,8 @@ NOTE: The indentation here is only for human-eyeballs.  If you were to add a
 variable after the credentials section it would **not** be part of the
 `[os_name.asa]` section, but rather a new global variable.
 
-**Default credentials**<br/>
+## Default credential
+
 Defined in the `[defaults]` section.
 
 Example:
@@ -51,7 +54,8 @@ Example:
     credentials.password = "$NETWORK_PASSWORD"
 ```
 
-**Global credentials**<br/>
+## Global credentials
+
 `netcfgbu` will use these credentials in the order that they are defined in the
 configuration file.
 
