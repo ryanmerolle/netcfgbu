@@ -3,7 +3,7 @@
 If you are a Netbox user you can dynamically build the inventory.csv file as
 described [here](../netbox/README.md).
 
-You can use the provided configuration file [netcfgbu.toml](../netcfgbu.toml) as
+You can use the provided configuration file [netcfgbu.toml](../examples/netcfgbu.toml) as
 a starting point and customize it as necessary.  See [Configurations](TOC.md)
 for details.
 

@@ -5,7 +5,7 @@ file name is `netcfgbu.toml` and is searched for in the current working director
 You can override this location using the -C <filepath> option or setting your
 environment variable `NETCFGBU_CONFIG`.
 
-(See [example config file](../netcfgbu.toml))
+(See [example config file](../examples/netcfgbu.toml))
 
 By default, without any OS specific configurations, when you run `netcfgbu
 backup` the tool will attempt to login to the devices provided in the inventory
@@ -72,4 +72,4 @@ file. The format of this section is the standard Python logging module, as
 documented [here]( https://docs.python.org/3/library/logging.config.html).
 
 The logger name for `netcfgbu` is "netcfgbu".
-See the [sample netcfgbu.toml](../netcfgbu.toml) for further details.
+See the [sample netcfgbu.toml](../examples/netcfgbu.toml) for further details.

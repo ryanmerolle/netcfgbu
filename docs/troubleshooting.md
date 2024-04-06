@@ -53,6 +53,6 @@ the login subcommmand.  You will observe the following logging information:
 
 Using the information provded update your configuration file to include the required
 exchange settings, either in the global `[ssh_configs]` section or in the `[os_name.$name.ssh_configs] section.
-There is an example of such a configuration is the sample [netcfgbu.toml](../netcfgbu.toml).
+There is an example of such a configuration is the sample [netcfgbu.toml](../examples/netcfgbu.toml).
 
 For addition information refer to the [SSH-config options](config-ssh-options.md) documentation page.

@@ -103,7 +103,7 @@ For example you can use the value "nxos" or "nexus" or "nx-os" as your
 `os_name` for Cisco NX-OS based devices **so long as** you create the necessary
 configuration using that same name.
 
-By way of example from the [netcfgbu.toml](../netcfgbu.toml) sample, the
+By way of example from the [netcfgbu.toml](../examples/netcfgbu.toml) sample, the
 following section says that any inventory item with the `os_name` field equal
 to "nxos" will use the command `show running-config | no-more` as the command
 to obtain the running configuration file.
