@@ -17,11 +17,18 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      - name: Set up Python 3.9
-        uses: actions/setup-python@v3
+      - name: Install and configure Poetry
+        uses: snok/install-poetry@v1
         with:
-          python-version: 3.9
-      - name: install tox and friends
-        run: python -m pip install --upgrade pip setuptools tox virtualenv
+          virtualenvs-create: true
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pypoetry
+          key: ${{ runner.os }}-poetry-${{ hashFiles('**/pyproject.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-poetry-
+      - name: Install dependencies
+        run: poetry config virtualenvs.in-project true && poetry install
       - name: run tox
-        run: tox
+        run: poetry run tox
