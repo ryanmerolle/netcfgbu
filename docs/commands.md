@@ -9,6 +9,18 @@ using the `--limit @failures.csv`.  Or you can use this file to exclude these
 devices using `--exlcude @failures.csv`.  For more details see
 [filtering](usage-filtering.md)
 
+**example**<br/>
+The `example` command is used to generate an example configuration and inventory file.  This is useful
+for getting started with the `netcfgbu` tool.
+
+Example:
+
+```shell script
+netcfgbu example
+```
+
+The files `example_inventory.csv` & `example_netcfgbu.toml` will be placed to the directory this is run from.
+
 **inventory**<br/>
 The `inventory ls` command is used to list the contents of the current inventory file.  This
 is useful for when you want to test your filtering expressions before you try to run a backup.
