@@ -1,5 +1,15 @@
 # Release Notes
 
+## v1.0.0 (2024-Aug-11)
+
+* Added a command to provide users  example configuration and inventory files.
+* Bumped pydantic v1 to v2. (@Sparrow1029)
+* Bumped dependencies to latest versions.
+* Added examples to support Cumulus (@saparikh)
+* Added devcontainer for quick development setup.
+* Migrated to poetry for dependency management and packaging.
+* Introduced megalinter for code quality checks using github actions.
+
 ## v0.6.0 (2020-Aug-11)
 
 * Added support for User defined prompt patterns
