@@ -11,8 +11,9 @@ from .root import (
 
 def copy_example_files():
     """
-    Copy all files from the 'netcfgbu/examples/' directory within the package
-    to the current working directory.
+    Check if any example file already exists in the current working directory.
+    If so, print an error message and do not copy any files.
+    Otherwise, copy all files from the 'src/examples/' directory within the package.
     """
     package_name = "netcfgbu"
     examples_dir_name = "examples"
@@ -20,14 +21,22 @@ def copy_example_files():
         pkg_resources.resource_filename(package_name, examples_dir_name)
     )
 
-    # Check if the examples directory exists
-    if not examples_path.exists():
-        print(f"The directory {examples_path} does not exist.")
-        return
+    # Preliminary check for existing files
+    existing_files = [
+        file_path
+        for file_path in examples_path.iterdir()
+        if (Path.cwd() / file_path.name).exists()
+    ]
+    if existing_files:
+        existing_files_names = ", ".join(file_path.name for file_path in existing_files)
+        print(
+            f"ERROR: No files were copied. The following file(s) already exist in the current directory: {existing_files_names}"
+        )
+        raise exit(code=1)
 
-    # Iterate over all files in the examples directory and copy them to the current working directory
+    # If no existing files were found, proceed to copy
     for file_path in examples_path.iterdir():
-        if file_path.is_file():  # Make sure to copy files only
+        if file_path.is_file():
             shutil.copy(file_path, Path.cwd())
             print(f"Copied {file_path.name} to the current directory.")
 
