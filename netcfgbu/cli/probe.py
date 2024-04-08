@@ -49,16 +49,12 @@ def exec_probe(inventory, timeout=None):
             try:
                 probe_ok = probe_task.result()
                 report.task_results[probe_ok].append((rec, probe_ok))
+                log.info(msg + ("PASS" if probe_ok else "FAIL"))
 
-            except (asyncio.TimeoutError, OSError) as exc:
-                probe_ok = False
-                report.task_results[False].append((rec, exc))
-
-            except Exception as exc:
+            except (asyncio.TimeoutError, Exception, OSError) as exc:
                 probe_ok = False
                 log.error(msg + f"FAILURE: {str(exc)}")
-
-            log.info(msg + ("PASS" if probe_ok else "FAIL"))
+                report.task_results[False].append((rec, exc))
 
     report.start_timing()
     loop.run_until_complete(proces_check())

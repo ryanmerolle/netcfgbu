@@ -62,13 +62,10 @@ def exec_test_login(app_cfg: AppConfig, inventory_recs, cli_opts):
                     log.warning(msg + reason)
                     report.task_results[False].append((rec, reason))
 
-            except asyncio.TimeoutError as exc:
+            except (asyncio.TimeoutError, Exception, OSError) as exc:
                 log.warning(msg + "Timeout")
                 report.task_results[False].append((rec, exc))
-
-            except Exception as exc:
-                report.task_results[False].append((rec, exc))
-                log.error(msg + f": {err_reason(exc)}")
+                log.error(msg + f"FAILURE: {str(exc)}")
 
     loop = asyncio.get_event_loop()
     report.start_timing()
