@@ -9,9 +9,9 @@
 # -----------------------------------------------------------------------------
 
 [defaults]
-    inventory = "$PROJ_DIR/inventory.csv"
-    configs_dir = "$PROJ_DIR/configs"
-    plugins_dir = "$PROJ_DIR/plugins"
+    inventory = "inventory.csv"
+    configs_dir = "configs"
+    plugins_dir = "plugins"
     credentials.username = "$NETWORK_USERNAME"
     credentials.password = "$NETWORK_PASSWORD"
 
