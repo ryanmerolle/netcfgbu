@@ -94,10 +94,10 @@ class DefaultCredential(DefaultBaseSettings):
 
 class Defaults(DefaultBaseSettings):
     configs_dir: Optional[EnvExpand] = Field(
-        validation_alias=AliasChoices("NETCFGBU_CONFIGSDIR", "PWD")
+        validation_alias="NETCFGBU_CONFIGSDIR"
     )
     plugins_dir: Optional[EnvExpand] = Field(
-        validation_alias=AliasChoices("NETCFGBU_PLUGINSDIR", "PWD")
+        validation_alias="NETCFGBU_PLUGINSDIR"
     )
     # configs_dir: Optional[EnvExpand] = Field(validation_alias="NETCFGBU_CONFIGSDIR")
     # plugins_dir: Optional[EnvExpand] = Field(validation_alias="NETCFGBU_PLUGINSDIR")
