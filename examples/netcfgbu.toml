@@ -236,9 +236,8 @@
 #   https://docs.python.org/3/library/logging.config.html
 # -----------------------------------------------------------------------------
 
-
 [logging.loggers.netcfgbu]
-    handlers = ["console", "file"]
+    handlers = []
     level = "INFO"
 
 [logging.loggers.asyncssh]
@@ -253,11 +252,13 @@
     class = "logging.StreamHandler"
     formatter = "basic"
     stream = "ext://sys.stdout"
+    level = "INFO"
 
 [logging.handlers.file]
     class = "logging.FileHandler"
     formatter = "basic"
     filename =  "netcfgbu.log"
+    level = "INFO"
 
 [logging.formatters.basic]
     format = "%(asctime)s %(levelname)s: %(message)s"
