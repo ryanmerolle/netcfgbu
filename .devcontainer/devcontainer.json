@@ -7,6 +7,10 @@
 		"ghcr.io/devcontainers-contrib/features/ruff": {},
 		"ghcr.io/devcontainers-contrib/features/pre-commit": {}
 	},
+	"containerEnv": {
+		"POETRY_VIRTUALENVS_IN_PROJECT": "true",
+		"HISTFILE": "/home/vscode/.bash_history"
+	  },
 	"postCreateCommand": "poetry install",
 	"customizations": {},
 	"remoteUser": "vscode"
