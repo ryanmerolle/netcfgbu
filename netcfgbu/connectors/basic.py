@@ -346,7 +346,7 @@ class BasicSSHConnector(object):
     async def read_until_prompt(self):
         output = b""
         while True:
-            self.log.debug(output)
+            self.log.debug(f"{self.name} - {output}")
             output += await self.process.stdout.read(io.DEFAULT_BUFFER_SIZE)
             nl_at = output.rfind(b"\n")
             if mobj := self.PROMPT_PATTERN.match(output[nl_at + 1 :]):
