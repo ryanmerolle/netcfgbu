@@ -18,7 +18,7 @@ from .root import (
     opt_timeout,
 )
 
-from .report import Report, err_reason
+from .report import Report
 from netcfgbu import jumphosts
 from netcfgbu.config_model import AppConfig
 from netcfgbu.consts import DEFAULT_LOGIN_TIMEOUT

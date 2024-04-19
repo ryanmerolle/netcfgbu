@@ -6,7 +6,6 @@ from itertools import chain
 from pathlib import Path
 
 from pydantic import (
-    AliasChoices,
     ValidationInfo,
     field_validator,
     ConfigDict,
@@ -93,12 +92,8 @@ class DefaultCredential(DefaultBaseSettings):
 
 
 class Defaults(DefaultBaseSettings):
-    configs_dir: Optional[EnvExpand] = Field(
-        validation_alias="NETCFGBU_CONFIGSDIR"
-    )
-    plugins_dir: Optional[EnvExpand] = Field(
-        validation_alias="NETCFGBU_PLUGINSDIR"
-    )
+    configs_dir: Optional[EnvExpand] = Field(validation_alias="NETCFGBU_CONFIGSDIR")
+    plugins_dir: Optional[EnvExpand] = Field(validation_alias="NETCFGBU_PLUGINSDIR")
     inventory: EnvExpand = Field(validation_alias="NETCFGBU_INVENTORY")
     credentials: DefaultCredential
 

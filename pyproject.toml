@@ -48,7 +48,7 @@ pytest = "*"
 pytest-asyncio = "*"
 pytest-cov = "*"
 requests = "*"
-#ruff = "*"
+ruff = "*"
 tox = "*"
 
 [build-system]
