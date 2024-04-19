@@ -15,6 +15,8 @@ def netcfgbu_envars(monkeypatch):
     monkeypatch.setenv("NETCFGBU_DEFAULT_USERNAME", "dummy-username")
     monkeypatch.setenv("NETCFGBU_DEFAULT_PASSWORD", "dummy-password")
     monkeypatch.setenv("NETCFGBU_INVENTORY", "/tmp/inventory.csv")
+    monkeypatch.setenv("NETCFGBU_CONFIGSDIR", "/tmp/configs")
+    monkeypatch.setenv("NETCFGBU_PLUGINSDIR", "/tmp/plugins")
 
 
 class RecordsCollector(logging.Handler):

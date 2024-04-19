@@ -1,7 +1,6 @@
 [defaults]
     inventory = "/tmp/inventory.csv"
     configs_dir = "/tmp/configs"
+    plugins_dir = "/tmp/plugins"
     credentials.username = "my-user-login-name"
     credentials.password = "my-user-login-password"
-
-
