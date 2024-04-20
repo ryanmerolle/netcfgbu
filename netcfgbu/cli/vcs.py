@@ -7,7 +7,7 @@ from netcfgbu.plugins import load_plugins
 
 from .root import cli, get_spec_nameorfirst, opt_config_file
 
-opt_vcs_name = click.option("--name", help="vcs name as defined in config file")
+opt_vcs_name = click.option("--name", help="VCS name as defined in config file")
 
 
 @cli.group(name="vcs")
