@@ -38,6 +38,7 @@ import pexpect
 from netcfgbu.logger import get_logger
 from netcfgbu.config_model import GitSpec
 from netcfgbu.plugins import Plugin
+from netcfgbu import consts
 
 git_bin = "git"
 
@@ -185,7 +186,7 @@ class GitRunner(object):
         self.git_config()
 
     def git_pull(self):
-        self.run("pull origin main", authreq=True)
+        self.run(f"pull origin {consts.DEFAULT_GIT_BRANCH}", authreq=True)
 
     def git_config(self):
         config = self.config
