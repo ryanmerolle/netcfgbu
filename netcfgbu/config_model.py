@@ -124,6 +124,7 @@ FilePathEnvExpand = Annotated[FilePath, BeforeValidator(expand_env_str)]
 class GitSpec(NoExtraBaseModel):
     name: Optional[str] = None
     repo: EnvExpand
+    add_tag: Optional[bool] = False
     email: Optional[str] = None
     username: Optional[EnvExpand] = None
     password: Optional[EnvExpand] = None

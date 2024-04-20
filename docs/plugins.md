@@ -15,7 +15,7 @@ The following table describes the possible lifecycle hooks:
 | Backup Success | `backup_success` | `backup_success` is executed for every device that has successfully backed up. | `record`, `result` |
 | Backup Failed | `backup_failed` | `backup_failed` is executed for every device that has failed to backup. | `record`, `result` |
 | Report | `report` | `report` is executed at the end of `netcfgbu backup` command. | `report` |
-| Git Report | `git_report` | `git_report` is executed at the end of `netcfgbu vcs save`. | `success`, `tag_name` |
+| Git Report | `git_report` | `git_report` is executed at the end of `netcfgbu vcs save`. | `success`, `message` |
 
 ## Implementing Plugins
 

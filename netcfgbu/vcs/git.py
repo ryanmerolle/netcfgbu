@@ -8,7 +8,7 @@ for use:
 
    * vcs_save:
       Used to save files in the repo directory into VCS and tag the collection
-      with a release tag.
+      with a git tag.
 
    * vcs_status:
       Used to show the current target status of file changes.
@@ -42,7 +42,7 @@ from netcfgbu.plugins import Plugin
 git_bin = "git"
 
 
-def tag_name_timestamp() -> str:
+def message_timestamp() -> str:
     """
     Create the tag name using the current time with
     format <year><month#><day#>_<24hr><minute><sec>
@@ -57,34 +57,43 @@ def tag_name_timestamp() -> str:
 # -----------------------------------------------------------------------------
 
 
-def vcs_save(gh_cfg: GitSpec, repo_dir: Path, tag_name: Optional[str] = None) -> bool:
+def vcs_save(
+    gh_cfg: GitSpec,
+    repo_dir: Path,
+    add_tag: bool = False,
+    message: Optional[str] = None,
+) -> bool:
     logr = get_logger()
     logr.info(f"VCS update git: {gh_cfg.repo}")
 
     ghr = git_runner(gh_cfg, repo_dir)
-    if not tag_name:
-        tag_name = tag_name_timestamp()
+    if not message:
+        message = message_timestamp()
 
     output = ghr.run("status")
     if "nothing to commit" in output:
         logr.info("VCS no changes, skipping")
-        Plugin.run_git_report(success=False, tag_name=tag_name)
+        Plugin.run_git_report(success=False, message=message if add_tag else None)
         return False
 
-    logr.info(f"VCS saving changes, tag={tag_name}")
+    logr.info(f"VCS saving changes{', tag=' + message if add_tag else ''}")
 
-    commands = (
-        ("add -A", False),
-        (f"commit -m {tag_name}", False),
-        ("push", True),
-        (f"tag -a {tag_name} -m {tag_name}", False),
-        ("push --tags", True),
-    )
+    # Always execute these commands
+    commands = [("add -A", False), (f"commit -m '{message}'", False), ("push", True)]
+
+    # Execute these commands only if tagging is not skipped
+    if add_tag:
+        commands.extend(
+            [
+                (f"tag -a '{message}' -m '{message}'", False),
+                ("push --tags", True),
+            ]
+        )
 
     for cmd, req_auth in commands:
         ghr.run(cmd, req_auth)
 
-    Plugin.run_git_report(success=True, tag_name=tag_name)
+    Plugin.run_git_report(success=True, message=message)
     return True
 
 

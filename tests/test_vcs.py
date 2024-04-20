@@ -122,7 +122,7 @@ def test_vcs_pass_save(mock_pexpect, tmpdir, monkeypatch):
 
     mock_timestamp = Mock()
     mock_timestamp.return_value = "dummy-timestamp"
-    monkeypatch.setattr(git, "tag_name_timestamp", mock_timestamp)
+    monkeypatch.setattr(git, "message_timestamp", mock_timestamp)
 
     git.vcs_save(gh_cfg=git_cfg, repo_dir=Path(repo_dir))
 
@@ -133,10 +133,11 @@ def test_vcs_pass_save(mock_pexpect, tmpdir, monkeypatch):
     expected_commands = [
         "git status",
         "git add -A",
-        "git commit -m dummy-timestamp",
+        "git commit -m 'dummy-timestamp'",
         "git push",
-        "git tag -a dummy-timestamp -m dummy-timestamp",
-        "git push --tags",
+        # TODO - build tests for tags vs no tags
+        #"git tag -a 'dummy-timestamp' -m 'dummy-timestamp'",
+        #"git push --tags",
     ]
 
     assert len(calls) == len(expected_commands)

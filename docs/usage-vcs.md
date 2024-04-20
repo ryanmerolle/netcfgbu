@@ -36,8 +36,9 @@ into the git repository you run the `save` command.  By default `netcfgbu`
 will create a git tag (release) based on the current timestamp in the format
 `<year><month-number><day-number>_<hour24><minute><seconds>`.  For example, if
 you run the `save` command on June 12, 2020 at 1:35p the tag release name would
-be `20200612_133500`.  If want to explicitly set the tag-release name use the
-`--tag-name` option.
+be `20200612_133500`.  If want to use a tag use the
+`--add-tag` option. If want to explicitly set the commit message / tag name use the
+`--message` option.
 
 ---
 
@@ -48,16 +49,16 @@ then the `save` command will not make any updates to git.
 
 ### Examples
 
-Save using the first `[[git]]` configuration and the default tag-name
+Save using the first `[[git]]` configuration and the default message
 
 ```shell script
 netcfgbu vcs save
 ```
 
-Save the configs using the tag-name "pre-change-ticket12345"
+Save the configs using the message "pre-change-ticket12345"
 
 ```shell script
-netcfgbu vcs save --tag-name pre-change-ticket12345
+netcfgbu vcs save --message pre-change-ticket12345
 ```
 
 Save using the git configuraiton named "firewalls"

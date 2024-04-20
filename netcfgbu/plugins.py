@@ -39,7 +39,7 @@ class Plugin(object):
         """returns a backup failed specific plugin once the netcfgbu backup process has completed"""
         pass
 
-    def git_report(success: bool, tag_name: str):
+    def git_report(success: bool, message: str):
         """returns a git report specific plugin once the netcfgbu vcs save process has completed"""
         pass
 
@@ -73,12 +73,12 @@ class Plugin(object):
         else:
             tasks.report(task_results)
 
-    def run_git_report(success: bool, tag_name: str) -> None:
+    def run_git_report(success: bool, message: str) -> None:
         """execute plugins submodules for vcs save plugins"""
 
         tasks = _registered_plugins[_PLUGIN_NAME] or Plugin
         if isinstance(tasks, list):
             for task in tasks:
-                task.git_report(success, tag_name)
+                task.git_report(success, message)
         else:
-            tasks.git_report(success, tag_name)
+            tasks.git_report(success, message)

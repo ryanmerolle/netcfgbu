@@ -61,7 +61,8 @@ def cli_vcs_prepare(ctx, **_cli_opts):
 @cli_vcs.command(name="save", cls=VCSCommand)
 @opt_config_file
 @opt_vcs_name
-@click.option("--tag-name", help="tag-release name")
+@click.option("--add-tag", is_flag=True, default=False, help="If set, create a git tag")
+@click.option("--message", help="Set commit message / tag name")
 @click.pass_context
 def cli_vcs_save(ctx, **cli_opts):
     """
@@ -69,7 +70,7 @@ def cli_vcs_save(ctx, **cli_opts):
 
     After you have run the config backup process you will need to push those
     changes into the VCS repository.  This command performs the necesssary
-    steps to add changes to the repository and set a release tag.  The release
+    steps to add changes to the repository and set a git tag.  The release
     tag by default is the timestamp in the form of
     "<year><month><day>_<hour><minute><second>"
     """
@@ -77,7 +78,8 @@ def cli_vcs_save(ctx, **cli_opts):
     git.vcs_save(
         ctx.obj["vcs_spec"],
         repo_dir=ctx.obj["app_cfg"].defaults.configs_dir,
-        tag_name=cli_opts["tag_name"],
+        add_tag=cli_opts["add_tag"],
+        message=cli_opts["message"],
     )
 
 
