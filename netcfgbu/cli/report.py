@@ -76,6 +76,9 @@ class Report(object):
             for rec, exc in self.task_results[False]
         ]
 
+        # Sort failure_tabular_data by 'host'
+        failure_tabular_data.sort(key=lambda x: x[0])  # Sorting by host
+
         if not fail_n:
             print(LN_SEP)
             return
