@@ -2,13 +2,22 @@
 
 ## v1.0.0 (2024-Aug-11)
 
-* Added a command to provide users  example configuration and inventory files.
-* Bumped pydantic v1 to v2. (@Sparrow1029)
-* Bumped dependencies to latest versions.
-* Added examples to support Cumulus (@saparikh)
-* Added devcontainer for quick development setup.
-* Migrated to poetry for dependency management and packaging.
-* Introduced megalinter for code quality checks using github actions.
+### Housekeeping
+
+* Bump pydantic version from 1.x to 2.x. (@Sparrow1029)
+* Bump dependencies to latest versions
+* Add devcontainer for quick development setup
+* Migrate to poetry for dependency management & packaging
+* Introduce more code quality checks using github actions
+* Leverage GitPython for git interactions
+
+### Features
+
+* Add a command to provide users example configuration & inventory files
+* Add examples to support Cumulus (@saparikh)
+* Add an option to set branch name for vcs git interactions
+* Add an option to enable the use of git tagging (disabled by default)
+* Add an option to override default git commit messages
 
 ## v0.6.0 (2020-Aug-11)
 
