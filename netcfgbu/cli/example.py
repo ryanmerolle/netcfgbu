@@ -7,6 +7,7 @@ from .root import (
     cli,
 )
 
+
 def copy_example_files():
     """
     Check if any example file already exists in the current working directory.
@@ -35,6 +36,7 @@ def copy_example_files():
         if file_path.is_file():
             shutil.copy(file_path, Path.cwd())
             print(f"Copied {file_path.name} to the current directory.")
+
 
 @cli.command(name="example")
 @click.pass_context
