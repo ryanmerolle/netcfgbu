@@ -1,13 +1,11 @@
 import click
 import shutil
 from pathlib import Path
-import pkg_resources
-
+import importlib
 
 from .root import (
     cli,
 )
-
 
 def copy_example_files():
     """
@@ -17,9 +15,7 @@ def copy_example_files():
     """
     package_name = "netcfgbu"
     examples_dir_name = "examples"
-    examples_path = Path(
-        pkg_resources.resource_filename(package_name, examples_dir_name)
-    )
+    examples_path = Path(importlib.resources.files(package_name) / examples_dir_name)
 
     # Preliminary check for existing files
     existing_files = [
@@ -39,7 +35,6 @@ def copy_example_files():
         if file_path.is_file():
             shutil.copy(file_path, Path.cwd())
             print(f"Copied {file_path.name} to the current directory.")
-
 
 @cli.command(name="example")
 @click.pass_context
