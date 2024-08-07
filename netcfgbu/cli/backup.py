@@ -1,11 +1,12 @@
 import asyncio
+import asyncssh
+import socket
 
 import click
 
 from netcfgbu.os_specs import make_host_connector
 from netcfgbu.logger import get_logger, stop_aiologging
 from netcfgbu.aiofut import as_completed
-from netcfgbu import jumphosts
 from netcfgbu.plugins import Plugin, load_plugins
 
 from .root import (
@@ -18,11 +19,11 @@ from .root import (
 )
 
 from .report import Report
+from netcfgbu import jumphosts
+from netcfgbu.config_model import AppConfig
 
 
-def exec_backup(app_cfg, inventory_recs):
-    backup_tasks = dict()
-
+def exec_backup(app_cfg: AppConfig, inventory_recs):
     log = get_logger()
 
     backup_tasks = {
@@ -30,8 +31,15 @@ def exec_backup(app_cfg, inventory_recs):
     }
 
     total = len(backup_tasks)
+
     report = Report()
     done = 0
+
+    async def handle_exception(exc, reason, rec, done_msg):
+        reason_detail = f"{reason} - {str(exc)}"
+        log.warning(done_msg + reason_detail)
+        report.task_results[False].append((rec, reason))
+        Plugin.run_backup_failed(rec, exc)
 
     async def process_batch():
         nonlocal done
@@ -43,20 +51,29 @@ def exec_backup(app_cfg, inventory_recs):
             done += 1
             coro = task.get_coro()
             rec = backup_tasks[coro]
-            msg = f"DONE ({done}/{total}): {rec['host']} "
+            done_msg = f"DONE ({done}/{total}): {rec['host']} "
 
             try:
                 res = task.result()
-                ok = res is True
-                report.task_results[ok].append((rec, res))
-                Plugin.run_backup_success(rec, res)
-                log.info(msg + ("PASS" if ok else "FALSE"))
+                if res:
+                    log.info(done_msg + "PASS")
+                    report.task_results[True].append((rec, res))
+                    Plugin.run_backup_success(rec, res)
+                else:
+                    reason = "backup failed"
+                    await handle_exception(Exception(reason), reason, rec, done_msg)
 
-            except (asyncio.TimeoutError, Exception, OSError) as exc:
-                ok = False
-                report.task_results[False].append((rec, exc))
-                Plugin.run_backup_failed(rec, exc)
-                log.error(msg + f"FAILURE: {str(exc)}")
+            except asyncssh.ConnectionLost as exc:
+                await handle_exception(exc, "ConnectionLost", rec, done_msg)
+            except socket.gaierror as exc:
+                await handle_exception(exc, "NameResolutionError", rec, done_msg)
+            except asyncio.TimeoutError as exc:
+                await handle_exception(exc, "TimeoutError", rec, done_msg)
+            except OSError as exc:
+                if exc.errno == 113:
+                    await handle_exception(exc, "NoRouteToHost", rec, done_msg)
+                else:
+                    await handle_exception(exc, "OSError", rec, done_msg)
 
     loop = asyncio.get_event_loop()
     report.start_timing()

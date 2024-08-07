@@ -9,7 +9,6 @@ from netcfgbu.aiofut import as_completed
 from netcfgbu.os_specs import make_host_connector
 from netcfgbu.connectors import set_max_startups
 
-
 from .root import (
     cli,
     WithInventoryCommand,
@@ -29,6 +28,8 @@ from netcfgbu.consts import DEFAULT_LOGIN_TIMEOUT
 def exec_test_login(app_cfg: AppConfig, inventory_recs, cli_opts):
     timeout = cli_opts["timeout"] or DEFAULT_LOGIN_TIMEOUT
 
+    log = get_logger()
+
     login_tasks = {
         make_host_connector(rec, app_cfg).test_login(timeout=timeout): rec
         for rec in inventory_recs
@@ -41,7 +42,11 @@ def exec_test_login(app_cfg: AppConfig, inventory_recs, cli_opts):
 
     report = Report()
     done = 0
-    log = get_logger()
+
+    async def handle_exception(exc, reason, rec, done_msg):
+        reason_detail = f"{reason} - {str(exc)}"
+        log.warning(done_msg + reason_detail)
+        report.task_results[False].append((rec, reason))
 
     async def process_batch():
         nonlocal done
@@ -54,7 +59,6 @@ def exec_test_login(app_cfg: AppConfig, inventory_recs, cli_opts):
             coro = task.get_coro()
             rec = login_tasks[coro]
             done_msg = f"DONE ({done}/{total}): {rec['host']} "
-            failure_msg = f"FAILURE: {rec['host']} - "
 
             try:
                 if login_user := task.result():
@@ -66,21 +70,16 @@ def exec_test_login(app_cfg: AppConfig, inventory_recs, cli_opts):
                     report.task_results[False].append((rec, reason))
 
             except asyncssh.ConnectionLost as exc:
-                report.task_results[False].append((rec, "ConnectionLost"))
-                log.error(failure_msg + f"ConnectionLost - {str(exc)}")
+                await handle_exception(exc, "ConnectionLost", rec, done_msg)
             except socket.gaierror as exc:
-                report.task_results[False].append((rec, "NameResolutionError"))
-                log.error(failure_msg + f"NameResolutionError - {str(exc)}")
+                await handle_exception(exc, "NameResolutionError", rec, done_msg)
             except asyncio.TimeoutError as exc:
-                report.task_results[False].append((rec, "TimeoutError"))
-                log.error(failure_msg + f"TimeoutError - {str(exc)}")
+                await handle_exception(exc, "TimeoutError", rec, done_msg)
             except OSError as exc:
                 if exc.errno == 113:
-                    report.task_results[False].append((rec, "NoRouteToHost"))
-                    log.error(failure_msg + f"NoRouteToHost - {str(exc)}")
+                    await handle_exception(exc, "NoRouteToHost", rec, done_msg)
                 else:
-                    report.task_results[False].append((rec, "OSError"))
-                    log.error(failure_msg + f"OSError - {str(exc)}")
+                    await handle_exception(exc, "OSError", rec, done_msg)
 
     loop = asyncio.get_event_loop()
     report.start_timing()
@@ -93,13 +92,12 @@ def exec_test_login(app_cfg: AppConfig, inventory_recs, cli_opts):
 @cli.command(name="login", cls=WithInventoryCommand)
 @opt_config_file
 @opts_inventory
-@opt_timeout
-@opt_batch
 @opt_debug_ssh
+@opt_batch
+@opt_timeout
 @click.pass_context
 def cli_login(ctx, **cli_opts):
     """
     Verify SSH login to devices.
     """
-
     exec_test_login(ctx.obj["app_cfg"], ctx.obj["inventory_recs"], cli_opts)
