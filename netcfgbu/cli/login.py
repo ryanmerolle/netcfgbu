@@ -1,4 +1,6 @@
 import asyncio
+import asyncssh
+import socket
 
 import click
 
@@ -51,21 +53,34 @@ def exec_test_login(app_cfg: AppConfig, inventory_recs, cli_opts):
             done += 1
             coro = task.get_coro()
             rec = login_tasks[coro]
-            msg = f"DONE ({done}/{total}): {rec['host']} "
+            done_msg = f"DONE ({done}/{total}): {rec['host']} "
+            failure_msg = f"FAILURE: {rec['host']} - "
 
             try:
                 if login_user := task.result():
-                    log.info(msg + f"with user {login_user}")
+                    log.info(done_msg + f"with user {login_user}")
                     report.task_results[True].append(rec)
                 else:
                     reason = "all credentials failed"
-                    log.warning(msg + reason)
+                    log.warning(done_msg + reason)
                     report.task_results[False].append((rec, reason))
 
-            except (asyncio.TimeoutError, Exception, OSError) as exc:
-                log.warning(msg + "Timeout")
-                report.task_results[False].append((rec, exc))
-                log.error(msg + f"FAILURE: {str(exc)}")
+            except asyncssh.ConnectionLost as exc:
+                report.task_results[False].append((rec, "ConnectionLost"))
+                log.error(failure_msg + f"ConnectionLost - {str(exc)}")
+            except socket.gaierror as exc:
+                report.task_results[False].append((rec, "NameResolutionError"))
+                log.error(failure_msg + f"NameResolutionError - {str(exc)}")
+            except asyncio.TimeoutError as exc:
+                report.task_results[False].append((rec, "TimeoutError"))
+                log.error(failure_msg + f"TimeoutError - {str(exc)}")
+            except OSError as exc:
+                if exc.errno == 113:
+                    report.task_results[False].append((rec, "NoRouteToHost"))
+                    log.error(failure_msg + f"NoRouteToHost - {str(exc)}")
+                else:
+                    report.task_results[False].append((rec, "OSError"))
+                    log.error(failure_msg + f"OSError - {str(exc)}")
 
     loop = asyncio.get_event_loop()
     report.start_timing()
