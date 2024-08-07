@@ -135,7 +135,7 @@ opt_batch = click.option(
     "--batch",
     "-b",
     type=click.IntRange(1, 500),
-    help="inevntory record processing batch size",
+    help="inventory record processing batch size",
 )
 
 opt_timeout = click.option(
