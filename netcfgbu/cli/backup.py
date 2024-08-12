@@ -63,6 +63,8 @@ def exec_backup(app_cfg: AppConfig, inventory_recs):
                     reason = "backup failed"
                     await handle_exception(Exception(reason), reason, rec, done_msg)
 
+            except asyncssh.PermissionDenied as exc:
+                await handle_exception(exc, "All credentials failed", rec, done_msg)
             except asyncssh.ConnectionLost as exc:
                 await handle_exception(exc, "ConnectionLost", rec, done_msg)
             except socket.gaierror as exc:
