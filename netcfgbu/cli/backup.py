@@ -67,15 +67,21 @@ def exec_backup(app_cfg: AppConfig, inventory_recs):
                 await handle_exception(exc, "All credentials failed", rec, done_msg)
             except asyncssh.ConnectionLost as exc:
                 await handle_exception(exc, "ConnectionLost", rec, done_msg)
+            except asyncssh.HostKeyNotVerifiable as exc:
+                    await handle_exception(exc, "HostKeyNotVerifiable", rec, done_msg)
             except socket.gaierror as exc:
                 await handle_exception(exc, "NameResolutionError", rec, done_msg)
-            except asyncio.TimeoutError as exc:
+            except (asyncio.TimeoutError, asyncssh.TimeoutError) as exc:
                 await handle_exception(exc, "TimeoutError", rec, done_msg)
             except OSError as exc:
                 if exc.errno == 113:
                     await handle_exception(exc, "NoRouteToHost", rec, done_msg)
                 else:
                     await handle_exception(exc, "OSError", rec, done_msg)
+            except Exception as exc:
+                exception_name = type(exc).__name__
+                subclass_names = [cls.__name__ for cls in type(exc).__bases__]
+                await handle_exception(exc, f"{exception_name}.{subclass_names}", rec, done_msg)
 
     loop = asyncio.get_event_loop()
     report.start_timing()
