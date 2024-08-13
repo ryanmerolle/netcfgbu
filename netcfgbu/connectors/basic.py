@@ -200,10 +200,12 @@ class BasicSSHConnector(object):
         try:
             res = await asyncio.wait_for(self.read_until_prompt(), timeout=60)
             at_prompt = True
+            # TODO - Add hostname to debug of AT-PROMPT
             self.log.debug(f"AT-PROMPT: {res}")
 
             res = await asyncio.wait_for(self.run_disable_paging(), timeout=timeout)
             paging_disabled = True
+            # TODO - Add hostname to debug of AFTER-PRE-GET-RUNNING
             self.log.debug(f"AFTER-PRE-GET-RUNNING: {res}")
 
             self.log.info(log_msg)
