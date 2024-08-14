@@ -46,6 +46,7 @@ def cli_inventory_list(ctx, **cli_opts):
         tabulate(
             headers=["os_name", "count"],
             tabular_data=sorted(os_names.items(), key=itemgetter(1), reverse=True),
+            tablefmt="pretty",
         ),
         SPACES_4,
     )
@@ -68,6 +69,7 @@ SUMMARY: TOTAL={len(inventory_recs)}
         tabulate(
             headers=field_names,
             tabular_data=[rec.values() for rec in inventory_recs],
+            tablefmt="pretty",
         )
     )
 

@@ -8,7 +8,7 @@ from datetime import datetime
 
 from tabulate import tabulate
 
-LN_SEP = "# " + "-" * 78
+LN_SEP = "\n# " + "-" * 78 + "\n"
 SPACES_4 = " " * 4
 
 
@@ -64,7 +64,7 @@ class Report(object):
         print(LN_SEP)
 
         print(
-            f"Summary: TOTAL={total_n}, OK={ok_n}, FAIL={fail_n}\n"
+            f"SUMMARY: TOTAL={total_n}, OK={ok_n}, FAIL={fail_n}\n"
             f"         START={self.start_time}, STOP={self.stop_time}\n"
             f"         DURATION={self.duration:.3f}s"
         )
@@ -89,5 +89,5 @@ class Report(object):
             wr_csv.writerows(failure_tabular_data)
 
         print(f"\n\nFAILURES: {fail_n}")
-        print(tabulate(headers=headers, tabular_data=failure_tabular_data))
+        print(tabulate(headers=headers, tabular_data=failure_tabular_data, tablefmt="pretty"))
         print(LN_SEP)
