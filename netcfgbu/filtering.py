@@ -50,10 +50,6 @@ class RegexFilter(Filter):
                 f"Invalid filter regular-expression: {expr!r}: {exc}"
             ) from None
 
-        self.__doc__ = f"limit_{fieldname}({self.re.pattern})"
-        self.__name__ = self.__doc__
-        self.__qualname__ = self.__doc__
-
     def __call__(self, record: Dict[str, AnyStr]) -> bool:
         return bool(self.re.match(record[self.fieldname]))
 
@@ -72,9 +68,6 @@ class IPFilter(Filter):
     def __init__(self, fieldname: str, ip: str) -> None:
         self.fieldname = fieldname
         self.ip = ipaddress.ip_network(ip)
-        self.__doc__ = f"limit_{fieldname}({self.ip})"
-        self.__name__ = self.__doc__
-        self.__qualname__ = self.__doc__
 
     def __call__(self, record: Dict[str, AnyStr]) -> bool:
         return ipaddress.ip_address(record[self.fieldname]) in self.ip
@@ -83,14 +76,38 @@ class IPFilter(Filter):
         return f"IpFilter(fieldname={self.fieldname!r}, ip='{self.ip}')"
 
 
+def parse_constraint(constraint: str, field_value_reg: re.Pattern, field_names: List[AnyStr]) -> Filter:
+    if mo := file_reg.match(constraint):
+        return handle_file_filter(mo)
+
+    if (mo := field_value_reg.match(constraint)) is None:
+        raise ValueError(f"Invalid filter expression: {constraint}")
+
+    fieldn, value = mo.groupdict().values()
+
+    if fieldn.casefold() == "ipaddr":
+        return create_ip_or_regex_filter(fieldn, value)
+
+    return RegexFilter(fieldn, value)
+
+
+def handle_file_filter(mo: re.Match) -> Filter:
+    filepath = mo.group(1)
+    if not Path(filepath).exists():
+        raise FileNotFoundError(filepath)
+    return mk_file_filter(filepath, key="host")
+
+
+def create_ip_or_regex_filter(fieldn: str, value: str) -> Filter:
+    try:
+        return IPFilter(fieldn, value)
+    except ValueError:
+        return RegexFilter(fieldn, value)
+
+
 def create_filter_function(op_filters, optest_fn):
     def filter_fn(rec):
-        for op_fn in op_filters:
-            if optest_fn(op_fn(rec)):
-                return False
-
-        return True
-
+        return not any(optest_fn(op_fn(rec)) for op_fn in op_filters)
     return filter_fn
 
 
@@ -104,11 +121,6 @@ def mk_file_filter(filepath, key):
 
     def op_filter(rec):
         return rec[key] in filter_hostnames
-
-    op_filter.hostnames = filter_hostnames
-    op_filter.__doc__ = f"file: {filepath})"
-    op_filter.__name__ = op_filter.__doc__
-    op_filter.__qualname__ = op_filter.__doc__
 
     return op_filter
 
@@ -145,40 +157,7 @@ def create_filter(
     fieldn_pattern = "^(?P<keyword>" + "|".join(fieldn for fieldn in field_names) + ")"
     field_value_reg = re.compile(fieldn_pattern + "=" + value_pattern)
 
-    op_filters: List[Filter] = []
-    for filter_expr in constraints:
-        # check for the '@<filename>' filtering use-case first.
-
-        if mo := file_reg.match(filter_expr):
-            filepath = mo.group(1)
-            if not Path(filepath).exists():
-                raise FileNotFoundError(filepath)
-
-            try:
-                op_filters.append(mk_file_filter(filepath, key="host"))
-                continue
-
-            except KeyError:
-                raise ValueError(
-                    f"File '{filepath}' does not contain host content as expected"
-                )
-
-        # next check for keyword=value filtering use-case
-
-        if (mo := field_value_reg.match(filter_expr)) is None:
-            raise ValueError(f"Invalid filter expression: {filter_expr}")
-
-        fieldn, value = mo.groupdict().values()
-
-        if fieldn.casefold() == "ipaddr":
-            try:
-                value_filter = IPFilter(fieldn, value)
-            except ValueError:
-                value_filter = RegexFilter(fieldn, value)
-        else:
-            value_filter = RegexFilter(fieldn, value)
-
-        op_filters.append(value_filter)
+    op_filters = [parse_constraint(constraint, field_value_reg, field_names) for constraint in constraints]
 
     optest_fn = operator.not_ if include else operator.truth
     filter_fn = create_filter_function(op_filters, optest_fn)

@@ -47,42 +47,55 @@ async def process_tasks(
         done_msg = f"DONE ({done}/{total}): {rec['host']}"
 
         if cli_command == "login":
-            try:
-                if login_user := task.result():
-                    rec["login_user"] = login_user
-                    rec["attempts"] = rec.get("attempts", 1)
-                    report.task_results[True].append(rec)
-                    log.info(done_msg + f" - {login_user=}")
-                else:
-                    reason = "all credentials failed"
-                    rec["login_user"] = reason
-                    rec["attempts"] = rec.get("attempts", 1)
-                    report.task_results[False].append((rec, reason))
-                    log.error(done_msg + reason)
-
-            except Exception as exc:
-                await handle_exception(exc, rec, done_msg, report)
-                if failure_callback:
-                    failure_callback(rec, exc)
+            await process_login_task(
+                task, report, done_msg, rec, failure_callback
+            )
         else:
-            try:
-                result = task.result()
-                if result:
-                    report.task_results[True].append((rec, result))
-                    log.info(done_msg + " - PASS")
-                    if success_callback:
-                        success_callback(rec, result)
-                else:
-                    reason = f"{cli_command} failed"
-                    await handle_exception(
-                        Exception(reason), reason, rec, done_msg, report
-                    )
-                    if failure_callback:
-                        failure_callback(rec, Exception(reason))
-            except Exception as exc:
-                await handle_exception(exc, rec, done_msg, report)
-                if failure_callback:
-                    failure_callback(rec, exc)
+            await process_generic_task(
+                task, report, cli_command, done_msg, rec, success_callback, failure_callback
+            )
+
+async def process_login_task(
+        task, report, done_msg, rec, failure_callback
+):
+    try:
+        if login_user := task.result():
+            rec["login_user"] = login_user
+            rec["attempts"] = rec.get("attempts", 1)
+            report.task_results[True].append(rec)
+            log.info(done_msg + f" - {login_user=}")
+        else:
+            reason = "all credentials failed"
+            rec["login_user"] = reason
+            rec["attempts"] = rec.get("attempts", 1)
+            report.task_results[False].append((rec, reason))
+            log.error(done_msg + reason)
+    except Exception as exc:
+        await handle_exception(exc, rec, done_msg, report)
+        if failure_callback:
+            failure_callback(rec, exc)
+
+async def process_generic_task(
+    task, report, cli_command, done_msg, rec, success_callback, failure_callback
+):
+    try:
+        result = task.result()
+        if result:
+            report.task_results[True].append((rec, result))
+            log.info(done_msg + " - PASS")
+            if success_callback:
+                success_callback(rec, result)
+        else:
+            reason = f"{cli_command} failed"
+            await handle_exception(
+                Exception(reason), rec, done_msg, report
+            )
+            if failure_callback:
+                failure_callback(rec, Exception(reason))
+    except Exception as exc:
+        await handle_exception(exc, rec, done_msg, report)
+        if failure_callback:
+            failure_callback(rec, exc)
 
 
 def execute_command(
