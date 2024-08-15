@@ -1,26 +1,25 @@
-import re
 import os
-from typing import Optional, Union, List, Dict, Annotated
-from os.path import expandvars
+import re
 from itertools import chain
+from os.path import expandvars
 from pathlib import Path
+from typing import Annotated, Dict, List, Optional, Union
 
 from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    FilePath,
+    PositiveInt,
+    SecretStr,
     ValidationInfo,
     field_validator,
-    ConfigDict,
-    BaseModel,
-    SecretStr,
-    PositiveInt,
-    FilePath,
-    Field,
     model_validator,
 )
-
 from pydantic.functional_validators import AfterValidator, BeforeValidator
+from pydantic_settings import BaseSettings
 
 from . import consts
-from pydantic_settings import BaseSettings
 
 __all__ = [
     "AppConfig",

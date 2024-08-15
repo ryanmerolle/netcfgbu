@@ -1,15 +1,14 @@
+from functools import reduce
 from importlib import metadata
 from pathlib import Path
 
 import click
-from functools import reduce
 from first import first
 
 import netcfgbu
 from netcfgbu import config as _config
 from netcfgbu import inventory as _inventory
 from netcfgbu import jumphosts
-
 
 VERSION = metadata.version(netcfgbu.__package__)
 
@@ -37,8 +36,9 @@ class WithInventoryCommand(click.Command):
             app_cfg = ctx.obj["app_cfg"] = _config.load(fileio=ctx.params["config"])
 
             if debug_ssh_lvl := ctx.params.get("debug_ssh"):  # pragma: no cover
-                from asyncssh import logging as assh_lgr
                 import logging
+
+                from asyncssh import logging as assh_lgr
 
                 assh_lgr.set_log_level(logging.DEBUG)
                 assh_lgr.set_debug_level(debug_ssh_lvl)

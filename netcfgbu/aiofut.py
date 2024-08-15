@@ -1,6 +1,6 @@
-from typing import AsyncIterable, Iterable, Coroutine, Optional
 import asyncio
 from asyncio import Task
+from typing import AsyncIterable, Coroutine, Iterable, Optional
 
 __all__ = ["as_completed"]
 

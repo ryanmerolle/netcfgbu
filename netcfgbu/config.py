@@ -4,19 +4,21 @@
 
 from pathlib import Path
 
+import toml
+from pydantic import ValidationError
+
+from .config_model import AppConfig
+from .logger import setup_logging
+
 # -----------------------------------------------------------------------------
 # Public Imports
 # -----------------------------------------------------------------------------
 
-import toml
 
 # -----------------------------------------------------------------------------
 # Private Imports
 # -----------------------------------------------------------------------------
 
-from .logger import setup_logging
-from .config_model import AppConfig
-from pydantic import ValidationError
 
 __all__ = ["load"]
 

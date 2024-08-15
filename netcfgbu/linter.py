@@ -1,9 +1,8 @@
-from pathlib import Path
 import re
+from pathlib import Path
 
-from .logger import get_logger
 from .config_model import LinterSpec
-
+from .logger import get_logger
 
 log = get_logger()
 

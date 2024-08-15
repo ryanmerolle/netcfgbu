@@ -2,20 +2,19 @@ import asyncio
 
 import click
 
-from netcfgbu.logger import get_logger, stop_aiologging
 from netcfgbu.aiofut import as_completed
+from netcfgbu.consts import DEFAULT_PROBE_TIMEOUT
+from netcfgbu.logger import get_logger, stop_aiologging
 from netcfgbu.probe import probe
 
-from .root import (
-    cli,
-    WithInventoryCommand,
-    opt_config_file,
-    opts_inventory,
-    opt_timeout,
-)
-
 from .report import Report
-from netcfgbu.consts import DEFAULT_PROBE_TIMEOUT
+from .root import (
+    WithInventoryCommand,
+    cli,
+    opt_config_file,
+    opt_timeout,
+    opts_inventory,
+)
 
 
 def exec_probe(inventory, timeout=None):

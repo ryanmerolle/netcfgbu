@@ -8,17 +8,15 @@ from tabulate import tabulate
 from netcfgbu.config_model import AppConfig
 from netcfgbu.inventory import build
 
+from .report import LN_SEP, SPACES_4
 from .root import (
+    WithConfigCommand,
+    WithInventoryCommand,
     cli,
     get_spec_nameorfirst,
-    WithInventoryCommand,
-    WithConfigCommand,
     opt_config_file,
     opts_inventory,
 )
-
-from .report import LN_SEP, SPACES_4
-
 
 # -----------------------------------------------------------------------------
 #                                Inventory Commands

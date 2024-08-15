@@ -1,20 +1,16 @@
-from typing import Optional
 import asyncio
 import io
-from pathlib import Path
 import re
 from copy import copy
+from pathlib import Path
+from typing import Optional
 
 import aiofiles
 import asyncssh
 
-
-from netcfgbu.config_model import AppConfig, OSNameSpec, Credential
+from netcfgbu import consts, jumphosts, linter
+from netcfgbu.config_model import AppConfig, Credential, OSNameSpec
 from netcfgbu.logger import get_logger
-from netcfgbu import consts
-from netcfgbu import linter
-from netcfgbu import jumphosts
-
 
 __all__ = ["BasicSSHConnector", "set_max_startups"]
 

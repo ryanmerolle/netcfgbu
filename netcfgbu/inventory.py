@@ -1,11 +1,10 @@
-from pathlib import Path
 import os
+from pathlib import Path
 
-
-from .logger import get_logger
-from .filtering import create_filter
-from .filetypes import CommentedCsvReader
 from .config_model import AppConfig, InventorySpec
+from .filetypes import CommentedCsvReader
+from .filtering import create_filter
+from .logger import get_logger
 
 
 def load(app_cfg: AppConfig, limits=None, excludes=None):

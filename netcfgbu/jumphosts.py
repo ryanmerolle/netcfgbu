@@ -4,11 +4,12 @@ so that any device in inventory that requires a proxy server can use
 the netcfgbu tool.
 """
 
+import asyncio
+
 # -----------------------------------------------------------------------------
 # System Imports
 # -----------------------------------------------------------------------------
-from typing import Optional, List, Dict, AnyStr
-import asyncio
+from typing import AnyStr, Dict, List, Optional
 from urllib.parse import urlparse
 
 # -----------------------------------------------------------------------------

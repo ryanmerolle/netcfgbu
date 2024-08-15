@@ -19,26 +19,28 @@ for use:
 # System Imports
 # -----------------------------------------------------------------------------
 
-from typing import Optional
 import os
-from urllib.parse import urlsplit
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
+from typing import Optional
+from urllib.parse import urlsplit
+
+import pexpect
+
+from netcfgbu import consts
+from netcfgbu.config_model import GitSpec
+from netcfgbu.logger import get_logger
+from netcfgbu.plugins import Plugin
 
 # -----------------------------------------------------------------------------
 # Public Imports
 # -----------------------------------------------------------------------------
 
-import pexpect
 
 # -----------------------------------------------------------------------------
 # Private Imports
 # -----------------------------------------------------------------------------
 
-from netcfgbu.logger import get_logger
-from netcfgbu.config_model import GitSpec
-from netcfgbu.plugins import Plugin
-from netcfgbu import consts
 
 git_bin = "git"
 

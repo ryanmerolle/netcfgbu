@@ -7,16 +7,14 @@ Logging in asyncio applications
    https://bit.ly/36WWgrf
 """
 
-from typing import Set
-import sys
 import asyncio
-from queue import SimpleQueue as Queue
-
-from logging.config import dictConfig
-from logging import getLogger
 import logging
 import logging.handlers
-
+import sys
+from logging import getLogger
+from logging.config import dictConfig
+from queue import SimpleQueue as Queue
+from typing import Set
 
 __all__ = ["setup_logging", "get_logger", "stop_aiologging"]
 

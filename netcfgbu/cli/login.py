@@ -1,28 +1,27 @@
 import asyncio
-import asyncssh
 import socket
 
+import asyncssh
 import click
 
-from netcfgbu.logger import get_logger, stop_aiologging
+from netcfgbu import jumphosts
 from netcfgbu.aiofut import as_completed
-from netcfgbu.os_specs import make_host_connector
+from netcfgbu.config_model import AppConfig
 from netcfgbu.connectors import set_max_startups
-
-from .root import (
-    cli,
-    WithInventoryCommand,
-    opt_config_file,
-    opts_inventory,
-    opt_batch,
-    opt_debug_ssh,
-    opt_timeout,
-)
+from netcfgbu.consts import DEFAULT_LOGIN_TIMEOUT
+from netcfgbu.logger import get_logger, stop_aiologging
+from netcfgbu.os_specs import make_host_connector
 
 from .report import Report
-from netcfgbu import jumphosts
-from netcfgbu.config_model import AppConfig
-from netcfgbu.consts import DEFAULT_LOGIN_TIMEOUT
+from .root import (
+    WithInventoryCommand,
+    cli,
+    opt_batch,
+    opt_config_file,
+    opt_debug_ssh,
+    opt_timeout,
+    opts_inventory,
+)
 
 
 def exec_test_login(app_cfg: AppConfig, inventory_recs, cli_opts):
@@ -64,13 +63,17 @@ def exec_test_login(app_cfg: AppConfig, inventory_recs, cli_opts):
                 if login_user := task.result():
                     log.info(done_msg + f"with user {login_user}")
                     rec["login_user"] = login_user
-                    rec["attempts"] = rec.get("attempts", 1)  # Capture the number of attempts if available
+                    rec["attempts"] = rec.get(
+                        "attempts", 1
+                    )  # Capture the number of attempts if available
                     report.task_results[True].append(rec)
                 else:
                     reason = "all credentials failed"
                     log.warning(done_msg + reason)
                     rec["login_user"] = reason
-                    rec["attempts"] = rec.get("attempts", 1)  # Capture the number of attempts if available
+                    rec["attempts"] = rec.get(
+                        "attempts", 1
+                    )  # Capture the number of attempts if available
                     report.task_results[False].append((rec, reason))
 
             except asyncssh.PermissionDenied as exc:
@@ -78,7 +81,7 @@ def exec_test_login(app_cfg: AppConfig, inventory_recs, cli_opts):
             except asyncssh.ConnectionLost as exc:
                 await handle_exception(exc, "ConnectionLost", rec, done_msg)
             except asyncssh.HostKeyNotVerifiable as exc:
-                    await handle_exception(exc, "HostKeyNotVerifiable", rec, done_msg)
+                await handle_exception(exc, "HostKeyNotVerifiable", rec, done_msg)
             except socket.gaierror as exc:
                 await handle_exception(exc, "NameResolutionError", rec, done_msg)
             except (asyncio.TimeoutError, asyncssh.TimeoutError) as exc:
@@ -91,7 +94,9 @@ def exec_test_login(app_cfg: AppConfig, inventory_recs, cli_opts):
             except Exception as exc:
                 exception_name = type(exc).__name__
                 subclass_names = [cls.__name__ for cls in type(exc).__bases__]
-                await handle_exception(exc, f"{exception_name}.{subclass_names}", rec, done_msg)
+                await handle_exception(
+                    exc, f"{exception_name}.{subclass_names}", rec, done_msg
+                )
 
     loop = asyncio.get_event_loop()
     report.start_timing()

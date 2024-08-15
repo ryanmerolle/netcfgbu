@@ -1,5 +1,5 @@
-from netcfgbu.connectors import get_connector_class
 from netcfgbu.config_model import AppConfig, OSNameSpec
+from netcfgbu.connectors import get_connector_class
 
 
 def get_os_spec(rec, app_cfg: AppConfig):

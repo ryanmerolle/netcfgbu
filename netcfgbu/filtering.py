@@ -10,7 +10,7 @@ import operator
 import re
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import List, AnyStr, Optional, Callable, Dict
+from typing import AnyStr, Callable, Dict, List, Optional
 
 from .filetypes import CommentedCsvReader
 

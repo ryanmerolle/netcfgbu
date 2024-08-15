@@ -1,11 +1,10 @@
-import click
+import importlib
 import shutil
 from pathlib import Path
-import importlib
 
-from .root import (
-    cli,
-)
+import click
+
+from .root import cli
 
 
 def copy_example_files():
