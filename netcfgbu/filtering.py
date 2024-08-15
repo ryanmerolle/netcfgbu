@@ -76,7 +76,9 @@ class IPFilter(Filter):
         return f"IpFilter(fieldname={self.fieldname!r}, ip='{self.ip}')"
 
 
-def parse_constraint(constraint: str, field_value_reg: re.Pattern, field_names: List[AnyStr]) -> Filter:
+def parse_constraint(
+    constraint: str, field_value_reg: re.Pattern, field_names: List[AnyStr]
+) -> Filter:
     if mo := file_reg.match(constraint):
         return handle_file_filter(mo)
 
@@ -108,6 +110,7 @@ def create_ip_or_regex_filter(fieldn: str, value: str) -> Filter:
 def create_filter_function(op_filters, optest_fn):
     def filter_fn(rec):
         return not any(optest_fn(op_fn(rec)) for op_fn in op_filters)
+
     return filter_fn
 
 
@@ -157,7 +160,10 @@ def create_filter(
     fieldn_pattern = "^(?P<keyword>" + "|".join(fieldn for fieldn in field_names) + ")"
     field_value_reg = re.compile(fieldn_pattern + "=" + value_pattern)
 
-    op_filters = [parse_constraint(constraint, field_value_reg, field_names) for constraint in constraints]
+    op_filters = [
+        parse_constraint(constraint, field_value_reg, field_names)
+        for constraint in constraints
+    ]
 
     optest_fn = operator.not_ if include else operator.truth
     filter_fn = create_filter_function(op_filters, optest_fn)

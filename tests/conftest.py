@@ -1,8 +1,9 @@
 # pytest configuration file
 
-import pytest
 import logging
 from pathlib import Path
+
+import pytest
 
 
 @pytest.fixture()

@@ -1,8 +1,10 @@
 from functools import lru_cache
 from importlib import import_module
 
-from .basic import set_max_startups  # noqa
-from .basic import BasicSSHConnector
+from .basic import (
+    BasicSSHConnector,
+    # set_max_startups,  # noqa
+)
 
 
 @lru_cache()

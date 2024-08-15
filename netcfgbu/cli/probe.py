@@ -1,6 +1,7 @@
 import click
 
 from netcfgbu.cli.common import execute_command
+from netcfgbu.config_model import AppConfig
 from netcfgbu.consts import DEFAULT_PROBE_TIMEOUT
 from netcfgbu.probe import probe
 
@@ -18,7 +19,7 @@ CLI_COMMAND = "probe"
 def exec_probe(inventory_recs: list, timeout=None) -> None:
     timeout = timeout or DEFAULT_PROBE_TIMEOUT
 
-    def task_creator(rec, app_cfg):
+    def task_creator(rec: dict, app_cfg: AppConfig):
         return probe(
             rec.get("ipaddr") or rec.get("host"), timeout=timeout, raise_exc=True
         )

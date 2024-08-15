@@ -47,17 +47,20 @@ async def process_tasks(
         done_msg = f"DONE ({done}/{total}): {rec['host']}"
 
         if cli_command == "login":
-            await process_login_task(
-                task, report, done_msg, rec, failure_callback
-            )
+            await process_login_task(task, report, done_msg, rec, failure_callback)
         else:
             await process_generic_task(
-                task, report, cli_command, done_msg, rec, success_callback, failure_callback
+                task,
+                report,
+                cli_command,
+                done_msg,
+                rec,
+                success_callback,
+                failure_callback,
             )
 
-async def process_login_task(
-        task, report, done_msg, rec, failure_callback
-):
+
+async def process_login_task(task, report, done_msg, rec, failure_callback):
     try:
         if login_user := task.result():
             rec["login_user"] = login_user
@@ -75,6 +78,7 @@ async def process_login_task(
         if failure_callback:
             failure_callback(rec, exc)
 
+
 async def process_generic_task(
     task, report, cli_command, done_msg, rec, success_callback, failure_callback
 ):
@@ -87,9 +91,7 @@ async def process_generic_task(
                 success_callback(rec, result)
         else:
             reason = f"{cli_command} failed"
-            await handle_exception(
-                Exception(reason), rec, done_msg, report
-            )
+            await handle_exception(Exception(reason), rec, done_msg, report)
             if failure_callback:
                 failure_callback(rec, Exception(reason))
     except Exception as exc:

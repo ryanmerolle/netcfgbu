@@ -1,10 +1,10 @@
 import asyncio
-
+from unittest.mock import Mock
 
 import pytest
-from click.testing import CliRunner
-from unittest.mock import Mock
 from asynctest import CoroutineMock
+from click.testing import CliRunner
+
 from netcfgbu.cli import probe
 
 

@@ -17,15 +17,14 @@
 #       Same as the options provided by "--help"
 #
 
-import sys
 import argparse
-import os
 import csv
+import os
+import sys
 from functools import lru_cache
 
 import requests  # noqa
 from urllib3 import disable_warnings  # noqa
-
 
 CSV_FIELD_NAMES = ["host", "ipaddr", "os_name", "role", "site", "region"]
 

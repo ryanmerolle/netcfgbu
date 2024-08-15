@@ -1,7 +1,8 @@
 import re
+
 from netcfgbu import os_specs
-from netcfgbu.connectors import BasicSSHConnector
 from netcfgbu.config import load
+from netcfgbu.connectors import BasicSSHConnector
 
 
 def test_config_os_name_prompt_pattern(netcfgbu_envars, request):  # noqa

@@ -4,10 +4,11 @@ This file contains the pytest test cases for the vcs.git module
 
 from pathlib import Path
 from unittest.mock import Mock
+
 import pytest  # noqa
 
-from netcfgbu.vcs import git
 from netcfgbu import config_model
+from netcfgbu.vcs import git
 
 
 @pytest.fixture()
@@ -136,8 +137,8 @@ def test_vcs_pass_save(mock_pexpect, tmpdir, monkeypatch):
         "git commit -m 'dummy-timestamp'",
         "git push",
         # TODO - build tests for tags vs no tags
-        #"git tag -a 'dummy-timestamp' -m 'dummy-timestamp'",
-        #"git push --tags",
+        # "git tag -a 'dummy-timestamp' -m 'dummy-timestamp'",
+        # "git push --tags",
     ]
 
     assert len(calls) == len(expected_commands)

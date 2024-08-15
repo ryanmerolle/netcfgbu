@@ -17,9 +17,9 @@ def precheck(ctx):
     """Run pre-checks on the project."""
     # ctx.run("black .")
     # ctx.run("flake8 .")
-    ctx.run("ruff check . --fix")
-    ctx.run("ruff format .")
-    ctx.run("pre-commit run -a")
+    ctx.run("poetry run ruff check . --select I --fix")
+    ctx.run("poetry run ruff format .")
+    ctx.run("poetry run pre-commit run -a")
     ctx.run(
         "poetry run interrogate -c pyproject.toml --exclude=build --exclude tests",
         pty=True,

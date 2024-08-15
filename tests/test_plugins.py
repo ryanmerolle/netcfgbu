@@ -1,4 +1,5 @@
 import pytest
+
 from netcfgbu.config import load
 from netcfgbu.plugins import Plugin, _registered_plugins, load_plugins
 

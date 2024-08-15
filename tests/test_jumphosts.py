@@ -1,15 +1,13 @@
 import asyncio
-from pathlib import Path
 from collections import Counter
+from pathlib import Path
 from unittest.mock import Mock
 
+import asyncssh
 import pytest  # noqa
 from asynctest import CoroutineMock  # noqa
 
-import asyncssh
-
-from netcfgbu import config_model
-from netcfgbu import jumphosts
+from netcfgbu import config_model, jumphosts
 from netcfgbu.filetypes import CommentedCsvReader
 
 

@@ -1,8 +1,7 @@
 import pytest  # noqa
 from first import first
 
-from netcfgbu import inventory
-from netcfgbu import config
+from netcfgbu import config, inventory
 
 
 def test_inventory_pass(request, monkeypatch, netcfgbu_envars):

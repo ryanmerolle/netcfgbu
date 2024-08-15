@@ -1,5 +1,4 @@
-from netcfgbu import os_specs
-from netcfgbu import config
+from netcfgbu import config, os_specs
 from netcfgbu.connectors import BasicSSHConnector
 
 

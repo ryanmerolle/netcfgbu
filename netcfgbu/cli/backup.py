@@ -18,7 +18,7 @@ CLI_COMMAND = "backup"
 
 
 def exec_backup(inventory_recs: list, app_cfg: AppConfig) -> None:
-    def task_creator(rec, app_cfg):
+    def task_creator(rec: dict, app_cfg: AppConfig):
         return make_host_connector(rec, app_cfg).backup_config()
 
     def success_callback(rec, result):

@@ -1,14 +1,14 @@
-from os import getenv
 from io import StringIO
+from os import getenv
 from pathlib import Path
 
 import pytest  # noqa
-from pydantic import ValidationError
-from first import first
 import toml
+from first import first
+from pydantic import ValidationError
 
-from netcfgbu.config import load
 from netcfgbu import config_model
+from netcfgbu.config import load
 
 
 def test_config_onlyenvars_pass(monkeypatch, netcfgbu_envars):
@@ -39,7 +39,7 @@ def test_config_onlyenvars_fail_missing():
     expected_envars = [
         "defaults.NETCFGBU_INVENTORY",
         "defaults.credentials.NETCFGBU_DEFAULT_USERNAME",
-        "defaults.credentials.NETCFGBU_DEFAULT_PASSWORD"
+        "defaults.credentials.NETCFGBU_DEFAULT_PASSWORD",
     ]
     for expected in expected_envars:
         assert expected in exc_errmsg

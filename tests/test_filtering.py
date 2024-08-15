@@ -1,6 +1,8 @@
-import pytest  # noqa
-from netcfgbu.filtering import create_filter
 import csv
+
+import pytest  # noqa
+
+from netcfgbu.filtering import create_filter
 
 
 def test_filtering_pass_include():

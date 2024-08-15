@@ -1,6 +1,7 @@
 import click
 
 from netcfgbu.cli.common import execute_command
+from netcfgbu.config_model import AppConfig
 from netcfgbu.consts import DEFAULT_LOGIN_TIMEOUT
 from netcfgbu.os_specs import make_host_connector  # Import added here
 
@@ -20,7 +21,7 @@ CLI_COMMAND = "login"
 def exec_test_login(inventory_recs: list, app_cfg, cli_opts) -> None:
     timeout = cli_opts["timeout"] or DEFAULT_LOGIN_TIMEOUT
 
-    def task_creator(rec, app_cfg):
+    def task_creator(rec: dict, app_cfg: AppConfig):
         return make_host_connector(rec, app_cfg).test_login(timeout=timeout)
 
     execute_command(

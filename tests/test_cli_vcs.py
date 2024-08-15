@@ -1,6 +1,6 @@
+from operator import itemgetter
 from pathlib import Path
 from unittest.mock import Mock
-from operator import itemgetter
 
 import pytest
 from click.testing import CliRunner

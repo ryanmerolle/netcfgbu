@@ -1,8 +1,8 @@
 import asyncio
 from unittest.mock import Mock
 
-from asynctest import CoroutineMock  # noqa
 import pytest  # noqa
+from asynctest import CoroutineMock  # noqa
 
 from netcfgbu import probe
 from netcfgbu.consts import DEFAULT_PROBE_TIMEOUT

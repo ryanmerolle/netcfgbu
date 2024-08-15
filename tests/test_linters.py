@@ -1,7 +1,6 @@
 from pathlib import Path
 
-from netcfgbu import config_model
-from netcfgbu import linter
+from netcfgbu import config_model, linter
 
 
 def test_linters_pass_content(files_dir):
