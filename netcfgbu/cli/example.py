@@ -1,4 +1,4 @@
-import importlib
+import importlib.resources
 import shutil
 from pathlib import Path
 
@@ -15,7 +15,9 @@ def copy_example_files():
     """
     package_name = "netcfgbu"
     examples_dir_name = "examples"
-    examples_path = Path(importlib.resources.files(package_name) / examples_dir_name)
+
+    # Use importlib.resources.files to access the directory
+    examples_path = importlib.resources.files(package_name) / examples_dir_name
 
     # Preliminary check for existing files
     existing_files = [
@@ -28,13 +30,14 @@ def copy_example_files():
         print(
             f"ERROR: No files were copied. The following file(s) already exist in the current directory: {existing_files_names}"
         )
-        raise exit(code=1)
+        raise SystemExit(1)
 
     # If no existing files were found, proceed to copy
     for file_path in examples_path.iterdir():
         if file_path.is_file():
-            shutil.copy(file_path, Path.cwd())
-            print(f"Copied {file_path.name} to the current directory.")
+            with importlib.resources.as_file(file_path) as source_file:
+                shutil.copy(source_file, Path.cwd())
+                print(f"Copied {file_path.name} to the current directory.")
 
 
 @cli.command(name="example")
