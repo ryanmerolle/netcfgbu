@@ -24,6 +24,8 @@ from .root import (
     opts_inventory,
 )
 
+CLI_COMMAND = "login"
+
 
 def exec_test_login(app_cfg: AppConfig, inventory_recs, cli_opts) -> None:
     timeout = cli_opts["timeout"] or DEFAULT_LOGIN_TIMEOUT
@@ -55,24 +57,24 @@ def exec_test_login(app_cfg: AppConfig, inventory_recs, cli_opts) -> None:
             done += 1
             coro = task.get_coro()
             rec = tasks[coro]
-            done_msg = f"DONE ({done}/{total}): {rec['host']} "
+            done_msg = f"DONE ({done}/{total}): {rec['host']}"
 
             try:
                 if login_user := task.result():
-                    log.info(done_msg + f"with user {login_user}")
                     rec["login_user"] = login_user
                     rec["attempts"] = rec.get(
                         "attempts", 1
                     )  # Capture the number of attempts if available
                     report.task_results[True].append(rec)
+                    log.info(done_msg + f" - {login_user=}")
                 else:
                     reason = "all credentials failed"
-                    log.warning(done_msg + reason)
                     rec["login_user"] = reason
                     rec["attempts"] = rec.get(
                         "attempts", 1
                     )  # Capture the number of attempts if available
                     report.task_results[False].append((rec, reason))
+                    log.error(done_msg + reason)
 
             except asyncssh.PermissionDenied as exc:
                 await handle_exception(
@@ -107,10 +109,10 @@ def exec_test_login(app_cfg: AppConfig, inventory_recs, cli_opts) -> None:
     loop.run_until_complete(process_batch())
     report.stop_timing()
     stop_aiologging()
-    report.print_report(reports_type="login")
+    report.print_report(reports_type=CLI_COMMAND)
 
 
-@cli.command(name="login", cls=WithInventoryCommand)
+@cli.command(name=CLI_COMMAND, cls=WithInventoryCommand)
 @opt_config_file
 @opts_inventory
 @opt_debug_ssh

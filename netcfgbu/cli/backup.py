@@ -22,6 +22,8 @@ from .root import (
     opts_inventory,
 )
 
+CLI_COMMAND = "backup"
+
 
 def exec_backup(app_cfg: AppConfig, inventory_recs) -> None:
     log = get_logger()
@@ -47,16 +49,15 @@ def exec_backup(app_cfg: AppConfig, inventory_recs) -> None:
             done += 1
             coro = task.get_coro()
             rec = tasks[coro]
-            done_msg = f"DONE ({done}/{total}): {rec['host']} "
+            done_msg = f"DONE ({done}/{total}): {rec['host']}"
 
             try:
-                res = task.result()
-                if res:
-                    log.info(done_msg + "PASS")
-                    report.task_results[True].append((rec, res))
-                    Plugin.run_backup_success(rec, res)
+                if result := task.result():
+                    report.task_results[True].append((rec, result))
+                    log.info(done_msg + " - PASS")
+                    Plugin.run_backup_success(rec, result)
                 else:
-                    reason = "backup failed"
+                    reason = f"{CLI_COMMAND} failed"
                     await handle_exception(
                         Exception(reason), reason, rec, done_msg, report
                     )
@@ -102,11 +103,11 @@ def exec_backup(app_cfg: AppConfig, inventory_recs) -> None:
     loop.run_until_complete(process_batch())
     report.stop_timing()
     stop_aiologging()
-    report.print_report(reports_type="backup")
+    report.print_report(reports_type=CLI_COMMAND)
     Plugin.run_report(report)
 
 
-@cli.command(name="backup", cls=WithInventoryCommand)
+@cli.command(name=CLI_COMMAND, cls=WithInventoryCommand)
 @opt_config_file
 @opts_inventory
 @opt_debug_ssh

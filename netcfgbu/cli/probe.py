@@ -1,6 +1,7 @@
 import asyncio
 import socket
 
+import asyncssh
 import click
 
 from netcfgbu.aiofut import as_completed
@@ -17,6 +18,8 @@ from .root import (
     opt_timeout,
     opts_inventory,
 )
+
+CLI_COMMAND = "probe"
 
 
 def exec_probe(inventory_recs, timeout=None) -> None:
@@ -47,18 +50,33 @@ def exec_probe(inventory_recs, timeout=None) -> None:
             done += 1
             coro = task.get_coro()
             rec = tasks[coro]
-            done_msg = f"DONE ({done}/{total}): {rec['host']} "
+            done_msg = f"DONE ({done}/{total}): {rec['host']}"
 
             try:
-                probe_ok = task.result()
-                report.task_results[probe_ok].append((rec, probe_ok))
-                log.info(done_msg + ("PASS" if probe_ok else "FAIL"))
+                if result := task.result():
+                    report.task_results[result].append((rec, result))
+                    log.info(done_msg + " - PASS")
+                else:
+                    reason = f"{CLI_COMMAND} failed"
+                    await handle_exception(
+                        Exception(reason), reason, rec, done_msg, report
+                    )
 
+            except asyncssh.PermissionDenied as exc:
+                await handle_exception(
+                    exc, "All credentials failed", rec, done_msg, report
+                )
+            except asyncssh.ConnectionLost as exc:
+                await handle_exception(exc, "ConnectionLost", rec, done_msg, report)
+            except asyncssh.HostKeyNotVerifiable as exc:
+                await handle_exception(
+                    exc, "HostKeyNotVerifiable", rec, done_msg, report
+                )
             except socket.gaierror as exc:
                 await handle_exception(
                     exc, "NameResolutionError", rec, done_msg, report
                 )
-            except asyncio.TimeoutError as exc:
+            except (asyncio.TimeoutError, asyncssh.TimeoutError) as exc:
                 await handle_exception(exc, "TimeoutError", rec, done_msg, report)
             except OSError as exc:
                 if exc.errno == 113:
@@ -76,10 +94,10 @@ def exec_probe(inventory_recs, timeout=None) -> None:
     loop.run_until_complete(proces_check())
     report.stop_timing()
     stop_aiologging()
-    report.print_report(reports_type="probe")
+    report.print_report(reports_type=CLI_COMMAND)
 
 
-@cli.command(name="probe", cls=WithInventoryCommand)
+@cli.command(name=CLI_COMMAND, cls=WithInventoryCommand)
 @opt_config_file
 @opts_inventory
 @opt_timeout
