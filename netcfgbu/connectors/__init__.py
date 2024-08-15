@@ -3,7 +3,7 @@ from importlib import import_module
 
 from .basic import (
     BasicSSHConnector,
-    # set_max_startups,  # noqa
+    set_max_startups,  # noqa
 )
 
 
