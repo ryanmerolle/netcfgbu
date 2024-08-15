@@ -6,6 +6,7 @@ import click
 
 from netcfgbu import jumphosts
 from netcfgbu.aiofut import as_completed
+from netcfgbu.cli.common import handle_exception
 from netcfgbu.config_model import AppConfig
 from netcfgbu.connectors import set_max_startups
 from netcfgbu.consts import DEFAULT_LOGIN_TIMEOUT
@@ -44,11 +45,6 @@ def exec_test_login(app_cfg: AppConfig, inventory_recs, cli_opts) -> None:
     done = 0
     report = Report()
 
-    async def handle_exception(exc, reason, rec, done_msg) -> None:
-        reason_detail = f"{reason} - {str(exc)}"
-        log.error(done_msg + reason_detail)
-        report.task_results[False].append((rec, reason))
-
     async def process_batch() -> None:
         nonlocal done
 
@@ -79,25 +75,31 @@ def exec_test_login(app_cfg: AppConfig, inventory_recs, cli_opts) -> None:
                     report.task_results[False].append((rec, reason))
 
             except asyncssh.PermissionDenied as exc:
-                await handle_exception(exc, "All credentials failed", rec, done_msg)
+                await handle_exception(
+                    exc, "All credentials failed", rec, done_msg, report
+                )
             except asyncssh.ConnectionLost as exc:
-                await handle_exception(exc, "ConnectionLost", rec, done_msg)
+                await handle_exception(exc, "ConnectionLost", rec, done_msg, report)
             except asyncssh.HostKeyNotVerifiable as exc:
-                await handle_exception(exc, "HostKeyNotVerifiable", rec, done_msg)
+                await handle_exception(
+                    exc, "HostKeyNotVerifiable", rec, done_msg, report
+                )
             except socket.gaierror as exc:
-                await handle_exception(exc, "NameResolutionError", rec, done_msg)
+                await handle_exception(
+                    exc, "NameResolutionError", rec, done_msg, report
+                )
             except (asyncio.TimeoutError, asyncssh.TimeoutError) as exc:
-                await handle_exception(exc, "TimeoutError", rec, done_msg)
+                await handle_exception(exc, "TimeoutError", rec, done_msg, report)
             except OSError as exc:
                 if exc.errno == 113:
-                    await handle_exception(exc, "NoRouteToHost", rec, done_msg)
+                    await handle_exception(exc, "NoRouteToHost", rec, done_msg, report)
                 else:
-                    await handle_exception(exc, "OSError", rec, done_msg)
+                    await handle_exception(exc, "OSError", rec, done_msg, report)
             except Exception as exc:
                 exception_name = type(exc).__name__
                 subclass_names = [cls.__name__ for cls in type(exc).__bases__]
                 await handle_exception(
-                    exc, f"{exception_name}.{subclass_names}", rec, done_msg
+                    exc, f"{exception_name}.{subclass_names}", rec, done_msg, report
                 )
 
     loop = asyncio.get_event_loop()

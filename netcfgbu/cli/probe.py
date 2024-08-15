@@ -4,6 +4,7 @@ import socket
 import click
 
 from netcfgbu.aiofut import as_completed
+from netcfgbu.cli.common import handle_exception
 from netcfgbu.consts import DEFAULT_PROBE_TIMEOUT
 from netcfgbu.logger import get_logger, stop_aiologging
 from netcfgbu.probe import probe
@@ -39,11 +40,6 @@ def exec_probe(inventory_recs, timeout=None) -> None:
     done = 0
     report = Report()
 
-    async def handle_exception(exc, reason, rec, done_msg) -> None:
-        reason_detail = f"{reason} - {str(exc)}"
-        log.error(done_msg + reason_detail)
-        report.task_results[False].append((rec, reason))
-
     async def proces_check() -> None:
         nonlocal done
 
@@ -59,19 +55,21 @@ def exec_probe(inventory_recs, timeout=None) -> None:
                 log.info(done_msg + ("PASS" if probe_ok else "FAIL"))
 
             except socket.gaierror as exc:
-                await handle_exception(exc, "NameResolutionError", rec, done_msg)
+                await handle_exception(
+                    exc, "NameResolutionError", rec, done_msg, report
+                )
             except asyncio.TimeoutError as exc:
-                await handle_exception(exc, "TimeoutError", rec, done_msg)
+                await handle_exception(exc, "TimeoutError", rec, done_msg, report)
             except OSError as exc:
                 if exc.errno == 113:
-                    await handle_exception(exc, "NoRouteToHost", rec, done_msg)
+                    await handle_exception(exc, "NoRouteToHost", rec, done_msg, report)
                 else:
-                    await handle_exception(exc, "OSError", rec, done_msg)
+                    await handle_exception(exc, "OSError", rec, done_msg, report)
             except Exception as exc:
                 exception_name = type(exc).__name__
                 subclass_names = [cls.__name__ for cls in type(exc).__bases__]
                 await handle_exception(
-                    exc, f"{exception_name}.{subclass_names}", rec, done_msg
+                    exc, f"{exception_name}.{subclass_names}", rec, done_msg, report
                 )
 
     report.start_timing()

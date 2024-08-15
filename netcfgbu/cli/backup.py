@@ -6,6 +6,7 @@ import click
 
 from netcfgbu import jumphosts
 from netcfgbu.aiofut import as_completed
+from netcfgbu.cli.common import handle_exception
 from netcfgbu.config_model import AppConfig
 from netcfgbu.logger import get_logger, stop_aiologging
 from netcfgbu.os_specs import make_host_connector
@@ -36,12 +37,6 @@ def exec_backup(app_cfg: AppConfig, inventory_recs) -> None:
     done = 0
     report = Report()
 
-    async def handle_exception(exc, reason, rec, done_msg) -> None:
-        reason_detail = f"{reason} - {str(exc)}"
-        log.warning(done_msg + reason_detail)
-        report.task_results[False].append((rec, reason))
-        Plugin.run_backup_failed(rec, exc)
-
     async def process_batch() -> None:
         nonlocal done
 
@@ -62,29 +57,45 @@ def exec_backup(app_cfg: AppConfig, inventory_recs) -> None:
                     Plugin.run_backup_success(rec, res)
                 else:
                     reason = "backup failed"
-                    await handle_exception(Exception(reason), reason, rec, done_msg)
+                    await handle_exception(
+                        Exception(reason), reason, rec, done_msg, report
+                    )
 
             except asyncssh.PermissionDenied as exc:
-                await handle_exception(exc, "All credentials failed", rec, done_msg)
+                await handle_exception(
+                    exc, "All credentials failed", rec, done_msg, report
+                )
+                Plugin.run_backup_failed(rec, exc)
             except asyncssh.ConnectionLost as exc:
-                await handle_exception(exc, "ConnectionLost", rec, done_msg)
+                await handle_exception(exc, "ConnectionLost", rec, done_msg, report)
+                Plugin.run_backup_failed(rec, exc)
             except asyncssh.HostKeyNotVerifiable as exc:
-                await handle_exception(exc, "HostKeyNotVerifiable", rec, done_msg)
+                await handle_exception(
+                    exc, "HostKeyNotVerifiable", rec, done_msg, report
+                )
+                Plugin.run_backup_failed(rec, exc)
             except socket.gaierror as exc:
-                await handle_exception(exc, "NameResolutionError", rec, done_msg)
+                await handle_exception(
+                    exc, "NameResolutionError", rec, done_msg, report
+                )
+                Plugin.run_backup_failed(rec, exc)
             except (asyncio.TimeoutError, asyncssh.TimeoutError) as exc:
-                await handle_exception(exc, "TimeoutError", rec, done_msg)
+                await handle_exception(exc, "TimeoutError", rec, done_msg, report)
+                Plugin.run_backup_failed(rec, exc)
             except OSError as exc:
                 if exc.errno == 113:
-                    await handle_exception(exc, "NoRouteToHost", rec, done_msg)
+                    await handle_exception(exc, "NoRouteToHost", rec, done_msg, report)
+                    Plugin.run_backup_failed(rec, exc)
                 else:
-                    await handle_exception(exc, "OSError", rec, done_msg)
+                    await handle_exception(exc, "OSError", rec, done_msg, report)
+                    Plugin.run_backup_failed(rec, exc)
             except Exception as exc:
                 exception_name = type(exc).__name__
                 subclass_names = [cls.__name__ for cls in type(exc).__bases__]
                 await handle_exception(
-                    exc, f"{exception_name}.{subclass_names}", rec, done_msg
+                    exc, f"{exception_name}.{subclass_names}", rec, done_msg, report
                 )
+                Plugin.run_backup_failed(rec, exc)
 
     loop = asyncio.get_event_loop()
     report.start_timing()
