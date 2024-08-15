@@ -1,7 +1,5 @@
 import asyncio
-import socket
 
-import asyncssh
 import click
 
 from netcfgbu.aiofut import as_completed
@@ -22,7 +20,7 @@ from .root import (
 CLI_COMMAND = "probe"
 
 
-def exec_probe(inventory_recs, timeout=None) -> None:
+def exec_probe(inventory_recs: list, timeout=None) -> None:
     timeout = timeout or DEFAULT_PROBE_TIMEOUT
 
     log = get_logger()
@@ -43,7 +41,7 @@ def exec_probe(inventory_recs, timeout=None) -> None:
     done = 0
     report = Report()
 
-    async def proces_check() -> None:
+    async def process_check() -> None:
         nonlocal done
 
         async for task in as_completed(tasks):
@@ -62,35 +60,11 @@ def exec_probe(inventory_recs, timeout=None) -> None:
                         Exception(reason), reason, rec, done_msg, report
                     )
 
-            except asyncssh.PermissionDenied as exc:
-                await handle_exception(
-                    exc, "All credentials failed", rec, done_msg, report
-                )
-            except asyncssh.ConnectionLost as exc:
-                await handle_exception(exc, "ConnectionLost", rec, done_msg, report)
-            except asyncssh.HostKeyNotVerifiable as exc:
-                await handle_exception(
-                    exc, "HostKeyNotVerifiable", rec, done_msg, report
-                )
-            except socket.gaierror as exc:
-                await handle_exception(
-                    exc, "NameResolutionError", rec, done_msg, report
-                )
-            except (asyncio.TimeoutError, asyncssh.TimeoutError) as exc:
-                await handle_exception(exc, "TimeoutError", rec, done_msg, report)
-            except OSError as exc:
-                if exc.errno == 113:
-                    await handle_exception(exc, "NoRouteToHost", rec, done_msg, report)
-                else:
-                    await handle_exception(exc, "OSError", rec, done_msg, report)
             except Exception as exc:
-                exception_name = type(exc).__name__
-                await handle_exception(
-                    exc, exception_name, rec, done_msg, report
-                )
+                await handle_exception(exc, rec, done_msg, report)
 
     report.start_timing()
-    loop.run_until_complete(proces_check())
+    loop.run_until_complete(process_check())
     report.stop_timing()
     stop_aiologging()
     report.print_report(reports_type=CLI_COMMAND)
@@ -104,8 +78,5 @@ def exec_probe(inventory_recs, timeout=None) -> None:
 def cli_check(ctx, **cli_opts) -> None:
     """
     Probe device for SSH reachablility.
-
-    The probe check determines if the device is reachable and the SSH port
-    is available to receive connections.
     """
     exec_probe(ctx.obj["inventory_recs"], timeout=cli_opts["timeout"])

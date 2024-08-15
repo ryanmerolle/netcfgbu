@@ -25,11 +25,13 @@ from .root import (
 CLI_COMMAND = "backup"
 
 
-def exec_backup(app_cfg: AppConfig, inventory_recs) -> None:
+def exec_backup(inventory_recs: list, app_cfg: AppConfig) -> None:
     log = get_logger()
 
     inv_n = len(inventory_recs)
     log.info(f"Backing up {inv_n} devices ...")
+
+    loop = asyncio.get_event_loop()
 
     tasks = {
         make_host_connector(rec, app_cfg).backup_config(): rec for rec in inventory_recs
@@ -61,43 +63,10 @@ def exec_backup(app_cfg: AppConfig, inventory_recs) -> None:
                     await handle_exception(
                         Exception(reason), reason, rec, done_msg, report
                     )
-
-            except asyncssh.PermissionDenied as exc:
-                await handle_exception(
-                    exc, "All credentials failed", rec, done_msg, report
-                )
-                Plugin.run_backup_failed(rec, exc)
-            except asyncssh.ConnectionLost as exc:
-                await handle_exception(exc, "ConnectionLost", rec, done_msg, report)
-                Plugin.run_backup_failed(rec, exc)
-            except asyncssh.HostKeyNotVerifiable as exc:
-                await handle_exception(
-                    exc, "HostKeyNotVerifiable", rec, done_msg, report
-                )
-                Plugin.run_backup_failed(rec, exc)
-            except socket.gaierror as exc:
-                await handle_exception(
-                    exc, "NameResolutionError", rec, done_msg, report
-                )
-                Plugin.run_backup_failed(rec, exc)
-            except (asyncio.TimeoutError, asyncssh.TimeoutError) as exc:
-                await handle_exception(exc, "TimeoutError", rec, done_msg, report)
-                Plugin.run_backup_failed(rec, exc)
-            except OSError as exc:
-                if exc.errno == 113:
-                    await handle_exception(exc, "NoRouteToHost", rec, done_msg, report)
-                    Plugin.run_backup_failed(rec, exc)
-                else:
-                    await handle_exception(exc, "OSError", rec, done_msg, report)
-                    Plugin.run_backup_failed(rec, exc)
             except Exception as exc:
-                exception_name = type(exc).__name__
-                await handle_exception(
-                    exc, exception_name, rec, done_msg, report
-                )
+                await handle_exception(exc, rec, done_msg, report)
                 Plugin.run_backup_failed(rec, exc)
 
-    loop = asyncio.get_event_loop()
     report.start_timing()
     loop.run_until_complete(process_batch())
     report.stop_timing()
@@ -117,4 +86,4 @@ def cli_backup(ctx, **_cli_opts) -> None:
     Backup network configurations.
     """
     load_plugins(ctx.obj["app_cfg"].defaults.plugins_dir)
-    exec_backup(app_cfg=ctx.obj["app_cfg"], inventory_recs=ctx.obj["inventory_recs"])
+    exec_backup(inventory_recs=ctx.obj["inventory_recs"], app_cfg=ctx.obj["app_cfg"])

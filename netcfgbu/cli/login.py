@@ -27,13 +27,15 @@ from .root import (
 CLI_COMMAND = "login"
 
 
-def exec_test_login(app_cfg: AppConfig, inventory_recs, cli_opts) -> None:
+def exec_test_login(inventory_recs: list, app_cfg: AppConfig, cli_opts) -> None:
     timeout = cli_opts["timeout"] or DEFAULT_LOGIN_TIMEOUT
 
     log = get_logger()
 
     inv_n = len(inventory_recs)
     log.info(f"Checking logins on {inv_n} devices ...")
+
+    loop = asyncio.get_event_loop()
 
     tasks = {
         make_host_connector(rec, app_cfg).test_login(timeout=timeout): rec
@@ -62,48 +64,19 @@ def exec_test_login(app_cfg: AppConfig, inventory_recs, cli_opts) -> None:
             try:
                 if login_user := task.result():
                     rec["login_user"] = login_user
-                    rec["attempts"] = rec.get(
-                        "attempts", 1
-                    )  # Capture the number of attempts if available
+                    rec["attempts"] = rec.get("attempts", 1)  # Capture attempts
                     report.task_results[True].append(rec)
                     log.info(done_msg + f" - {login_user=}")
                 else:
                     reason = "all credentials failed"
                     rec["login_user"] = reason
-                    rec["attempts"] = rec.get(
-                        "attempts", 1
-                    )  # Capture the number of attempts if available
+                    rec["attempts"] = rec.get("attempts", 1)  # Capture attempts
                     report.task_results[False].append((rec, reason))
                     log.error(done_msg + reason)
 
-            except asyncssh.PermissionDenied as exc:
-                await handle_exception(
-                    exc, "All credentials failed", rec, done_msg, report
-                )
-            except asyncssh.ConnectionLost as exc:
-                await handle_exception(exc, "ConnectionLost", rec, done_msg, report)
-            except asyncssh.HostKeyNotVerifiable as exc:
-                await handle_exception(
-                    exc, "HostKeyNotVerifiable", rec, done_msg, report
-                )
-            except socket.gaierror as exc:
-                await handle_exception(
-                    exc, "NameResolutionError", rec, done_msg, report
-                )
-            except (asyncio.TimeoutError, asyncssh.TimeoutError) as exc:
-                await handle_exception(exc, "TimeoutError", rec, done_msg, report)
-            except OSError as exc:
-                if exc.errno == 113:
-                    await handle_exception(exc, "NoRouteToHost", rec, done_msg, report)
-                else:
-                    await handle_exception(exc, "OSError", rec, done_msg, report)
             except Exception as exc:
-                exception_name = type(exc).__name__
-                await handle_exception(
-                    exc, exception_name, rec, done_msg, report
-                )
+                await handle_exception(exc, rec, done_msg, report)
 
-    loop = asyncio.get_event_loop()
     report.start_timing()
     loop.run_until_complete(process_batch())
     report.stop_timing()
@@ -122,4 +95,4 @@ def cli_login(ctx, **cli_opts) -> None:
     """
     Verify SSH login to devices.
     """
-    exec_test_login(ctx.obj["app_cfg"], ctx.obj["inventory_recs"], cli_opts)
+    exec_test_login(ctx.obj["inventory_recs"], ctx.obj["app_cfg"], cli_opts)
