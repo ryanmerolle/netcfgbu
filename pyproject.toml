@@ -34,6 +34,10 @@ tabulate = "*"
 click = "*"
 first = "*"
 pexpect = "*"
+types-tabulate = "*"
+types-first = "*"
+types-aiofiles = "*"
+types-toml = "*"
 
 [tool.poetry.group.dev.dependencies]
 asynctest = "*"

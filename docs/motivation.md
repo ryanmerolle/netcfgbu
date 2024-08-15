@@ -213,4 +213,4 @@ Cheers
 
 Twitter: [@nwkautomaniac](https://twitter.com/nwkautomaniac)
 
-Slack: @nwkautomaniac on [networktocode.slack.com](https://networktocode.herokuapp.com)
+Slack: @nwkautomaniac on [networktocode.slack.com](https://slack.networktocode.com/)
