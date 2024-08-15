@@ -145,7 +145,7 @@ class Report(object):
 
         print(LN_SEP)
 
-    def print_report(self):
+    def print_report(self, reports_type):
         if not self.stop_tm:
             self.stop_timing()  # pragma: no cover
 
@@ -162,5 +162,7 @@ class Report(object):
             f"         DURATION={self.duration:.3f}s"
         )
 
-        self.save_login_report()
+        if reports_type == "login":
+            self.save_login_report()
+
         self.save_failure_report()

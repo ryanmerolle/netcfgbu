@@ -98,7 +98,7 @@ def exec_test_login(app_cfg: AppConfig, inventory_recs, cli_opts):
     loop.run_until_complete(process_batch())
     report.stop_timing()
     stop_aiologging()
-    report.print_report()
+    report.print_report(reports_type="login")
 
 
 @cli.command(name="login", cls=WithInventoryCommand)

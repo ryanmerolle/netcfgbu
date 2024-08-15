@@ -88,7 +88,7 @@ def exec_backup(app_cfg: AppConfig, inventory_recs):
     loop.run_until_complete(process_batch())
     report.stop_timing()
     stop_aiologging()
-    report.print_report()
+    report.print_report(reports_type="backup")
     Plugin.run_report(report)
 
 
