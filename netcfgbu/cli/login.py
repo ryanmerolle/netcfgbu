@@ -63,10 +63,14 @@ def exec_test_login(app_cfg: AppConfig, inventory_recs, cli_opts):
             try:
                 if login_user := task.result():
                     log.info(done_msg + f"with user {login_user}")
+                    rec["login_user"] = login_user
+                    rec["attempts"] = rec.get("attempts", 1)  # Capture the number of attempts if available
                     report.task_results[True].append(rec)
                 else:
                     reason = "all credentials failed"
                     log.warning(done_msg + reason)
+                    rec["login_user"] = reason
+                    rec["attempts"] = rec.get("attempts", 1)  # Capture the number of attempts if available
                     report.task_results[False].append((rec, reason))
 
             except asyncssh.PermissionDenied as exc:

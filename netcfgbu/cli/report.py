@@ -52,6 +52,97 @@ class Report(object):
     def duration(self):
         return self.stop_tm - self.start_tm
 
+    def save_login_report(self):
+        headers = ["host", "os_name", "num_of_attempts", "login_used"]
+
+        login_tabular_data = []
+        summary_data = defaultdict(lambda: defaultdict(lambda: defaultdict(int)))
+
+        for rec in self.task_results[True]:
+            host = rec["host"]
+            os_name = rec["os_name"]
+            attempts = rec.get("attempts", 1)  # Default to 1 if not specified
+            login_used = rec["login_user"]
+
+            login_tabular_data.append([host, os_name, attempts, login_used])
+
+            # Update summary data
+            summary_data[os_name][login_used][attempts] += 1
+
+        login_tabular_data.sort(key=lambda x: x[0])  # Sorting by host
+
+        with open("login.csv", "w+") as ofile:
+            wr_csv = csv.writer(ofile)
+            wr_csv.writerow(headers)
+            wr_csv.writerows(login_tabular_data)
+
+        # Print summary
+        print("\n\nSUCCESS SUMMARY")
+
+        login_tabular_data = []
+        login_total = 0
+        for os_name, user_data in summary_data.items():
+            for login_used, attempt_data in user_data.items():
+                for attempts, count in attempt_data.items():
+                    login_tabular_data.append([os_name, login_used, attempts, count])
+                    login_total += count
+
+        if login_total > 0:
+            summary_headers = ["os_name", "login_used", "attempts", "count"]
+            login_tabular_data.sort(key=lambda x: (x[0], x[1], x[2]))  # Sort by os_name, login_used, then attempts
+            login_tabular_data.append(["-" * 7, "-" * 10, "-" * 8, "-" * 5]) # SEPARATING_LINE does not work with tablefmt="pretty"
+            login_tabular_data.append(["TOTAL", "", "", login_total])
+
+            print(tabulate(headers=summary_headers, tabular_data=login_tabular_data, tablefmt="pretty"))
+        else:
+            print("No successful logins")
+
+    def save_failure_report(self):
+        headers = ["host", "os_name", "reason"]
+
+        failure_tabular_data = [
+            [rec["host"], rec["os_name"], err_reason(exc)]
+            for rec, exc in self.task_results[False]
+        ]
+
+        # Sort failure_tabular_data by 'host'
+        failure_tabular_data.sort(key=lambda x: x[0])  # Sorting by host
+        #failure_tabular_data.append(SEPARATING_LINE)
+
+        with open("failures.csv", "w+") as ofile:
+            wr_csv = csv.writer(ofile)
+            wr_csv.writerow(headers)
+            wr_csv.writerows(failure_tabular_data)
+
+        # Summarizing failures
+        summary_data = defaultdict(lambda: defaultdict(int))
+        for _, os_name, reason in failure_tabular_data:
+            summary_data[os_name][reason] += 1
+
+        # Print summary
+        print("\n\nFAILURE SUMMARY")
+        login_tabular_data = []
+        login_total = 0
+        for os_name, reason_data in summary_data.items():
+            for reason, count in reason_data.items():
+                login_tabular_data.append([os_name, reason, count])
+                login_total += count
+
+        if login_total > 0:
+            summary_headers = ["os_name", "reason", "count"]
+            login_tabular_data.sort(key=lambda x: (x[0], x[1]))  # Sort by os_name, then reason
+            login_tabular_data.append(["-" * 7, "-" * 6, "-" * 8, "-" * 5]) # SEPARATING_LINE does not work with tablefmt="pretty"
+            login_tabular_data.append([ "TOTAL", "", login_total])
+            print(tabulate(headers=summary_headers, tabular_data=login_tabular_data, tablefmt="pretty"))
+        else:
+            print("No logins failures")
+
+
+        # Also print the detailed failures
+        print("\nDETAILED FAILURE REPORT")
+        print(tabulate(headers=headers, tabular_data=failure_tabular_data, tablefmt="pretty"))
+        print(LN_SEP)
+
     def print_report(self):
         if not self.stop_tm:
             self.stop_timing()  # pragma: no cover
@@ -69,25 +160,5 @@ class Report(object):
             f"         DURATION={self.duration:.3f}s"
         )
 
-        headers = ["host", "os_name", "reason"]
-
-        failure_tabular_data = [
-            [rec["host"], rec["os_name"], err_reason(exc)]
-            for rec, exc in self.task_results[False]
-        ]
-
-        # Sort failure_tabular_data by 'host'
-        failure_tabular_data.sort(key=lambda x: x[0])  # Sorting by host
-
-        if not fail_n:
-            print(LN_SEP)
-            return
-
-        with open("failures.csv", "w+") as ofile:
-            wr_csv = csv.writer(ofile)
-            wr_csv.writerow(headers)
-            wr_csv.writerows(failure_tabular_data)
-
-        print(f"\n\nFAILURES: {fail_n}")
-        print(tabulate(headers=headers, tabular_data=failure_tabular_data, tablefmt="pretty"))
-        print(LN_SEP)
+        self.save_login_report()
+        self.save_failure_report()
