@@ -138,9 +138,11 @@ class Report(object):
             print("No logins failures")
 
 
-        # Also print the detailed failures
-        print("\nDETAILED FAILURE REPORT")
-        print(tabulate(headers=headers, tabular_data=failure_tabular_data, tablefmt="pretty"))
+        if len(failure_tabular_data) > 0:
+            # Also print the detailed failures
+            print("\nDETAILED FAILURE REPORT")
+            print(tabulate(headers=headers, tabular_data=failure_tabular_data, tablefmt="pretty"))
+
         print(LN_SEP)
 
     def print_report(self):
