@@ -59,10 +59,10 @@ def expand_env_str(env_string):
     ):
         for var in found_vars:
             if (var_val := os.getenv(var)) is None:
-                raise ValueError(f'Environment variable "{var}" missing.')
+                raise EnvironmentError(f'Environment variable "{var}" missing.')
 
             if not len(var_val):
-                raise ValueError(f'Environment variable "{var}" empty.')
+                raise EnvironmentError(f'Environment variable "{var}" empty.')
 
         return expandvars(env_string)
 

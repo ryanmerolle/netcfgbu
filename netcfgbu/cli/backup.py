@@ -92,9 +92,8 @@ def exec_backup(app_cfg: AppConfig, inventory_recs) -> None:
                     Plugin.run_backup_failed(rec, exc)
             except Exception as exc:
                 exception_name = type(exc).__name__
-                subclass_names = [cls.__name__ for cls in type(exc).__bases__]
                 await handle_exception(
-                    exc, f"{exception_name}.{subclass_names}", rec, done_msg, report
+                    exc, exception_name, rec, done_msg, report
                 )
                 Plugin.run_backup_failed(rec, exc)
 

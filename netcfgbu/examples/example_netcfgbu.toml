@@ -9,9 +9,13 @@
 # -----------------------------------------------------------------------------
 
 [defaults]
+    # Path to the inventory file
     inventory = '$PROJ_DIR/inventory.csv'
+    # Directory to store configuration backups
     configs_dir = '$PROJ_DIR/configs'
+    # Directory containing custom plugins
     plugins_dir = '$PROJ_DIR/plugins'
+    # Default credentials for network devices
     credentials.username = '$NETWORK_USERNAME'
     credentials.password = '$NETWORK_PASSWORD'
 

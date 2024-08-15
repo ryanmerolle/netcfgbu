@@ -36,9 +36,13 @@ def test_config_onlyenvars_fail_missing():
 
     exc_errmsg = excinfo.value.args[0]
 
-    assert "defaults.NETCFGBU_INVENTORY" in exc_errmsg
-    assert "defaults.credentials.NETCFGBU_DEFAULT_USERNAME" in exc_errmsg
-    assert "defaults.credentials.NETCFGBU_DEFAULT_PASSWORD" in exc_errmsg
+    expected_envars = [
+        "defaults.NETCFGBU_INVENTORY",
+        "defaults.credentials.NETCFGBU_DEFAULT_USERNAME",
+        "defaults.credentials.NETCFGBU_DEFAULT_PASSWORD"
+    ]
+    for expected in expected_envars:
+        assert expected in exc_errmsg
 
 
 def test_config_onlyenvars_fail_bad_noinventory(monkeypatch):

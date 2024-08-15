@@ -99,9 +99,8 @@ def exec_test_login(app_cfg: AppConfig, inventory_recs, cli_opts) -> None:
                     await handle_exception(exc, "OSError", rec, done_msg, report)
             except Exception as exc:
                 exception_name = type(exc).__name__
-                subclass_names = [cls.__name__ for cls in type(exc).__bases__]
                 await handle_exception(
-                    exc, f"{exception_name}.{subclass_names}", rec, done_msg, report
+                    exc, exception_name, rec, done_msg, report
                 )
 
     loop = asyncio.get_event_loop()
