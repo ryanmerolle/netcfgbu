@@ -50,7 +50,7 @@ def exec_probe(inventory, timeout=None) -> None:
                 report.task_results[probe_ok].append((rec, probe_ok))
                 log.info(msg + ("PASS" if probe_ok else "FAIL"))
 
-            except (asyncio.TimeoutError, Exception, OSError) as exc:
+            except (asyncio.TimeoutError, OSError, Exception) as exc:
                 probe_ok = False
                 log.error(msg + f"FAILURE: {str(exc)}")
                 report.task_results[False].append((rec, exc))
