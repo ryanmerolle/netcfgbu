@@ -54,7 +54,9 @@ def expand_env_str(env_string):
         foo_password -> "boo!_foo"
     """
 
-    if found_vars := list(filter(len, chain.from_iterable(_var_re.findall(env_string)))):
+    if found_vars := list(
+        filter(len, chain.from_iterable(_var_re.findall(env_string)))
+    ):
         for var in found_vars:
             if (var_val := os.getenv(var)) is None:
                 raise ValueError(f'Environment variable "{var}" missing.')

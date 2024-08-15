@@ -1,4 +1,5 @@
 import asyncio
+import socket
 
 import click
 
@@ -17,11 +18,13 @@ from .root import (
 )
 
 
-def exec_probe(inventory, timeout=None) -> None:
-    inv_n = len(inventory)
-    log = get_logger()
-    log.info(f"Checking SSH reachability on {inv_n} devices ...")
+def exec_probe(inventory_recs, timeout=None) -> None:
     timeout = timeout or DEFAULT_PROBE_TIMEOUT
+
+    log = get_logger()
+
+    inv_n = len(inventory_recs)
+    log.info(f"Checking SSH reachability on {inv_n} devices ...")
 
     loop = asyncio.get_event_loop()
 
@@ -29,37 +32,53 @@ def exec_probe(inventory, timeout=None) -> None:
         probe(
             rec.get("ipaddr") or rec.get("host"), timeout=timeout, raise_exc=True
         ): rec
-        for rec in inventory
+        for rec in inventory_recs
     }
 
     total = len(tasks)
     done = 0
     report = Report()
 
+    async def handle_exception(exc, reason, rec, done_msg) -> None:
+        reason_detail = f"{reason} - {str(exc)}"
+        log.error(done_msg + reason_detail)
+        report.task_results[False].append((rec, reason))
+
     async def proces_check() -> None:
         nonlocal done
 
-        async for probe_task in as_completed(tasks):
+        async for task in as_completed(tasks):
             done += 1
-            task_coro = probe_task.get_coro()
-            rec = tasks[task_coro]
-            msg = f"DONE ({done}/{total}): {rec['host']} "
+            coro = task.get_coro()
+            rec = tasks[coro]
+            done_msg = f"DONE ({done}/{total}): {rec['host']} "
 
             try:
-                probe_ok = probe_task.result()
+                probe_ok = task.result()
                 report.task_results[probe_ok].append((rec, probe_ok))
-                log.info(msg + ("PASS" if probe_ok else "FAIL"))
+                log.info(done_msg + ("PASS" if probe_ok else "FAIL"))
 
-            except (asyncio.TimeoutError, OSError, Exception) as exc:
-                probe_ok = False
-                log.error(msg + f"FAILURE: {str(exc)}")
-                report.task_results[False].append((rec, exc))
+            except socket.gaierror as exc:
+                await handle_exception(exc, "NameResolutionError", rec, done_msg)
+            except asyncio.TimeoutError as exc:
+                await handle_exception(exc, "TimeoutError", rec, done_msg)
+            except OSError as exc:
+                if exc.errno == 113:
+                    await handle_exception(exc, "NoRouteToHost", rec, done_msg)
+                else:
+                    await handle_exception(exc, "OSError", rec, done_msg)
+            except Exception as exc:
+                exception_name = type(exc).__name__
+                subclass_names = [cls.__name__ for cls in type(exc).__bases__]
+                await handle_exception(
+                    exc, f"{exception_name}.{subclass_names}", rec, done_msg
+                )
 
     report.start_timing()
     loop.run_until_complete(proces_check())
     report.stop_timing()
     stop_aiologging()
-    report.print_report()
+    report.print_report(reports_type="probe")
 
 
 @cli.command(name="probe", cls=WithInventoryCommand)

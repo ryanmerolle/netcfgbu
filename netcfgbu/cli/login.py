@@ -29,7 +29,10 @@ def exec_test_login(app_cfg: AppConfig, inventory_recs, cli_opts) -> None:
 
     log = get_logger()
 
-    login_tasks = {
+    inv_n = len(inventory_recs)
+    log.info(f"Checking logins on {inv_n} devices ...")
+
+    tasks = {
         make_host_connector(rec, app_cfg).test_login(timeout=timeout): rec
         for rec in inventory_recs
     }
@@ -37,14 +40,13 @@ def exec_test_login(app_cfg: AppConfig, inventory_recs, cli_opts) -> None:
     if (batch_n := cli_opts["batch"]) is not None:
         set_max_startups(batch_n)
 
-    total = len(login_tasks)
-
-    report = Report()
+    total = len(tasks)
     done = 0
+    report = Report()
 
     async def handle_exception(exc, reason, rec, done_msg) -> None:
         reason_detail = f"{reason} - {str(exc)}"
-        log.warning(done_msg + reason_detail)
+        log.error(done_msg + reason_detail)
         report.task_results[False].append((rec, reason))
 
     async def process_batch() -> None:
@@ -53,10 +55,10 @@ def exec_test_login(app_cfg: AppConfig, inventory_recs, cli_opts) -> None:
         if app_cfg.jumphost:
             await jumphosts.connect_jumphosts()
 
-        async for task in as_completed(login_tasks):
+        async for task in as_completed(tasks):
             done += 1
             coro = task.get_coro()
-            rec = login_tasks[coro]
+            rec = tasks[coro]
             done_msg = f"DONE ({done}/{total}): {rec['host']} "
 
             try:

@@ -25,14 +25,16 @@ from .root import (
 def exec_backup(app_cfg: AppConfig, inventory_recs) -> None:
     log = get_logger()
 
-    backup_tasks = {
+    inv_n = len(inventory_recs)
+    log.info(f"Backing up {inv_n} devices ...")
+
+    tasks = {
         make_host_connector(rec, app_cfg).backup_config(): rec for rec in inventory_recs
     }
 
-    total = len(backup_tasks)
-
-    report = Report()
+    total = len(tasks)
     done = 0
+    report = Report()
 
     async def handle_exception(exc, reason, rec, done_msg) -> None:
         reason_detail = f"{reason} - {str(exc)}"
@@ -46,10 +48,10 @@ def exec_backup(app_cfg: AppConfig, inventory_recs) -> None:
         if app_cfg.jumphost:
             await jumphosts.connect_jumphosts()
 
-        async for task in as_completed(backup_tasks):
+        async for task in as_completed(tasks):
             done += 1
             coro = task.get_coro()
-            rec = backup_tasks[coro]
+            rec = tasks[coro]
             done_msg = f"DONE ({done}/{total}): {rec['host']} "
 
             try:
