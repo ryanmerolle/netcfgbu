@@ -7,5 +7,5 @@ from .root import cli
 from .vcs import cli_vcs  # noqa
 
 
-def run():
+def run() -> None:
     cli(obj={})

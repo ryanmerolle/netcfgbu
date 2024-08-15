@@ -149,5 +149,5 @@ opt_debug_ssh = click.option(
 
 @click.group()
 @click.version_option(version=VERSION)
-def cli():
+def cli() -> None:
     pass  # pragma: no cover

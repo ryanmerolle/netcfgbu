@@ -24,7 +24,7 @@ from .root import (
 
 
 @cli.group(name="inventory")
-def cli_inventory():
+def cli_inventory() -> None:
     """
     Inventory subcommands.
     """
@@ -77,7 +77,7 @@ SUMMARY: TOTAL={len(inventory_recs)}
 @click.option("--name", "-n", help="inventory name as defined in config file")
 @click.option("--brief", is_flag=True)
 @click.pass_context
-def cli_inventory_build(ctx, **cli_opts):
+def cli_inventory_build(ctx, **cli_opts) -> None:
     """
     Build the inventory file.
 

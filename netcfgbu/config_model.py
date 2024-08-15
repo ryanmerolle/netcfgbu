@@ -40,7 +40,7 @@ class NoExtraBaseModel(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
 
-def expand_env_str(v):
+def expand_env_str(env_string):
     """
     When a string value contains a reference to an environment variable, use
     this type to expand the contents of the variable using os.path.expandvars.
@@ -54,7 +54,7 @@ def expand_env_str(v):
         foo_password -> "boo!_foo"
     """
 
-    if found_vars := list(filter(len, chain.from_iterable(_var_re.findall(v)))):
+    if found_vars := list(filter(len, chain.from_iterable(_var_re.findall(env_string)))):
         for var in found_vars:
             if (var_val := os.getenv(var)) is None:
                 raise ValueError(f'Environment variable "{var}" missing.')
@@ -62,9 +62,9 @@ def expand_env_str(v):
             if not len(var_val):
                 raise ValueError(f'Environment variable "{var}" empty.')
 
-        return expandvars(v)
+        return expandvars(env_string)
 
-    return v
+    return env_string
 
 
 EnvExpand = Annotated[str, AfterValidator(expand_env_str)]

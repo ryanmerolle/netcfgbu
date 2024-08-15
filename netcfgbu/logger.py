@@ -61,7 +61,7 @@ def setup_logging_queue(logger_names) -> None:
     _g_quelgr_listener.start()
 
 
-def setup_logging(app_cfg):
+def setup_logging(app_cfg) -> None:
     log_cfg = app_cfg.get("logging") or {}
     log_cfg["version"] = 1
 
@@ -69,7 +69,7 @@ def setup_logging(app_cfg):
     setup_logging_queue(log_cfg.get("loggers") or [])
 
 
-def stop_aiologging():
+def stop_aiologging() -> None:
     _g_quelgr_listener.stop()  # noqa
     sys.stdout.flush()
 

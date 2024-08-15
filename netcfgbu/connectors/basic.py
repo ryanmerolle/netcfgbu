@@ -397,5 +397,5 @@ class BasicSSHConnector(object):
             await ofile.write("\n")
 
 
-def set_max_startups(count, cls=BasicSSHConnector):
+def set_max_startups(count, cls=BasicSSHConnector) -> None:
     cls.set_max_startups(count)

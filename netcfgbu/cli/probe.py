@@ -17,7 +17,7 @@ from .root import (
 )
 
 
-def exec_probe(inventory, timeout=None):
+def exec_probe(inventory, timeout=None) -> None:
     inv_n = len(inventory)
     log = get_logger()
     log.info(f"Checking SSH reachability on {inv_n} devices ...")
@@ -36,7 +36,7 @@ def exec_probe(inventory, timeout=None):
     done = 0
     report = Report()
 
-    async def proces_check():
+    async def proces_check() -> None:
         nonlocal done
 
         async for probe_task in as_completed(tasks):
@@ -67,7 +67,7 @@ def exec_probe(inventory, timeout=None):
 @opts_inventory
 @opt_timeout
 @click.pass_context
-def cli_check(ctx, **cli_opts):
+def cli_check(ctx, **cli_opts) -> None:
     """
     Probe device for SSH reachablility.
 

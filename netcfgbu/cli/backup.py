@@ -22,7 +22,7 @@ from .root import (
 )
 
 
-def exec_backup(app_cfg: AppConfig, inventory_recs):
+def exec_backup(app_cfg: AppConfig, inventory_recs) -> None:
     log = get_logger()
 
     backup_tasks = {
@@ -34,13 +34,13 @@ def exec_backup(app_cfg: AppConfig, inventory_recs):
     report = Report()
     done = 0
 
-    async def handle_exception(exc, reason, rec, done_msg):
+    async def handle_exception(exc, reason, rec, done_msg) -> None:
         reason_detail = f"{reason} - {str(exc)}"
         log.warning(done_msg + reason_detail)
         report.task_results[False].append((rec, reason))
         Plugin.run_backup_failed(rec, exc)
 
-    async def process_batch():
+    async def process_batch() -> None:
         nonlocal done
 
         if app_cfg.jumphost:
@@ -99,7 +99,7 @@ def exec_backup(app_cfg: AppConfig, inventory_recs):
 @opt_debug_ssh
 @opt_batch
 @click.pass_context
-def cli_backup(ctx, **_cli_opts):
+def cli_backup(ctx, **_cli_opts) -> None:
     """
     Backup network configurations.
     """

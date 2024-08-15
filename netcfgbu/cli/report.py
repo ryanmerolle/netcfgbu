@@ -22,18 +22,18 @@ def err_reason(exc):
 class Report(object):
     TIME_FORMAT = "%Y-%b-%d %I:%M:%S %p"
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.start_ts = None
         self.start_tm = 0
         self.stop_ts = None
         self.stop_tm = 0
         self.task_results = defaultdict(list)
 
-    def start_timing(self):
+    def start_timing(self) -> None:
         self.start_ts = datetime.now()
         self.start_tm = monotonic()
 
-    def stop_timing(self):
+    def stop_timing(self) -> None:
         self.stop_ts = datetime.now()
         self.stop_tm = monotonic()
 
@@ -51,7 +51,7 @@ class Report(object):
 
     def save_report(
         self, filename, headers, data, summary_headers=None, summary_data=None
-    ):
+    ) -> None:
         data.sort(key=lambda x: x[0])  # Sorting by the first column (usually 'host')
 
         with open(filename, "w+") as ofile:
@@ -80,7 +80,7 @@ class Report(object):
                 )
             )
 
-    def save_login_report(self):
+    def save_login_report(self) -> None:
         headers = ["host", "os_name", "num_of_attempts", "login_used"]
         login_tabular_data = []
         summary_data = defaultdict(lambda: defaultdict(int))
@@ -102,7 +102,7 @@ class Report(object):
             summary_data,
         )
 
-    def save_failure_report(self):
+    def save_failure_report(self) -> None:
         headers = ["host", "os_name", "reason"]
         failure_tabular_data = [
             [rec["host"], rec["os_name"], err_reason(exc)]
@@ -121,7 +121,7 @@ class Report(object):
             summary_data,
         )
 
-    def print_report(self, reports_type):
+    def print_report(self, reports_type) -> None:
         if not self.stop_tm:
             self.stop_timing()  # pragma: no cover
 

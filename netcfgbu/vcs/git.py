@@ -100,7 +100,7 @@ def vcs_save(
     return True
 
 
-def vcs_prepare(spec: GitSpec, repo_dir: Path):
+def vcs_prepare(spec: GitSpec, repo_dir: Path) -> None:
     logr = get_logger()
     logr.info(f"VCS prepare git: {spec.repo}")
 
@@ -135,7 +135,7 @@ class GitRunner(object):
     operations requested for the VCS use cases.
     """
 
-    def __init__(self, config: GitSpec, repo_dir):
+    def __init__(self, config: GitSpec, repo_dir) -> None:
         self.user = config.username or os.environ["USER"]
         self.config = config
         self.repo_dir = repo_dir
@@ -177,7 +177,7 @@ class GitRunner(object):
     def run(self, cmd: str, authreq=False):
         return [self.run_noauth, self.run_auth][authreq](cmd)  # noqa
 
-    def git_init(self):
+    def git_init(self) -> None:
         output = self.run("remote -v") if self.repo_exists else ""
         if self.repo_url not in output:
             commands = (("init", False), (f"remote add origin {self.repo_url}", False))
@@ -190,7 +190,7 @@ class GitRunner(object):
     def git_pull(self):
         self.run(f"pull origin {consts.DEFAULT_GIT_BRANCH}", authreq=True)
 
-    def git_config(self):
+    def git_config(self) -> None:
         config = self.config
 
         config_opts = (
@@ -202,7 +202,7 @@ class GitRunner(object):
         for cfg_opt, cfg_val in config_opts:
             self.run(f"config --local {cfg_opt} {cfg_val}")
 
-    def git_clone(self):
+    def git_clone(self) -> None:
         self.run(f"clone {self.repo_url} {str(self.repo_dir)}", authreq=True)
         self.git_config()
 
@@ -243,7 +243,7 @@ class GitDeployKeyRunner(GitRunner):
     Git Runner used with deployment keys without passphrase
     """
 
-    def git_config(self):
+    def git_config(self) -> None:
         super().git_config()
         ssh_key = str(Path(self.config.deploy_key).absolute())
         self.run(

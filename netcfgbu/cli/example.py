@@ -7,7 +7,7 @@ import click
 from .root import cli
 
 
-def copy_example_files():
+def copy_example_files() -> None:
     """
     Check if any example file already exists in the current working directory.
     If so, print an error message and do not copy any files.
@@ -42,7 +42,7 @@ def copy_example_files():
 
 @cli.command(name="example")
 @click.pass_context
-def cli_example(ctx, **cli_opts):
+def cli_example(ctx, **cli_opts) -> None:
     """
     Generate example inventory & configuration files.
 

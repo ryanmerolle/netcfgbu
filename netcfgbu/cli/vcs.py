@@ -11,7 +11,7 @@ opt_vcs_name = click.option("--name", help="VCS name as defined in config file")
 
 
 @cli.group(name="vcs")
-def cli_vcs():
+def cli_vcs() -> None:
     """
     Version Control System subcommands.
     """
@@ -19,7 +19,7 @@ def cli_vcs():
 
 
 class VCSCommand(click.Command):
-    def invoke(self, ctx):
+    def invoke(self, ctx) -> None:
         cfg_fileopt = ctx.params["config"]
 
         try:
@@ -44,7 +44,7 @@ class VCSCommand(click.Command):
 @opt_config_file
 @opt_vcs_name
 @click.pass_context
-def cli_vcs_prepare(ctx, **_cli_opts):
+def cli_vcs_prepare(ctx, **_cli_opts) -> None:
     """
     Prepare your system with the VCS repo.
 
@@ -64,7 +64,7 @@ def cli_vcs_prepare(ctx, **_cli_opts):
 @click.option("--add-tag", is_flag=True, default=False, help="If set, create a git tag")
 @click.option("--message", help="Set commit message / tag name")
 @click.pass_context
-def cli_vcs_save(ctx, **cli_opts):
+def cli_vcs_save(ctx, **cli_opts) -> None:
     """
     Save changes into VCS repository.
 
@@ -87,7 +87,7 @@ def cli_vcs_save(ctx, **cli_opts):
 @opt_config_file
 @opt_vcs_name
 @click.pass_context
-def cli_vcs_status(ctx, **_cli_opts):
+def cli_vcs_status(ctx, **_cli_opts) -> None:
     """
     Show VCS repository status.
 

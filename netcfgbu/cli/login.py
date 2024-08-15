@@ -24,7 +24,7 @@ from .root import (
 )
 
 
-def exec_test_login(app_cfg: AppConfig, inventory_recs, cli_opts):
+def exec_test_login(app_cfg: AppConfig, inventory_recs, cli_opts) -> None:
     timeout = cli_opts["timeout"] or DEFAULT_LOGIN_TIMEOUT
 
     log = get_logger()
@@ -42,12 +42,12 @@ def exec_test_login(app_cfg: AppConfig, inventory_recs, cli_opts):
     report = Report()
     done = 0
 
-    async def handle_exception(exc, reason, rec, done_msg):
+    async def handle_exception(exc, reason, rec, done_msg) -> None:
         reason_detail = f"{reason} - {str(exc)}"
         log.warning(done_msg + reason_detail)
         report.task_results[False].append((rec, reason))
 
-    async def process_batch():
+    async def process_batch() -> None:
         nonlocal done
 
         if app_cfg.jumphost:
@@ -113,7 +113,7 @@ def exec_test_login(app_cfg: AppConfig, inventory_recs, cli_opts):
 @opt_batch
 @opt_timeout
 @click.pass_context
-def cli_login(ctx, **cli_opts):
+def cli_login(ctx, **cli_opts) -> None:
     """
     Verify SSH login to devices.
     """
