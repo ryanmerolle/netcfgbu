@@ -21,7 +21,20 @@ VERSION = metadata.version(netcfgbu.__package__)
 
 
 class WithConfigCommand(click.Command):
+    """
+    Custom Click command that loads the configuration file before invoking the command.
+    """
+
     def invoke(self, ctx):
+        """
+        Invokes the command after loading the configuration file.
+
+        Args:
+            ctx: Click context object.
+
+        Raises:
+            Exception: If there is an error loading the configuration.
+        """
         try:
             ctx.obj["app_cfg"] = _config.load(fileio=ctx.params["config"])
             super().invoke(ctx)
@@ -31,7 +44,22 @@ class WithConfigCommand(click.Command):
 
 
 class WithInventoryCommand(click.Command):
+    """
+    Custom Click command that loads the configuration and inventory before invoking the command.
+    Also handles SSH debugging and jumphost initialization if configured.
+    """
+
     def invoke(self, ctx):
+        """
+        Invokes the command after loading the configuration and inventory.
+
+        Args:
+            ctx: Click context object.
+
+        Raises:
+            Exception: If there is an error loading the configuration, inventory,
+            or initializing jumphosts.
+        """
         try:
             app_cfg = ctx.obj["app_cfg"] = _config.load(fileio=ctx.params["config"])
 
@@ -75,6 +103,16 @@ class WithInventoryCommand(click.Command):
 
 
 def get_spec_nameorfirst(spec_list, spec_name=None):
+    """
+    Returns the first matching spec by name or the first spec in the list.
+
+    Args:
+        spec_list: List of specs to search.
+        spec_name: Name of the spec to find (optional).
+
+    Returns:
+        The matching spec or the first spec if no name is specified.
+    """
     if not spec_list:
         return None
 
@@ -85,6 +123,17 @@ def get_spec_nameorfirst(spec_list, spec_name=None):
 
 
 def check_for_default(ctx: click.Context, opt, value):
+    """
+    Checks if the value is provided or if a default configuration file exists.
+
+    Args:
+        ctx: Click context object.
+        opt: Option being checked.
+        value: Value of the option.
+
+    Returns:
+        The provided value or None if no value is provided and no default file exists.
+    """
     if value or Path("netcfgbu.toml").exists():
         return value
 
@@ -126,6 +175,15 @@ opt_excludes = click.option(
 
 
 def opts_inventory(in_fn_deco):
+    """
+    Decorator that applies inventory-related options to a command.
+
+    Args:
+        in_fn_deco: The command function to decorate.
+
+    Returns:
+        The decorated command function with inventory options applied.
+    """
     return reduce(
         lambda _d, fn: fn(_d), [opt_inventory, opt_limits, opt_excludes], in_fn_deco
     )
@@ -150,4 +208,7 @@ opt_debug_ssh = click.option(
 @click.group()
 @click.version_option(version=VERSION)
 def cli() -> None:
+    """
+    The main entry point for the CLI application.
+    """
     pass  # pragma: no cover

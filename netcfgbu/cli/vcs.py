@@ -19,7 +19,35 @@ def cli_vcs() -> None:
 
 
 class VCSCommand(click.Command):
+    """
+    A custom Click command that handles version control system (VCS) operations.
+
+    This class extends `click.Command` and is used to invoke VCS-related commands
+    within a CLI application. It loads the application configuration, selects the
+    appropriate VCS specification, and then invokes the command. If any errors occur
+    during the process, they are handled and displayed to the user.
+
+    Example usage:
+        @click.command(cls=VCSCommand)
+        def my_command():
+            # Command implementation
+
+    Methods:
+        invoke: Executes the VCS command with the given context, loading the appropriate
+                configuration and handling errors.
+    """
+
     def invoke(self, ctx) -> None:
+        """
+        Execute the VCS command with the given context.
+
+        Args:
+            ctx: The Click context object containing command parameters and options.
+
+        Raises:
+            RuntimeError: If no configuration file is provided or if no VCS configuration
+                          section is found in the configuration file.
+        """
         cfg_fileopt = ctx.params["config"]
 
         try:

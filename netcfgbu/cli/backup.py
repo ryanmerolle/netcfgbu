@@ -18,13 +18,45 @@ CLI_COMMAND = "backup"
 
 
 def exec_backup(inventory_recs: list, app_cfg: AppConfig) -> None:
+    """
+    Executes the backup command on the provided inventory records.
+
+    Args:
+        inventory_recs: List of inventory records to back up.
+        app_cfg: Application configuration object.
+    """
+
     def task_creator(rec: dict, app_cfg: AppConfig):
+        """
+        Creates a backup task for the given inventory record.
+
+        Args:
+            rec: A dictionary representing an inventory record.
+            app_cfg: Application configuration object.
+
+        Returns:
+            A backup task configured with the host connector.
+        """
         return make_host_connector(rec, app_cfg).backup_config()
 
     def success_callback(rec, result):
+        """
+        Callback function executed on a successful backup.
+
+        Args:
+            rec: A dictionary representing an inventory record.
+            result: The result of the backup task.
+        """
         Plugin.run_backup_success(rec, result)
 
     def failure_callback(rec, exc):
+        """
+        Callback function executed on a failed backup.
+
+        Args:
+            rec: A dictionary representing an inventory record.
+            exc: The exception raised during the backup task.
+        """
         Plugin.run_backup_failed(rec, exc)
 
     execute_command(

@@ -49,6 +49,9 @@ def generate_commit_message() -> str:
     """
     Create a commit message using the current timestamp with
     format <year><month#><day#>_<24hr><minute><sec>
+
+    Returns:
+        str: The generated commit message based on the current timestamp.
     """
     return datetime.now().strftime("%Y%m%d_%H%M%S")  # pragma: no cover
 
@@ -66,6 +69,18 @@ def vcs_save(
     add_tag: bool = False,
     message: Optional[str] = None,
 ) -> bool:
+    """
+    Save changes to the Git repository and optionally tag the commit.
+
+    Args:
+        gh_cfg (GitSpec): The Git configuration.
+        repo_dir (Path): The path to the Git repository directory.
+        add_tag (bool, optional): Whether to add a Git tag to the commit. Defaults to False.
+        message (Optional[str], optional): The commit message. Defaults to None.
+
+    Returns:
+        bool: True if changes were committed, False otherwise.
+    """
     log = get_logger()
     log.info("VCS update git: %s", gh_cfg.repo)
 
@@ -101,6 +116,13 @@ def vcs_save(
 
 
 def vcs_prepare(spec: GitSpec, repo_dir: Path) -> None:
+    """
+    Prepare the Git repository by initializing it and pulling the latest changes.
+
+    Args:
+        spec (GitSpec): The Git configuration.
+        repo_dir (Path): The path to the Git repository directory.
+    """
     log = get_logger()
     log.info("VCS prepare git: %s", spec.repo)
 
@@ -109,7 +131,17 @@ def vcs_prepare(spec: GitSpec, repo_dir: Path) -> None:
     ghr.git_pull()
 
 
-def vcs_status(spec: GitSpec, repo_dir: Path):
+def vcs_status(spec: GitSpec, repo_dir: Path) -> str:
+    """
+    Display the current status of the Git repository.
+
+    Args:
+        spec (GitSpec): The Git configuration.
+        repo_dir (Path): The path to the Git repository directory.
+
+    Returns:
+        str: The output of the Git status command.
+    """
     log = get_logger()
     log.info(
         """
@@ -131,10 +163,14 @@ VCS diffs git: %s
 # -----------------------------------------------------------------------------
 
 
-class GitRunner(object):
+class GitRunner:
     """
-    The GitRunner class is used to peform the specific `git` command
-    operations requested for the VCS use cases.
+    The GitRunner class is used to perform specific `git` command
+    operations for the VCS use cases.
+
+    Args:
+        config (GitSpec): The Git configuration.
+        repo_dir (Path): The path to the Git repository directory.
     """
 
     def __init__(self, config: GitSpec, repo_dir) -> None:
@@ -150,25 +186,46 @@ class GitRunner(object):
             self.repo_url = config.repo
 
     @property
-    def repo_exists(self):
+    def repo_exists(self) -> bool:
+        """
+        Check if the Git repository exists.
+
+        Returns:
+            bool: True if the repository exists, False otherwise.
+        """
         return self.git_file.exists()
 
     @property
-    def is_dir_empty(self):
+    def is_dir_empty(self) -> bool:
+        """
+        Check if the repository directory is empty.
+
+        Returns:
+            bool: True if the directory is empty, False otherwise.
+        """
         return not any(self.repo_dir.iterdir())
 
-    def run_noauth(self, cmd: str):
+    def run_noauth(self, cmd: str) -> str:
         """
-        Run the git command that does not require any user authentication
+        Run a Git command that does not require user authentication.
+
+        Args:
+            cmd (str): The Git command to run.
+
+        Returns:
+            str: The output of the Git command.
+
+        Raises:
+            RuntimeError: If the Git command fails.
         """
-        output, rc = pexpect.run(
+        output, result_code = pexpect.run(
             command=f"{GIT_BIN} {cmd}",
             withexitstatus=True,
             cwd=self.repo_dir,
             encoding="utf-8",
         )
 
-        if rc != 0:
+        if result_code != 0:
             raise RuntimeError(f"git {cmd} failed: %s" % output)
 
         return output
@@ -176,10 +233,23 @@ class GitRunner(object):
     # run with auth is an alias to be created by subclass if needed
     run_auth = run_noauth
 
-    def run(self, cmd: str, authreq=False):
+    def run(self, cmd: str, authreq=False) -> str:
+        """
+        Run a Git command, optionally with authentication.
+
+        Args:
+            cmd (str): The Git command to run.
+            authreq (bool, optional): Whether authentication is required. Defaults to False.
+
+        Returns:
+            str: The output of the Git command.
+        """
         return [self.run_noauth, self.run_auth][authreq](cmd)  # noqa
 
     def git_init(self) -> None:
+        """
+        Initialize the Git repository and set up the remote origin.
+        """
         output = self.run("remote -v") if self.repo_exists else ""
         if self.repo_url not in output:
             commands = (("init", False), (f"remote add origin {self.repo_url}", False))
@@ -190,9 +260,15 @@ class GitRunner(object):
         self.git_config()
 
     def git_pull(self):
+        """
+        Pull the latest changes from the remote repository.
+        """
         self.run(f"pull origin {DEFAULT_GIT_BRANCH}", authreq=True)
 
     def git_config(self) -> None:
+        """
+        Configure the Git user and push settings.
+        """
         config = self.config
 
         config_opts = (
@@ -205,23 +281,46 @@ class GitRunner(object):
             self.run(f"config --local {cfg_opt} {cfg_val}")
 
     def git_clone(self) -> None:
+        """
+        Clone the Git repository to the specified directory.
+        """
         self.run(f"clone {self.repo_url} {str(self.repo_dir)}", authreq=True)
         self.git_config()
 
 
 class GitAuthRunner(GitRunner):
     """
-    Git Runner that is used for either User/Password or Token cases
+    GitRunner that handles authentication using either username/password or token.
+
+    Attributes:
+        PASSWORD_PROMPT (str): The prompt used to request the user's password.
     """
 
-    #
     PASSWORD_PROMPT = "Password for"  # nosec
 
-    def _get_secret(self):
+    def _get_secret(self) -> str:
+        """
+        Retrieve the secret value for authentication.
+
+        Returns:
+            str: The secret value (e.g., password or token).
+        """
         return self.config.token.get_secret_value()
 
-    def run_auth(self, cmd):
-        output, rc = pexpect.run(
+    def run_auth(self, cmd) -> str:
+        """
+        Run a Git command that requires user authentication.
+
+        Args:
+            cmd (str): The Git command to run.
+
+        Returns:
+            str: The output of the Git command.
+
+        Raises:
+            RuntimeError: If the Git command fails.
+        """
+        output, result_code = pexpect.run(
             command=f"{GIT_BIN} {cmd}",
             cwd=self.repo_dir,
             withexitstatus=True,
@@ -229,23 +328,36 @@ class GitAuthRunner(GitRunner):
             events={self.PASSWORD_PROMPT: self._get_secret() + "\n"},
         )
 
-        if rc != 0:
+        if result_code != 0:
             raise RuntimeError(output)
 
         return output
 
 
 class GitTokenRunner(GitAuthRunner):
+    """
+    GitRunner that handles authentication using a token.
+    """
+
     # use the default password prompt value
     pass
 
 
 class GitDeployKeyRunner(GitRunner):
     """
-    Git Runner used with deployment keys without passphrase
+    GitRunner used with deployment keys without a passphrase.
+
+    This runner configures Git to use a specific SSH key for authentication.
     """
 
     def git_config(self) -> None:
+        """
+        Configure the Git repository to use the specified deployment key for SSH access.
+
+        Raises:
+            ValueError: If the deployment key is not configured.
+            FileNotFoundError: If the deployment key file is not found.
+        """
         super().git_config()
         if self.config.deploy_key is None:
             raise ValueError("Deploy key is not configured.")
@@ -260,7 +372,12 @@ class GitDeployKeyRunner(GitRunner):
 
 class GitSecuredDeployKeyRunner(GitDeployKeyRunner, GitAuthRunner):
     """
-    Git Runner used when deployment key has passphrase configured
+    GitRunner used when a deployment key has a passphrase configured.
+
+    This runner handles the additional authentication step required to provide the passphrase.
+
+    Attributes:
+        PASSWORD_PROMPT (str): The prompt used to request the passphrase for the key.
     """
 
     PASSWORD_PROMPT = "Enter passphrase for key"  # nosec
@@ -271,8 +388,17 @@ class GitSecuredDeployKeyRunner(GitDeployKeyRunner, GitAuthRunner):
 
 def git_runner(gh_cfg: GitSpec, repo_dir: Path) -> GitRunner:
     """
-    Used to select the Git Runner based on the configuration file
-    settings.
+    Select the appropriate GitRunner based on the configuration file settings.
+
+    Args:
+        gh_cfg (GitSpec): The Git configuration.
+        repo_dir (Path): The path to the Git repository directory.
+
+    Returns:
+        GitRunner: The appropriate GitRunner instance for the given configuration.
+
+    Raises:
+        RuntimeError: If the Git configuration is missing authentication settings.
     """
     if gh_cfg.token:
         return GitTokenRunner(gh_cfg, repo_dir)

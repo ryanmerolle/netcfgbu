@@ -39,7 +39,7 @@ def load_plugins(plugins_dir: Path) -> None:
         _registered_plugins[_PLUGIN_NAME].append(subclass)
 
 
-class Plugin(object):
+class Plugin:
     """base plugin class to use for subclassed plugins to enable custom methods to be run"""
 
     name = None

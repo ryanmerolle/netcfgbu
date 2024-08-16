@@ -8,6 +8,20 @@ from .logger import get_logger
 
 
 def load(app_cfg: AppConfig, limits=None, excludes=None):
+    """
+    Load and filter inventory records based on the provided limits and excludes.
+
+    Args:
+        app_cfg: The application configuration containing the inventory file path.
+        limits: Optional list of constraints to limit the inventory records.
+        excludes: Optional list of constraints to exclude certain inventory records.
+
+    Returns:
+        List of filtered inventory records.
+
+    Raises:
+        FileNotFoundError: If the inventory file does not exist.
+    """
     inventory_file = Path(app_cfg.defaults.inventory)
     if not inventory_file.exists():
         raise FileNotFoundError(
@@ -31,6 +45,17 @@ def load(app_cfg: AppConfig, limits=None, excludes=None):
 
 
 def build(inv_def: InventorySpec) -> int:
+    """
+    Execute the script defined in the inventory specification.
+
+    Args:
+        inv_def: The inventory specification containing the script to execute.
+
+    Returns:
+        int: The result code of the executed script.
+
+    Logs a warning if the script returns a non-zero exit code.
+    """
     log = get_logger()
 
     # the script field is required so therefore it exists from
@@ -44,8 +69,8 @@ def build(inv_def: InventorySpec) -> int:
     # is no exception handling.  If you want to do exception handling, then
     # you'll need to use subprocess.call in place of os.system.
 
-    rc = os.system(script)  # nosec
-    if rc != 0:  # nosec
-        log.warning("inventory script returned non-zero return code: %s", rc)
+    result_code = os.system(script)  # nosec
+    if result_code != 0:  # nosec
+        log.warning("inventory script returned non-zero return code: %s", result_code)
 
-    return rc
+    return result_code

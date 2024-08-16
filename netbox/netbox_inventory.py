@@ -1,21 +1,21 @@
 #!/usr/bin/env python3.9
-#
-# This script is used to retrieve the device inventory from a Netbox system and
-# emil the CSV file to either stdout (default) or a filename provided
-#
-# The following Environment variables are REQUIRED:
-#
-#   NETBOX_ADDR: the URL to the NetBox server
-#       "https://my-netbox-server"
-#
-#   NETBOX_TOKEN: the NetBox login token
-#       "e0759aa0d6b4146-from-netbox-f744c4489adfec48f"
-#
-# The following Environment variables are OPTIONAL:
-#
-#   NETBOX_INVENTORY_OPTIONS
-#       Same as the options provided by "--help"
-#
+"""
+This script is used to retrieve the device inventory from a Netbox system and
+emil the CSV file to either stdout (default) or a filename provided
+
+The following Environment variables are REQUIRED:
+
+  NETBOX_ADDR: the URL to the NetBox server
+      "https://my-netbox-server"
+
+  NETBOX_TOKEN: the NetBox login token
+      "e0759aa0d6b4146-from-netbox-f744c4489adfec48f"
+
+The following Environment variables are OPTIONAL:
+
+  NETBOX_INVENTORY_OPTIONS
+      Same as the options provided by "--help"
+"""
 
 import argparse
 import csv
@@ -29,7 +29,16 @@ from urllib3 import disable_warnings  # noqa
 CSV_FIELD_NAMES = ["host", "ipaddr", "os_name", "role", "site", "region"]
 
 
-def rec_to_csv(rec):
+def rec_to_csv(rec: dict) -> list:
+    """
+    Convert a NetBox device record to a list suitable for CSV output.
+
+    Args:
+        rec: A dictionary representing a device record from NetBox.
+
+    Returns:
+        list: A list of device attributes in the order of CSV_FIELD_NAMES.
+    """
     hostname = rec["name"]
     ipaddr = rec["primary_ip"]["address"].split("/")[0]
     platform = rec["platform"]
@@ -41,8 +50,13 @@ def rec_to_csv(rec):
     return [hostname, ipaddr, os_name, role, site, region]
 
 
-def cli():
-    """Create CLI option parser, parse User inputs and return results"""
+def cli() -> argparse.Namespace:
+    """
+    Create and parse command-line interface (CLI) options.
+
+    Returns:
+        argparse.Namespace: Parsed command-line options.
+    """
     options_parser = argparse.ArgumentParser()
     options_parser.add_argument("--site", action="store", help="limit devices to site")
     options_parser.add_argument(
@@ -70,13 +84,37 @@ def cli():
 
 
 class NetBoxSession(requests.Session):
-    def __init__(self, url, token):
+    """
+    A session for interacting with the NetBox API.
+
+    Attributes:
+        url: The base URL of the NetBox instance.
+        token: The API token for authentication.
+    """
+
+    def __init__(self, url: str, token: str):
+        """
+        Initialize the NetBoxSession.
+
+        Args:
+            url: The base URL of the NetBox instance.
+            token: The API token for authentication.
+        """
         super(NetBoxSession, self).__init__()
         self.url = url
         self.headers["authorization"] = f"Token {token}"
         self.verify = False
 
-    def prepare_request(self, request):
+    def prepare_request(self, request: requests.Request) -> requests.PreparedRequest:
+        """
+        Prepare the request by appending the base URL to the request URL.
+
+        Args:
+            request: The request object to prepare.
+
+        Returns:
+            requests.PreparedRequest: The prepared request object.
+        """
         request.url = self.url + request.url
         return super(NetBoxSession, self).prepare_request(request)
 
@@ -85,13 +123,29 @@ netbox: NetBoxSession = None
 
 
 @lru_cache()
-def get_site(site_slug):
+def get_site(site_slug: str) -> dict:
+    """
+    Retrieve details of a site from NetBox using its slug.
+
+    Args:
+        site_slug: The slug of the site.
+
+    Returns:
+        dict: The site details as a dictionary.
+    """
     res = netbox.get("/api/dcim/sites/", params={"slug": site_slug})
     res.raise_for_status()
     return res.json()["results"][0]
 
 
-def create_csv_file(inventory_records, cli_opts):
+def create_csv_file(inventory_records: iter, cli_opts: argparse.Namespace) -> None:
+    """
+    Create a CSV file from inventory records.
+
+    Args:
+        inventory_records: An iterator of device records.
+        cli_opts: Parsed command-line options, including the output file.
+    """
     csv_wr = csv.writer(cli_opts.output)
     csv_wr.writerow(CSV_FIELD_NAMES)
 
@@ -99,7 +153,16 @@ def create_csv_file(inventory_records, cli_opts):
         csv_wr.writerow(rec_to_csv(rec))
 
 
-def fetch_inventory(cli_opts):
+def fetch_inventory(cli_opts: argparse.Namespace) -> iter:
+    """
+    Fetch the inventory of devices from NetBox based on the provided CLI options.
+
+    Args:
+        cli_opts: Parsed command-line options.
+
+    Returns:
+        iter: An iterator of filtered device records.
+    """
     global netbox
 
     try:
@@ -177,7 +240,12 @@ def fetch_inventory(cli_opts):
     return apply_filters() if filter_functions else iter(device_list)
 
 
-def build_inventory():
+def build_inventory() -> None:
+    """
+    Build the inventory by fetching device records and creating a CSV file.
+
+    This function handles CLI parsing, inventory fetching, and CSV file creation.
+    """
     cli_opts = cli()
     inventory = fetch_inventory(cli_opts)
     create_csv_file(inventory, cli_opts)

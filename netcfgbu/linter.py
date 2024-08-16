@@ -7,7 +7,17 @@ from .logger import get_logger
 log = get_logger()
 
 
-def lint_content(config_content, lint_spec: LinterSpec):
+def lint_content(config_content, lint_spec: LinterSpec) -> str:
+    """
+    Lint the configuration content based on the provided linting specification.
+
+    Args:
+        config_content: The original configuration content as a string.
+        lint_spec: An instance of LinterSpec containing the linting rules.
+
+    Returns:
+        The linted configuration content as a string.
+    """
     start_offset = 0
     end_offset = None
 
@@ -34,8 +44,14 @@ def lint_content(config_content, lint_spec: LinterSpec):
 
 def lint_file(fileobj: Path, lint_spec) -> bool:
     """
-    Perform the linting function on the content in the given file.
-    Returns True if the content was changed, False otherwise.
+    Perform the linting function on the content of the given file.
+
+    Args:
+        fileobj: A Path object representing the file to lint.
+        lint_spec: An instance of LinterSpec containing the linting rules.
+
+    Returns:
+        bool: True if the content was changed, False otherwise.
     """
     orig_config_content = fileobj.read_text()
 

@@ -14,6 +14,15 @@ log = get_logger()
 
 
 async def handle_exception(exc, rec, done_msg, report) -> None:
+    """
+    Handles exceptions during task execution and logs the error.
+
+    Args:
+        exc: The exception that occurred.
+        rec: The inventory record associated with the task.
+        done_msg: The message indicating task completion status.
+        report: The Report object to store task results.
+    """
     exception_map = {
         asyncssh.PermissionDenied: "All credentials failed",
         asyncssh.ConnectionLost: "ConnectionLost",
@@ -34,6 +43,17 @@ async def handle_exception(exc, rec, done_msg, report) -> None:
 async def process_tasks(
     tasks, app_cfg, report, cli_command, success_callback=None, failure_callback=None
 ):
+    """
+    Processes tasks in the provided task list, handling both login and generic tasks.
+
+    Args:
+        tasks: A list of tasks to process.
+        app_cfg: The application configuration object.
+        report: The Report object to store task results.
+        cli_command: The CLI command being executed.
+        success_callback: Optional callback for successful tasks.
+        failure_callback: Optional callback for failed tasks.
+    """
     done = 0
     total = len(tasks)
 
@@ -61,6 +81,16 @@ async def process_tasks(
 
 
 async def process_login_task(task, report, done_msg, rec, failure_callback):
+    """
+    Processes a login task, handling the results and exceptions.
+
+    Args:
+        task: The task to process.
+        report: The Report object to store task results.
+        done_msg: The message indicating task completion status.
+        rec: The inventory record associated with the task.
+        failure_callback: Optional callback for failed tasks.
+    """
     try:
         if login_user := task.result():
             rec["login_user"] = login_user
@@ -82,6 +112,18 @@ async def process_login_task(task, report, done_msg, rec, failure_callback):
 async def process_generic_task(
     task, report, cli_command, done_msg, rec, success_callback, failure_callback
 ):
+    """
+    Processes a generic task, handling the results and exceptions.
+
+    Args:
+        task: The task to process.
+        report: The Report object to store task results.
+        cli_command: The CLI command being executed.
+        done_msg: The message indicating task completion status.
+        rec: The inventory record associated with the task.
+        success_callback: Optional callback for successful tasks.
+        failure_callback: Optional callback for failed tasks.
+    """
     try:
         result = task.result()
         if result:
@@ -105,16 +147,30 @@ def execute_command(
     app_cfg,
     cli_command,
     task_creator,
-    cli_opts={},
+    cli_opts=None,
     success_callback=None,
     failure_callback=None,
 ):
+    """
+    Executes the specified CLI command on the provided inventory records.
+
+    Args:
+        inventory_recs: List of inventory records to process.
+        app_cfg: The application configuration object.
+        cli_command: The CLI command to execute.
+        task_creator: Function to create tasks for each inventory record.
+        cli_opts: Optional CLI options.
+        success_callback: Optional callback for successful tasks.
+        failure_callback: Optional callback for failed tasks.
+    """
     device_count = len(inventory_recs)
     log.info("%s %d devices ...", cli_command.capitalize(), device_count)
 
     loop = asyncio.get_event_loop()
 
     tasks = {task_creator(rec, app_cfg): rec for rec in inventory_recs}
+    if not cli_opts:
+        cli_opts = {}
 
     if cli_command == "login" and cli_opts.get("batch"):
         set_max_startups(cli_opts.get("batch"))

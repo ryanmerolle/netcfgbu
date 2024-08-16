@@ -17,9 +17,26 @@ CLI_COMMAND = "probe"
 
 
 def exec_probe(inventory_recs: list, timeout=None) -> None:
+    """
+    Executes the probe command on the provided inventory records.
+
+    Args:
+        inventory_recs: List of inventory records to probe.
+        timeout: Optional timeout value for the probe command. Defaults to DEFAULT_PROBE_TIMEOUT.
+    """
     timeout = timeout or DEFAULT_PROBE_TIMEOUT
 
     def task_creator(rec: dict, app_cfg: AppConfig):
+        """
+        Creates a probe task for the given inventory record.
+
+        Args:
+            rec: A dictionary representing an inventory record.
+            app_cfg: Application configuration object.
+
+        Returns:
+            A probe task configured with the IP address or hostname from the inventory record.
+        """
         return probe(
             rec.get("ipaddr") or rec.get("host"), timeout=timeout, raise_exc=True
         )

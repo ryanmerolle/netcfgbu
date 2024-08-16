@@ -37,21 +37,25 @@ _var_re = re.compile(
 
 
 class NoExtraBaseModel(BaseModel):
+    """
+    A base model class that forbids extra fields in derived models.
+    """
+
     model_config = ConfigDict(extra="forbid")
 
 
-def expand_env_str(env_string):
+def expand_env_str(env_string: str) -> str:
     """
-    When a string value contains a reference to an environment variable, use
-    this type to expand the contents of the variable using os.path.expandvars.
+    Expand environment variables in a string.
 
-    For example like:
-        password = "$MY_PASSWORD"
-        foo_password = "${MY_PASSWORD}_foo"
+    Args:
+        env_string: The string containing environment variable references.
 
-    will be expanded, given MY_PASSWORD is set to 'boo!' in the environment:
-        password -> "boo!"
-        foo_password -> "boo!_foo"
+    Returns:
+        str: The string with expanded environment variables.
+
+    Raises:
+        EnvironmentError: If an environment variable is missing or empty.
     """
 
     if found_variables := list(
@@ -61,7 +65,7 @@ def expand_env_str(env_string):
             if (var_val := os.getenv(var)) is None:
                 raise EnvironmentError(f"Environment variable '{var}' missing.")
 
-            if not len(var_val):
+            if not var_val:
                 raise EnvironmentError(f"Environment variable '{var}' empty.")
 
         return expandvars(env_string)
@@ -74,6 +78,14 @@ EnvSecretStr = Annotated[SecretStr, BeforeValidator(expand_env_str)]
 
 
 class Credential(NoExtraBaseModel):
+    """
+    Represents a credential with a username and password, supporting environment variable expansion.
+
+    Attributes:
+        username: The username for the credential.
+        password: The password for the credential.
+    """
+
     username: EnvExpand
     password: EnvSecretStr
 
@@ -82,10 +94,22 @@ class Credential(NoExtraBaseModel):
 # https://github.com/pydantic/pydantic-settings/issues/178#issuecomment-2037795239
 # but may be fixed in a future pydantic v2 release
 class DefaultBaseSettings(BaseSettings):
+    """
+    A base settings class that ignores extra fields and supports name-based population.
+    """
+
     model_config = ConfigDict(extra="ignore", populate_by_name=True)
 
 
 class DefaultCredential(DefaultBaseSettings):
+    """
+    Represents default credentials loaded from environment variables.
+
+    Attributes:
+        username: The default username for credentials.
+        password: The default password for credentials.
+    """
+
     model_config = ConfigDict(extra="ignore", populate_by_name=True)
 
     username: EnvExpand = Field(validation_alias="NETCFGBU_DEFAULT_USERNAME")
@@ -93,6 +117,16 @@ class DefaultCredential(DefaultBaseSettings):
 
 
 class Defaults(DefaultBaseSettings):
+    """
+    Represents default application settings.
+
+    Attributes:
+        configs_dir: Directory for configuration files.
+        plugins_dir: Directory for plugins.
+        inventory: Path to the inventory file.
+        credentials: Default credentials for the application.
+    """
+
     configs_dir: Optional[EnvExpand] = Field(validation_alias="NETCFGBU_CONFIGSDIR")
     plugins_dir: Optional[EnvExpand] = Field(validation_alias="NETCFGBU_PLUGINSDIR")
     inventory: EnvExpand = Field(validation_alias="NETCFGBU_INVENTORY")
@@ -100,19 +134,52 @@ class Defaults(DefaultBaseSettings):
 
     @field_validator("inventory")
     @classmethod
-    def _inventory_provided(cls, value):  # noqa
-        if not len(value):
+    def _inventory_provided(cls, value: str) -> str:  # noqa
+        """
+        Validate that the inventory path is not empty.
+
+        Args:
+            value: The inventory path.
+
+        Returns:
+            str: The validated inventory path.
+
+        Raises:
+            ValueError: If the inventory path is empty.
+        """
+        if not value:
             raise ValueError("inventory empty value not allowed")
         return value
 
     @field_validator("configs_dir")
     @classmethod
-    def _configs_dir(cls, value):  # noqa
+    def _configs_dir(cls, value: str) -> Path:  # noqa
+        """
+        Convert the configuration directory path to an absolute path.
+
+        Args:
+            value: The configuration directory path.
+
+        Returns:
+            Path: The absolute path of the configuration directory.
+        """
         return Path(value).absolute()
 
     @field_validator("plugins_dir", mode="after")
     @classmethod
-    def _plugins_dir(cls, value):  # noqa
+    def _plugins_dir(cls, value: str) -> Path:  # noqa
+        """
+        Convert the plugins directory path to an absolute path.
+
+        If the value is the current working directory and doesn't contain "/plugins",
+        append "/plugins" to the path.
+
+        Args:
+            value: The plugins directory path.
+
+        Returns:
+            Path: The absolute path of the plugins directory.
+        """
         if value == os.getenv("PWD") and "/plugins" not in value:
             value = value + "/plugins"
         return Path(value).absolute()
@@ -150,7 +217,19 @@ class GitSpec(NoExtraBaseModel):
 
     @field_validator("repo")
     @classmethod
-    def validate_repo(cls, repo) -> str:
+    def validate_repo(cls, repo: str) -> str:
+        """
+        Validate the Git repository URL.
+
+        Args:
+            repo: The repository URL.
+
+        Returns:
+            str: The validated repository URL.
+
+        Raises:
+            ValueError: If the repository URL does not start with the expected protocols.
+        """
         expected = ("https:", "git@")
         if not repo.startswith(expected):
             raise ValueError(
@@ -160,7 +239,20 @@ class GitSpec(NoExtraBaseModel):
 
     @model_validator(mode="before")
     @classmethod
-    def ensure_proper_auth(cls, values):
+    def ensure_proper_auth(cls, values: dict) -> dict:
+        """
+        Ensure that the correct authentication method is provided.
+
+        Args:
+            values: The dictionary of values provided to the model.
+
+        Returns:
+            dict: The validated values.
+
+        Raises:
+            ValueError: If no or multiple authentication methods are provided, or
+            if deploy_passphrase is used without deploy_key.
+        """
         req = ("token", "deploy_key", "password")
         auth_vals = list(filter(None, (values.get(auth) for auth in req)))
         auth_count = len(auth_vals)
@@ -204,29 +296,44 @@ class OSNameSpec(NoExtraBaseModel):
 
 
 class LinterSpec(NoExtraBaseModel):
+    """
+    Represents the configuration for a linter.
+
+    Attributes:
+        config_starts_after: The marker indicating where the config starts.
+        config_ends_at: The marker indicating where the config ends.
+    """
+
     config_starts_after: Optional[str] = None
     config_ends_at: Optional[str] = None
 
 
 class InventorySpec(NoExtraBaseModel):
+    """
+    Represents the configuration for an inventory specification.
+
+    Attributes:
+        name: Optional name for the inventory.
+        script: The script to execute for the inventory.
+    """
+
     name: Optional[str] = None
     script: EnvExpand
 
     @field_validator("script")
     @classmethod
-    def validate_script(cls, script_exec) -> str:  # noqa
+    def validate_script(cls, script_exec: str) -> str:  # noqa
         """
         Validate the script field of the InventorySpec.
 
         Args:
-            script_exec (str): The script execution string.
+            script_exec: The script execution string.
 
         Returns:
             str: The validated script execution string.
 
         Raises:
-            ValueError: If the script is not excutable, is invalid,
-            or the file does not exist.
+            ValueError: If the script is not executable, is invalid, or the file does not exist.
         """
         try:
             script_bin, *script_vargs = script_exec.split()
@@ -234,12 +341,23 @@ class InventorySpec(NoExtraBaseModel):
                 raise ValueError(f"File not found: {script_bin}")
             if not os.access(script_bin, os.X_OK):
                 raise ValueError(f"{script_bin} is not executable")
-        except Exception as e:
-            raise ValueError(f"Invalid script: {e}")
+        except Exception as exc:
+            raise ValueError(f"Invalid script: {exc}") from exc
         return script_exec
 
 
 class JumphostSpec(NoExtraBaseModel):
+    """
+    Represents the configuration for a jumphost.
+
+    Attributes:
+        proxy: The proxy host or address for the jumphost.
+        name: Optional name for the jumphost.
+        include: Optional list of hosts to include when using the jumphost.
+        exclude: Optional list of hosts to exclude when using the jumphost.
+        timeout: Timeout for connecting through the jumphost.
+    """
+
     proxy: str
     name: Optional[str] = None
     include: Optional[List[str]] = None
@@ -262,6 +380,21 @@ class JumphostSpec(NoExtraBaseModel):
 
 
 class AppConfig(NoExtraBaseModel):
+    """
+    Represents the overall application configuration.
+
+    Attributes:
+        defaults: Default settings for the application.
+        credentials: Optional list of credentials for the application.
+        linters: Optional dictionary of linter specifications.
+        os_name: Optional dictionary of OS-specific configurations.
+        inventory: Optional list of inventory specifications.
+        logging: Optional logging configuration.
+        ssh_configs: Optional SSH configurations.
+        git: Optional list of Git repository configurations.
+        jumphost: Optional list of jumphost configurations.
+    """
+
     defaults: Defaults
     credentials: Optional[List[Credential]] = None
     linters: Optional[Dict[str, LinterSpec]] = None
@@ -274,13 +407,15 @@ class AppConfig(NoExtraBaseModel):
 
     @field_validator("os_name")
     @classmethod
-    def _linters(cls, v, info: ValidationInfo):  # noqa
+    def _linters(
+        cls, os_configs: Dict[str, OSNameSpec], info: ValidationInfo
+    ) -> Dict[str, OSNameSpec]:  # noqa
         """
         Validate that the linters specified in os_name configurations are defined.
 
         Args:
-            v (Dict[str, OSNameSpec]): The os_name configurations.
-            info (ValidationInfo): Validation context information.
+            os_configs: The os_name configurations.
+            info: Validation context information.
 
         Returns:
             Dict[str, OSNameSpec]: The validated os_name configurations.
@@ -292,10 +427,10 @@ class AppConfig(NoExtraBaseModel):
             # sometimes it's still None
             # see tests/test_config.py::test_config_linter_fail
             linters = {}
-        if v is not None:
-            for os_name, os_spec in v.items():
+        if os_configs is not None:
+            for os_name, os_spec in os_configs.items():
                 if os_spec.linter and os_spec.linter not in linters:
                     raise ValueError(
                         f'OS spec "{os_name}" using undefined linter "{os_spec.linter}"'
                     )
-        return v
+        return os_configs

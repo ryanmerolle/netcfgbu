@@ -2,8 +2,34 @@ import csv
 
 
 class CommentedCsvReader(csv.DictReader):
+    """
+    A CSV reader that skips rows starting with a comment character ('#').
+
+    This class extends `csv.DictReader` to ignore lines where the first column
+    starts with the comment character '#'. It processes the CSV file and returns
+    the next valid row as a dictionary.
+
+    Example usage:
+        reader = CommentedCsvReader(file)
+        for row in reader:
+            # Process each row
+
+    Methods:
+        __next__: Returns the next valid row from the CSV file, skipping commented rows.
+    """
+
     def __next__(self):
-        value = super(CommentedCsvReader, self).__next__()
+        """
+        Return the next row from the CSV file, skipping rows where the first column
+        starts with the comment character '#'.
+
+        Returns:
+            dict: The next valid row as a dictionary.
+
+        Raises:
+            StopIteration: When there are no more rows to return.
+        """
+        value = super().__next__()
 
         if value[self.fieldnames[0]].startswith("#"):
             return self.__next__()
@@ -12,7 +38,7 @@ class CommentedCsvReader(csv.DictReader):
 
 
 # TODO: not in use just yet.
-# class TextFileReader(object):
+# class TextFileReader:
 #     wordsep_re = re.compile(r"\s+|,")
 #
 #     def __init__(self, fileio, index=0):

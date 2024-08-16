@@ -57,13 +57,13 @@ def clean(ctx):
                 print(f"Deleted folder: {folder}")
             else:
                 print(f"Folder not found: {folder}")
-        except Exception as e:
-            print(f"Error deleting {folder}: {e}")
+        except Exception as exc:
+            print(f"Error deleting {folder}: {exc}")
     for file in FILES_TO_CLEAN:
         try:
             os.remove(file)
-        except Exception as e:
-            print(f"Error deleting {file}: {e}")
+        except Exception as exc:
+            print(f"Error deleting {file}: {exc}")
 
 
 @task

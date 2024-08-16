@@ -35,6 +35,9 @@ def cli_inventory() -> None:
 @click.option("--brief", "-b", is_flag=True)
 @click.pass_context
 def cli_inventory_list(ctx: click.Context, **cli_opts):
+    """
+    List inventory.
+    """
     inventory_recs = ctx.obj["inventory_recs"]
     inventory_tabular_data = []
     os_name_counter = {}

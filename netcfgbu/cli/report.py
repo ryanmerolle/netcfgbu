@@ -13,6 +13,15 @@ SPACES_4 = " " * 4
 
 
 def err_reason(exc) -> str:
+    """
+    Returns a string representation of the error reason based on the exception type.
+
+    Args:
+        exc: The exception to handle.
+
+    Returns:
+        A string describing the error.
+    """
     return {
         str: lambda: exc,
         asyncio.TimeoutError: lambda: f"TIMEOUT{str(exc.args or '')}",
@@ -20,10 +29,18 @@ def err_reason(exc) -> str:
     }.get(exc.__class__, lambda: f"{exc.__class__.__name__}: {str(exc)}")()
 
 
-class Report(object):
+class Report:
+    """
+    A class to handle reporting of task results, including timing, saving reports to files,
+    and printing summaries.
+    """
+
     TIME_FORMAT = "%Y-%b-%d %I:%M:%S %p"
 
     def __init__(self) -> None:
+        """
+        Initializes a new instance of the Report class.
+        """
         self.start_ts: Union[None, datetime] = None
         self.start_tm: float = 0.0
         self.stop_ts: Union[None, datetime] = None
@@ -31,27 +48,57 @@ class Report(object):
         self.task_results: Dict[bool, List[Dict[str, Any]]] = defaultdict(list)
 
     def start_timing(self) -> None:
+        """
+        Starts the timing for the report.
+        """
         self.start_ts = datetime.now()
         self.start_tm = monotonic()
 
     def stop_timing(self) -> None:
+        """
+        Stops the timing for the report.
+        """
         self.stop_ts = datetime.now()
         self.stop_tm = monotonic()
 
     @property
     def start_time(self) -> str:
+        """
+        Returns the formatted start time of the report.
+
+        Raises:
+            ValueError: If the start time has not been set.
+
+        Returns:
+            str: The start time as a formatted string.
+        """
         if self.start_ts is None:
             raise ValueError("start_ts is not set")
         return self.start_ts.strftime(self.TIME_FORMAT)
 
     @property
     def stop_time(self) -> str:
+        """
+        Returns the formatted stop time of the report.
+
+        Raises:
+            ValueError: If the stop time has not been set.
+
+        Returns:
+            str: The stop time as a formatted string.
+        """
         if self.stop_ts is None:
             raise ValueError("stop_ts is not set")
         return self.stop_ts.strftime(self.TIME_FORMAT)
 
     @property
     def duration(self) -> float:
+        """
+        Returns the duration between the start and stop times.
+
+        Returns:
+            float: The duration in seconds.
+        """
         return self.stop_tm - self.start_tm
 
     def save_report(
@@ -62,6 +109,16 @@ class Report(object):
         summary_headers: Union[None, List[str]] = None,
         summary_data: Union[None, Dict[str, Dict[str, int]]] = None,
     ) -> None:
+        """
+        Saves the report data to a CSV file and prints a summary if provided.
+
+        Args:
+            filename: The name of the CSV file to save the report to.
+            headers: The headers for the CSV file.
+            data: The data to save in the CSV file.
+            summary_headers: The headers for the summary table (optional).
+            summary_data: The data for the summary table (optional).
+        """
         data.sort(key=lambda x: x[0])  # Sorting by the first column (usually 'host')
 
         with open(filename, "w+", encoding="utf-8") as ofile:
@@ -92,6 +149,9 @@ class Report(object):
             )
 
     def save_login_report(self) -> None:
+        """
+        Generates and saves the login report as a CSV file, including a summary of login attempts.
+        """
         headers = ["host", "os_name", "num_of_attempts", "login_used"]
         login_tabular_data: List[List[Any]] = []
         summary_data: Dict[str, Dict[str, int]] = defaultdict(lambda: defaultdict(int))
@@ -114,6 +174,9 @@ class Report(object):
         )
 
     def save_failure_report(self) -> None:
+        """
+        Generates & saves the failure report as a CSV file, including a summary of failure reasons.
+        """
         headers = ["host", "os_name", "reason"]
         failure_tabular_data: List[List[Any]] = [
             [rec["host"], rec["os_name"], err_reason(exc)]
@@ -133,6 +196,12 @@ class Report(object):
         )
 
     def print_report(self, reports_type: str) -> None:
+        """
+        Prints a summary report of the task results and saves the appropriate reports to files.
+
+        Args:
+            reports_type: The type of report to generate ("login" or other types).
+        """
         if not self.stop_tm:
             self.stop_timing()  # pragma: no cover
 

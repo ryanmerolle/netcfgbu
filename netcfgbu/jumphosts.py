@@ -26,7 +26,7 @@ from .filtering import create_filter
 from .logger import get_logger
 
 
-class JumpHost(object):
+class JumpHost:
     """
     A JumpHost instance is used to provide a tunnel connection so that any
     device in the inventory that requires one can use it.
@@ -171,19 +171,19 @@ async def connect_jumphosts():
     False otherwise; check log errors for details.
     """
     log = get_logger()
-    ok = True
+    jump_host_connected = True
 
-    for jh in JumpHost.available:
+    for jump_host in JumpHost.available:
         try:
-            await jh.connect()
-            log.info("JUMPHOST: connected to %s", jh.name)
+            await jump_host.connect()
+            log.info("JUMPHOST: connected to %s", jump_host.name)
 
         except (asyncio.TimeoutError, asyncssh.Error) as exc:
             errmsg = str(exc) or exc.__class__.__name__
-            log.error("JUMPHOST: connect to %s failed: %s", jh.name, errmsg)
-            ok = False
+            log.error("JUMPHOST: connect to %s failed: %s", jump_host.name, errmsg)
+            jump_host_connected = False
 
-    return ok
+    return jump_host_connected
 
 
 def get_jumphost(inv_rec: dict) -> Optional[JumpHost]:

@@ -1,7 +1,3 @@
-# -----------------------------------------------------------------------------
-# System Imports
-# -----------------------------------------------------------------------------
-
 from pathlib import Path
 
 import toml
@@ -10,20 +6,20 @@ from pydantic import ValidationError
 from .config_model import AppConfig
 from .logger import setup_logging
 
-# -----------------------------------------------------------------------------
-# Public Imports
-# -----------------------------------------------------------------------------
-
-
-# -----------------------------------------------------------------------------
-# Private Imports
-# -----------------------------------------------------------------------------
-
-
 __all__ = ["load"]
 
 
-def validation_errors(filepath, errors):
+def validation_errors(filepath: str, errors: list) -> str:
+    """
+    Format validation errors into a human-readable string.
+
+    Args:
+        filepath: The path to the configuration file.
+        errors: A list of validation errors.
+
+    Returns:
+        str: A formatted string describing the validation errors.
+    """
     sp_4 = " " * 4
     as_human = ["Configuration errors", f"{sp_4}File:[{filepath}]"]
 
@@ -34,7 +30,20 @@ def validation_errors(filepath, errors):
     return "\n".join(as_human)
 
 
-def load(*, filepath=None, fileio=None) -> AppConfig:
+def load(*, filepath: str = None, fileio=None) -> AppConfig:
+    """
+    Load and validate the application configuration from a TOML file.
+
+    Args:
+        filepath: Optional path to the configuration file.
+        fileio: Optional file object to read the configuration from.
+
+    Returns:
+        AppConfig: The validated application configuration object.
+
+    Raises:
+        RuntimeError: If validation fails, including details of the validation errors.
+    """
     app_cfg = {}
 
     if filepath:
@@ -54,7 +63,9 @@ def load(*, filepath=None, fileio=None) -> AppConfig:
         cfg_obj = AppConfig.model_validate(app_cfg)
     except ValidationError as exc:
         filepath = fileio.name if fileio else ""
-        raise RuntimeError(validation_errors(filepath=filepath, errors=exc.errors()))
+        raise RuntimeError(
+            validation_errors(filepath=filepath, errors=exc.errors())
+        ) from exc
 
     configs_dir: Path = cfg_obj.defaults.configs_dir
     if not configs_dir.is_dir():
