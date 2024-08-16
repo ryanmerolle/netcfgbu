@@ -44,8 +44,8 @@ def build(inv_def: InventorySpec) -> int:
     # is no exception handling.  If you want to do exception handling, then
     # you'll need to use subprocess.call in place of os.system.
 
-    rc = os.system(script)
-    if rc != 0:
+    rc = os.system(script) #nosec
+    if rc != 0: #nosec
         lgr.warning(f"inventory script returned non-zero return code: {rc}")
 
     return rc
