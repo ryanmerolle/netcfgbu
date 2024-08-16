@@ -13,7 +13,6 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import AnyStr, Callable, Dict, List, Optional
 
-from .filetypes import CommentedCsvReader
 
 __all__ = ["create_filter"]
 
