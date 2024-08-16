@@ -9,7 +9,10 @@
 # Flake8: https://flake8.pycqa.org/en/latest/user/configuration.html
 
 
-from invoke import task
+from invoke import task, exceptions
+import contextlib
+import os
+import shutil
 
 
 @task
@@ -29,17 +32,45 @@ def precheck(ctx):
 @task
 def clean(ctx):
     """Clean up the project."""
-    ctx.run("rm -rf netcfgbu.egg-info")
-    ctx.run(
-        "rm -rf .pytest_cache .pytest_tmpdir .coverage .ruff_cache tests/__pycache__ netcfgbu/__pycache__"
-    )
-    ctx.run(
-        "rm -rf netcfgbu/cli/__pycache__ netcfgbu/connectors/__pycache__ netcfgbu/vcs/__pycache__ tests/files/plugins/__pycache__"
-    )
-    ctx.run("rm -rf htmlcov")
+    DIRS_TO_CLEAN = [
+        '.mypy_cache',
+        '.pytest_cache',
+        '.pytest_tmpdir',
+        '.ruff_cache',
+        'htmlcov',
+        'netcfgbu.egg-info',
+        'netcfgbu/__pycache__',
+        'netcfgbu/cli/__pycache__',
+        'netcfgbu/connectors/__pycache__',
+        'netcfgbu/vcs/__pycache__',
+        'tests/__pycache__',
+        'tests/files/plugins/__pycache__'
+    ]
+    FILES_TO_CLEAN = [
+        '.coverage',
+    ]
+
+    for folder in DIRS_TO_CLEAN:
+        try:
+            if os.path.exists(folder):
+                shutil.rmtree(folder)
+                print(f"Deleted folder: {folder}")
+            else:
+                print(f"Folder not found: {folder}")
+        except Exception as e:
+            print(f"Error deleting {folder}: {e}")
+    for file in FILES_TO_CLEAN:
+        try:
+            os.remove(file)
+        except Exception as e:
+            print(f"Error deleting {file}: {e}")
 
 
 @task
 def install(ctx):
     """Install the package locally."""
-    ctx.run("pip install . --force")
+    try:
+        ctx.run("pip install . --force")
+    except exceptions.UnexpectedExit as e:
+        print(f"Installation failed: {e}")
+        raise

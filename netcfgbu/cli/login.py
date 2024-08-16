@@ -19,6 +19,17 @@ CLI_COMMAND = "login"
 
 
 def exec_test_login(inventory_recs: list, app_cfg, cli_opts) -> None:
+    """
+    Execute login tests for the given inventory records.
+
+    Args:
+        inventory_recs (list): List of inventory records to test.
+        app_cfg: Application configuration.
+        cli_opts (dict): Command-line options.
+
+    Returns:
+        None
+    """
     timeout = cli_opts["timeout"] or DEFAULT_LOGIN_TIMEOUT
 
     def task_creator(rec: dict, app_cfg: AppConfig):

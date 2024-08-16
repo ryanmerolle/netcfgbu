@@ -35,8 +35,8 @@ def copy_example_files() -> None:
     # If no existing files were found, proceed to copy
     for file_path in examples_path.iterdir():
         if file_path.is_file():
-            with importlib.resources.as_file(file_path) as source_file:
-                shutil.copy(source_file, Path.cwd())
+            with importlib.resources.as_file(file_path) as source_file, open(Path.cwd() / file_path.name, 'wb') as dest_file:
+                shutil.copyfileobj(source_file.open('rb'), dest_file)
                 print(f"Copied {file_path.name} to the current directory.")
 
 

@@ -164,6 +164,19 @@ class GitSpec(NoExtraBaseModel):
 
 
 class OSNameSpec(NoExtraBaseModel):
+    """
+    Represents the configuration for a specific OS name.
+
+    Attributes:
+        credentials: List of credentials for this OS.
+        pre_get_config: Commands to run before getting the config.
+        get_config: Command to get the config.
+        connection: Connection type.
+        linter: Linter to use for this OS.
+        timeout: Timeout for getting the config.
+        ssh_configs: SSH configurations.
+        prompt_pattern: Pattern to match the prompt.
+    """
     credentials: Optional[List[Credential]] = None
     pre_get_config: Optional[Union[str, List[str]]] = None
     get_config: Optional[str] = None
@@ -185,7 +198,19 @@ class InventorySpec(NoExtraBaseModel):
 
     @field_validator("script")
     @classmethod
-    def validate_script(cls, script_exec):  # noqa
+    def validate_script(cls, script_exec) -> str:  # noqa
+        """
+        Validate the script field of the InventorySpec.
+
+        Args:
+            script_exec (str): The script execution string.
+
+        Returns:
+            str: The validated script execution string.
+
+        Raises:
+            ValueError: If the script file does not exist.
+        """
         script_bin, *script_vargs = script_exec.split()
         if not os.path.isfile(script_bin):
             raise ValueError(f"File not found: {script_bin}")
@@ -205,6 +230,14 @@ class JumphostSpec(NoExtraBaseModel):
 
     @model_validator(mode="after")
     def default_name(self):  # noqa
+        """
+        Set the default name for the jumphost if not provided.
+
+        If the name is not set, it will be set to the proxy value.
+
+        Returns:
+            JumphostSpec: The updated JumphostSpec instance.
+        """
         if not self.name:
             self.name = self.proxy
         return self
@@ -224,6 +257,19 @@ class AppConfig(NoExtraBaseModel):
     @field_validator("os_name")
     @classmethod
     def _linters(cls, v, info: ValidationInfo):  # noqa
+        """
+        Validate that the linters specified in os_name configurations are defined.
+
+        Args:
+            v (Dict[str, OSNameSpec]): The os_name configurations.
+            info (ValidationInfo): Validation context information.
+
+        Returns:
+            Dict[str, OSNameSpec]: The validated os_name configurations.
+
+        Raises:
+            ValueError: If an OS spec uses an undefined linter.
+        """
         if (linters := info.data.get("linters")) is None:
             # sometimes it's still None
             # see tests/test_config.py::test_config_linter_fail
