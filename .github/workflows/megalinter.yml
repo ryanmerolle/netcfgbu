@@ -19,7 +19,7 @@ env: # Comment env block if you don't want to apply fixes
   SPELL_LYCHEE_DISABLE_ERRORS: true # Only warn for lychee
   REPOSITORY_KICS_DISABLE_ERRORS: true # Only warn for kics
   REPOSITORY_DEVSKIM_DISABLE_ERRORS: true # Only warn for devskim
-  PYTHON_PYLINT_CONFIG_FILE: /tox.ini
+  PYTHON_FLAKE8_CONFIG_FILE: /tox.ini
 
 concurrency:
   group: ${{ github.ref }}-${{ github.workflow }}
