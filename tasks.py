@@ -14,6 +14,24 @@ import shutil
 
 from invoke import exceptions, task
 
+DIRS_TO_CLEAN = [
+    ".mypy_cache",
+    ".pytest_cache",
+    ".pytest_tmpdir",
+    ".ruff_cache",
+    "htmlcov",
+    "netcfgbu.egg-info",
+    "netcfgbu/__pycache__",
+    "netcfgbu/cli/__pycache__",
+    "netcfgbu/connectors/__pycache__",
+    "netcfgbu/vcs/__pycache__",
+    "tests/__pycache__",
+    "tests/files/plugins/__pycache__",
+]
+FILES_TO_CLEAN = [
+    ".coverage",
+]
+
 
 @task
 def precheck(ctx):
@@ -32,24 +50,6 @@ def precheck(ctx):
 @task
 def clean(ctx):
     """Clean up the project."""
-    DIRS_TO_CLEAN = [
-        ".mypy_cache",
-        ".pytest_cache",
-        ".pytest_tmpdir",
-        ".ruff_cache",
-        "htmlcov",
-        "netcfgbu.egg-info",
-        "netcfgbu/__pycache__",
-        "netcfgbu/cli/__pycache__",
-        "netcfgbu/connectors/__pycache__",
-        "netcfgbu/vcs/__pycache__",
-        "tests/__pycache__",
-        "tests/files/plugins/__pycache__",
-    ]
-    FILES_TO_CLEAN = [
-        ".coverage",
-    ]
-
     for folder in DIRS_TO_CLEAN:
         try:
             if os.path.exists(folder):
