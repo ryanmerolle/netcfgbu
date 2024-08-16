@@ -34,7 +34,7 @@ def cli_inventory() -> None:
 @opts_inventory
 @click.option("--brief", "-b", is_flag=True)
 @click.pass_context
-def cli_inventory_list(ctx, **cli_opts):
+def cli_inventory_list(ctx: click.Context, **cli_opts):
     inventory_recs = ctx.obj["inventory_recs"]
     inventory_tabular_data = []
     os_name_counter = {}
@@ -81,7 +81,7 @@ def cli_inventory_list(ctx, **cli_opts):
 @click.option("--name", "-n", help="inventory name as defined in config file")
 @click.option("--brief", is_flag=True)
 @click.pass_context
-def cli_inventory_build(ctx, **cli_opts) -> None:
+def cli_inventory_build(ctx: click.Context, **cli_opts) -> None:
     """
     Build the inventory file.
 

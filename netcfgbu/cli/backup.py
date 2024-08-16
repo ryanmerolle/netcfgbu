@@ -43,7 +43,7 @@ def exec_backup(inventory_recs: list, app_cfg: AppConfig) -> None:
 @opt_debug_ssh
 @opt_batch
 @click.pass_context
-def cli_backup(ctx, **_cli_opts) -> None:
+def cli_backup(ctx: click.Context, **_cli_opts) -> None:
     """
     Backup network configurations.
     """

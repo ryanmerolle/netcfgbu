@@ -27,8 +27,8 @@ from urllib.parse import urlsplit
 
 import pexpect
 
-from netcfgbu import consts
 from netcfgbu.config_model import GitSpec
+from netcfgbu.consts import DEFAULT_GIT_BRANCH
 from netcfgbu.logger import get_logger
 from netcfgbu.plugins import Plugin
 
@@ -190,7 +190,7 @@ class GitRunner(object):
         self.git_config()
 
     def git_pull(self):
-        self.run(f"pull origin {consts.DEFAULT_GIT_BRANCH}", authreq=True)
+        self.run(f"pull origin {DEFAULT_GIT_BRANCH}", authreq=True)
 
     def git_config(self) -> None:
         config = self.config
@@ -249,7 +249,10 @@ class GitDeployKeyRunner(GitRunner):
         super().git_config()
         if self.config.deploy_key is None:
             raise ValueError("Deploy key is not configured.")
-        ssh_key = str(Path(self.config.deploy_key).absolute())
+        ssh_key_path = Path(self.config.deploy_key).absolute()
+        if not ssh_key_path.exists():
+            raise FileNotFoundError(f"Deploy key file not found: {ssh_key_path}")
+        ssh_key = str(ssh_key_path)
         self.run(
             f"config --local core.sshCommand 'ssh -i {ssh_key} -o StrictHostKeyChecking=no'"
         )

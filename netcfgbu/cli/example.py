@@ -45,7 +45,7 @@ def copy_example_files() -> None:
 
 @cli.command(name="example")
 @click.pass_context
-def cli_example(ctx, **cli_opts) -> None:
+def cli_example(ctx: click.Context, **cli_opts) -> None:
     """
     Generate example inventory & configuration files.
 

@@ -50,10 +50,10 @@ def setup_logging_queue(logger_names) -> None:
     for lname in logger_names:
         log = logging.getLogger(lname)
         log.addHandler(que_handler)
-        for h in log.handlers[:]:
-            if h is not que_handler:
-                log.removeHandler(h)
-                handlers.add(h)
+        for handler in log.handlers[:]:
+            if handler is not que_handler:
+                log.removeHandler(handler)
+                handlers.add(handler)
 
     _g_quelgr_listener = logging.handlers.QueueListener(
         queue, *handlers, respect_handler_level=True

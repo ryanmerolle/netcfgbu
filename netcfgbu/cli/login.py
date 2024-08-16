@@ -48,7 +48,7 @@ def exec_test_login(inventory_recs: list, app_cfg: AppConfig, cli_opts: dict) ->
 @opt_batch
 @opt_timeout
 @click.pass_context
-def cli_login(ctx, **cli_opts) -> None:
+def cli_login(ctx: click.Context, **cli_opts) -> None:
     """
     Verify SSH login to devices.
     """

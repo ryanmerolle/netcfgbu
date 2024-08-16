@@ -54,10 +54,10 @@ def expand_env_str(env_string):
         foo_password -> "boo!_foo"
     """
 
-    if found_vars := list(
+    if found_variables := list(
         filter(len, chain.from_iterable(_var_re.findall(env_string)))
     ):
-        for var in found_vars:
+        for var in found_variables:
             if (var_val := os.getenv(var)) is None:
                 raise EnvironmentError(f"Environment variable '{var}' missing.")
 
@@ -123,6 +123,21 @@ FilePathEnvExpand = Annotated[FilePath, BeforeValidator(expand_env_str)]
 
 
 class GitSpec(NoExtraBaseModel):
+    """
+    Represents the configuration for a Git repository.
+
+    Attributes:
+        name: Optional name for the Git configuration.
+        repo: The Git repository URL.
+        add_tag: Whether to add a tag or not.
+        email: Optional email for Git operations.
+        username: Optional username for Git authentication.
+        password: Optional password for Git authentication.
+        token: Optional token for Git authentication.
+        deploy_key: Optional deploy key file path for Git authentication.
+        deploy_passphrase: Optional passphrase for the deploy key.
+    """
+
     name: Optional[str] = None
     repo: EnvExpand
     add_tag: Optional[bool] = False
@@ -135,7 +150,7 @@ class GitSpec(NoExtraBaseModel):
 
     @field_validator("repo")
     @classmethod
-    def validate_repo(cls, repo):  # noqa
+    def validate_repo(cls, repo) -> str:
         expected = ("https:", "git@")
         if not repo.startswith(expected):
             raise ValueError(

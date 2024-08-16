@@ -32,7 +32,7 @@ def exec_probe(inventory_recs: list, timeout=None) -> None:
 @opts_inventory
 @opt_timeout
 @click.pass_context
-def cli_check(ctx, **cli_opts) -> None:
+def cli_check(ctx: click.Context, **cli_opts) -> None:
     """
     Probe device for SSH reachablility.
     """

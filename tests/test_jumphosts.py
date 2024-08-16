@@ -109,7 +109,9 @@ async def test_jumphosts_fail_connect(
     log_recs = log_vcr.handlers[0].records
 
     # Manually format the log messages before comparison
-    expected_timeout_log = "JUMPHOST: connect to dummy-user@1.2.3.4:8022 failed: TimeoutError"
+    expected_timeout_log = (
+        "JUMPHOST: connect to dummy-user@1.2.3.4:8022 failed: TimeoutError"
+    )
     expected_error_log = "JUMPHOST: connect to dummy-user@1.2.3.4:8022 failed: nooooope"
 
     assert log_recs[-2].getMessage() == expected_timeout_log

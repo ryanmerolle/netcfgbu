@@ -52,7 +52,7 @@
 # @opt_config_file
 # @opts_inventory
 # @click.pass_context
-# def cli_lint(ctx, **_cli_opts) -> None:
+# def cli_lint(ctx: click.Context, **_cli_opts) -> None:
 #     """
 #     Remove unwanted content from network config files.
 #     """

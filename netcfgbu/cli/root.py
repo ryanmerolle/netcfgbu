@@ -84,7 +84,7 @@ def get_spec_nameorfirst(spec_list, spec_name=None):
     return first(spec for spec in spec_list if getattr(spec, "name", "") == spec_name)
 
 
-def check_for_default(ctx, opt, value):
+def check_for_default(ctx: click.Context, opt, value):
     if value or Path("netcfgbu.toml").exists():
         return value
 

@@ -44,7 +44,7 @@ class VCSCommand(click.Command):
 @opt_config_file
 @opt_vcs_name
 @click.pass_context
-def cli_vcs_prepare(ctx, **_cli_opts) -> None:
+def cli_vcs_prepare(ctx: click.Context, **_cli_opts) -> None:
     """
     Prepare your system with the VCS repo.
 
@@ -64,7 +64,7 @@ def cli_vcs_prepare(ctx, **_cli_opts) -> None:
 @click.option("--add-tag", is_flag=True, default=False, help="If set, create a git tag")
 @click.option("--message", help="Set commit message / tag name")
 @click.pass_context
-def cli_vcs_save(ctx, **cli_opts) -> None:
+def cli_vcs_save(ctx: click.Context, **cli_opts) -> None:
     """
     Save changes into VCS repository.
 
@@ -87,7 +87,7 @@ def cli_vcs_save(ctx, **cli_opts) -> None:
 @opt_config_file
 @opt_vcs_name
 @click.pass_context
-def cli_vcs_status(ctx, **_cli_opts) -> None:
+def cli_vcs_status(ctx: click.Context, **_cli_opts) -> None:
     """
     Show VCS repository status.
 
