@@ -37,6 +37,7 @@ types-tabulate = "*"
 types-first = "*"
 types-aiofiles = "*"
 types-toml = "*"
+types-pexpect = "*"
 pydantic = "2.7.*"
 cryptography = "< 43.0.0"
 
@@ -45,6 +46,8 @@ asynctest = "*"
 #black = "*"
 #flake8 = "*"
 #flake8-breakpoint = "*"
+pylint = "*"
+mypy = "*"
 interrogate = "*"
 invoke = "*"
 isort = "*"
@@ -73,3 +76,9 @@ target-version = ['py39']
 
 [tool.bandit]
 exclude_dirs = ["tests"]
+
+[tool.mypy]
+python_version = "3.9"
+exclude = [
+    ".vnenv"
+]

@@ -4,6 +4,7 @@ from collections import defaultdict
 from datetime import datetime
 from errno import errorcode
 from time import monotonic
+from typing import Any, Dict, List, Union
 
 from tabulate import tabulate
 
@@ -11,7 +12,7 @@ LN_SEP = "\n# " + "-" * 78 + "\n"
 SPACES_4 = " " * 4
 
 
-def err_reason(exc):
+def err_reason(exc) -> str:
     return {
         str: lambda: exc,
         asyncio.TimeoutError: lambda: f"TIMEOUT{str(exc.args or '')}",
@@ -23,11 +24,11 @@ class Report(object):
     TIME_FORMAT = "%Y-%b-%d %I:%M:%S %p"
 
     def __init__(self) -> None:
-        self.start_ts = None
-        self.start_tm = 0
-        self.stop_ts = None
-        self.stop_tm = 0
-        self.task_results = defaultdict(list)
+        self.start_ts: Union[None, datetime] = None
+        self.start_tm: float = 0.0
+        self.stop_ts: Union[None, datetime] = None
+        self.stop_tm: float = 0.0
+        self.task_results: Dict[bool, List[Dict[str, Any]]] = defaultdict(list)
 
     def start_timing(self) -> None:
         self.start_ts = datetime.now()
@@ -38,19 +39,28 @@ class Report(object):
         self.stop_tm = monotonic()
 
     @property
-    def start_time(self):
+    def start_time(self) -> str:
+        if self.start_ts is None:
+            raise ValueError("start_ts is not set")
         return self.start_ts.strftime(self.TIME_FORMAT)
 
     @property
-    def stop_time(self):
+    def stop_time(self) -> str:
+        if self.stop_ts is None:
+            raise ValueError("stop_ts is not set")
         return self.stop_ts.strftime(self.TIME_FORMAT)
 
     @property
-    def duration(self):
+    def duration(self) -> float:
         return self.stop_tm - self.start_tm
 
     def save_report(
-        self, filename, headers, data, summary_headers=None, summary_data=None
+        self,
+        filename: str,
+        headers: List[str],
+        data: List[List[Any]],
+        summary_headers: Union[None, List[str]] = None,
+        summary_data: Union[None, Dict[str, Dict[str, int]]] = None,
     ) -> None:
         data.sort(key=lambda x: x[0])  # Sorting by the first column (usually 'host')
 
@@ -60,8 +70,9 @@ class Report(object):
             wr_csv.writerows(data)
 
         if summary_headers and summary_data:
-            print(f"\n\n{filename.split('.')[0].upper()} SUMMARY")
-            summary_tabular_data = []
+            base_filename = filename.rsplit(".", 1)[0]  # Ensure this is a string
+            print(f"\n\n{base_filename.upper()} SUMMARY")
+            summary_tabular_data: List[List[Any]] = []
             total_count = 0
             for key1, key2_data in summary_data.items():
                 for key2, count in key2_data.items():
@@ -82,8 +93,8 @@ class Report(object):
 
     def save_login_report(self) -> None:
         headers = ["host", "os_name", "num_of_attempts", "login_used"]
-        login_tabular_data = []
-        summary_data = defaultdict(lambda: defaultdict(int))
+        login_tabular_data: List[List[Any]] = []
+        summary_data: Dict[str, Dict[str, int]] = defaultdict(lambda: defaultdict(int))
 
         for rec in self.task_results[True]:
             host = rec["host"]
@@ -104,12 +115,12 @@ class Report(object):
 
     def save_failure_report(self) -> None:
         headers = ["host", "os_name", "reason"]
-        failure_tabular_data = [
+        failure_tabular_data: List[List[Any]] = [
             [rec["host"], rec["os_name"], err_reason(exc)]
             for rec, exc in self.task_results[False]
         ]
 
-        summary_data = defaultdict(lambda: defaultdict(int))
+        summary_data: Dict[str, Dict[str, int]] = defaultdict(lambda: defaultdict(int))
         for _, os_name, reason in failure_tabular_data:
             summary_data[os_name][reason] += 1
 
@@ -121,7 +132,7 @@ class Report(object):
             summary_data,
         )
 
-    def print_report(self, reports_type) -> None:
+    def print_report(self, reports_type: str) -> None:
         if not self.stop_tm:
             self.stop_timing()  # pragma: no cover
 

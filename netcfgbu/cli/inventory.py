@@ -1,5 +1,3 @@
-from collections import Counter
-from operator import itemgetter
 from textwrap import indent
 
 import click
@@ -38,25 +36,29 @@ def cli_inventory() -> None:
 @click.pass_context
 def cli_inventory_list(ctx, **cli_opts):
     inventory_recs = ctx.obj["inventory_recs"]
-    os_names = Counter(rec["os_name"] for rec in inventory_recs)
+    inventory_tabular_data = []
+    os_name_counter = {}
+    for rec in inventory_recs:
+        os_name = rec.get("os_name")
+        if os_name:
+            os_name_counter[os_name] = os_name_counter.get(os_name, 0) + 1
+
+    inventory_tabular_data = sorted(os_name_counter.items())
+    inventory_tabular_data.append(("-" * 7, "-" * 5))
+    inventory_tabular_data.append(("TOTAL", len(inventory_recs)))
 
     os_name_table = indent(
         tabulate(
             headers=["os_name", "count"],
-            tabular_data=sorted(os_names.items(), key=itemgetter(1), reverse=True),
+            tabular_data=inventory_tabular_data,
             tablefmt="pretty",
         ),
         SPACES_4,
     )
 
     print(LN_SEP)
-    print(
-        f"""
-SUMMARY: TOTAL={len(inventory_recs)}
-
-{os_name_table}
-"""
-    )
+    print("SUMMARY:")
+    print(os_name_table)
 
     if cli_opts["brief"] is True:
         return  # pragma: no cover
@@ -70,6 +72,8 @@ SUMMARY: TOTAL={len(inventory_recs)}
             tablefmt="pretty",
         )
     )
+
+    print(LN_SEP)
 
 
 @cli_inventory.command("build", cls=WithConfigCommand)

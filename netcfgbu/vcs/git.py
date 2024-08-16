@@ -247,6 +247,8 @@ class GitDeployKeyRunner(GitRunner):
 
     def git_config(self) -> None:
         super().git_config()
+        if self.config.deploy_key is None:
+            raise ValueError("Deploy key is not configured.")
         ssh_key = str(Path(self.config.deploy_key).absolute())
         self.run(
             f"config --local core.sshCommand 'ssh -i {ssh_key} -o StrictHostKeyChecking=no'"
