@@ -177,6 +177,7 @@ class OSNameSpec(NoExtraBaseModel):
         ssh_configs: SSH configurations.
         prompt_pattern: Pattern to match the prompt.
     """
+
     credentials: Optional[List[Credential]] = None
     pre_get_config: Optional[Union[str, List[str]]] = None
     get_config: Optional[str] = None
@@ -209,15 +210,17 @@ class InventorySpec(NoExtraBaseModel):
             str: The validated script execution string.
 
         Raises:
-            ValueError: If the script file does not exist.
+            ValueError: If the script is not excutable, is invalid,
+            or the file does not exist.
         """
-        script_bin, *script_vargs = script_exec.split()
-        if not os.path.isfile(script_bin):
-            raise ValueError(f"File not found: {script_bin}")
-
-        if not os.access(script_bin, os.X_OK):
-            raise ValueError(f"{script_bin} is not executable")
-
+        try:
+            script_bin, *script_vargs = script_exec.split()
+            if not os.path.isfile(script_bin):
+                raise ValueError(f"File not found: {script_bin}")
+            if not os.access(script_bin, os.X_OK):
+                raise ValueError(f"{script_bin} is not executable")
+        except Exception as e:
+            raise ValueError(f"Invalid script: {e}")
         return script_exec
 
 

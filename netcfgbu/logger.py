@@ -48,11 +48,11 @@ def setup_logging_queue(logger_names) -> None:
     que_handler = LocalQueueHandler(queue)
 
     for lname in logger_names:
-        lgr = logging.getLogger(lname)
-        lgr.addHandler(que_handler)
-        for h in lgr.handlers[:]:
+        log = logging.getLogger(lname)
+        log.addHandler(que_handler)
+        for h in log.handlers[:]:
             if h is not que_handler:
-                lgr.removeHandler(h)
+                log.removeHandler(h)
                 handlers.add(h)
 
     _g_quelgr_listener = logging.handlers.QueueListener(
@@ -65,8 +65,17 @@ def setup_logging(app_cfg) -> None:
     log_cfg = app_cfg.get("logging") or {}
     log_cfg["version"] = 1
 
-    dictConfig(log_cfg)
-    setup_logging_queue(log_cfg.get("loggers") or [])
+    try:
+        dictConfig(log_cfg)
+    except ValueError as e:
+        print(f"Error in logging configuration: {e}", file=sys.stderr)
+        sys.exit(1)
+
+    try:
+        setup_logging_queue(log_cfg.get("loggers") or [])
+    except Exception as e:
+        print(f"Error setting up logging queue: {e}", file=sys.stderr)
+        sys.exit(1)
 
 
 def stop_aiologging() -> None:

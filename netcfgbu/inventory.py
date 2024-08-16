@@ -31,13 +31,13 @@ def load(app_cfg: AppConfig, limits=None, excludes=None):
 
 
 def build(inv_def: InventorySpec) -> int:
-    lgr = get_logger()
+    log = get_logger()
 
     # the script field is required so therefore it exists from
     # config-load-validation.
 
     script = inv_def.script
-    lgr.info("Executing script: [%s]", script)
+    log.info("Executing script: [%s]", script)
 
     # Note: if you want to check the pass/fail of this call os.system() will
     # return 0 or non-zero as the exit code from the underlying script.  There
@@ -46,6 +46,6 @@ def build(inv_def: InventorySpec) -> int:
 
     rc = os.system(script)  # nosec
     if rc != 0:  # nosec
-        lgr.warning("inventory script returned non-zero return code: %s", rc)
+        log.warning("inventory script returned non-zero return code: %s", rc)
 
     return rc

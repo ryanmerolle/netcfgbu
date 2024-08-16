@@ -1,9 +1,13 @@
 from collections import defaultdict
 from pathlib import Path
 
+from netcfgbu.logger import get_logger
+
 _registered_plugins = defaultdict(dict)
 
 _PLUGIN_NAME = "hooks"
+
+log = get_logger()
 
 
 def load_plugins(plugins_dir: Path) -> None:
@@ -18,12 +22,14 @@ def load_plugins(plugins_dir: Path) -> None:
         None
     """
     if not plugins_dir.is_dir():
+        log.warning("Plugin directory %s does not exist.", plugins_dir)
         return
 
     from importlib.machinery import FileFinder, SourceFileLoader
 
     finder = FileFinder(str(plugins_dir), (SourceFileLoader, [".py"]))  # noqa
 
+    log.info("Loading plugins from %s", plugins_dir)
     for py_file in plugins_dir.glob("*.py"):
         mod_name = py_file.stem
         finder.find_spec(mod_name).loader.load_module(mod_name)

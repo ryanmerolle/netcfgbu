@@ -123,7 +123,7 @@ def test_vcs_pass_save(mock_pexpect, tmpdir, monkeypatch):
 
     mock_timestamp = Mock()
     mock_timestamp.return_value = "dummy-timestamp"
-    monkeypatch.setattr(git, "message_timestamp", mock_timestamp)
+    monkeypatch.setattr(git, "generate_commit_message", mock_timestamp)
 
     git.vcs_save(gh_cfg=git_cfg, repo_dir=Path(repo_dir))
 

@@ -30,14 +30,14 @@ class RecordsCollector(logging.Handler):
 
 
 @pytest.fixture()
-def log_vcr():
-    lgr = logging.getLogger()
-    lgr.setLevel(logging.DEBUG)
-    lgr_vcr = RecordsCollector()
-    lgr.handlers[0] = lgr_vcr
-    return lgr
+def log_vcr() -> logging.Logger:
+    log = logging.getLogger()
+    log.setLevel(logging.DEBUG)
+    log_vcr = RecordsCollector()
+    log.handlers[0] = log_vcr
+    return log
 
 
 @pytest.fixture(scope="module")
-def files_dir(request):
+def files_dir(request) -> Path:
     return Path(request.module.__file__).parent / "files"

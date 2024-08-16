@@ -45,9 +45,9 @@ from netcfgbu.plugins import Plugin
 GIT_BIN = "git"
 
 
-def message_timestamp() -> str:
+def generate_commit_message() -> str:
     """
-    Create the tag name using the current time with
+    Create a commit message using the current timestamp with
     format <year><month#><day#>_<24hr><minute><sec>
     """
     return datetime.now().strftime("%Y%m%d_%H%M%S")  # pragma: no cover
@@ -71,7 +71,7 @@ def vcs_save(
 
     ghr = git_runner(gh_cfg, repo_dir)
     if not message:
-        message = message_timestamp()
+        message = generate_commit_message()
 
     output = ghr.run("status")
     if "nothing to commit" in output:

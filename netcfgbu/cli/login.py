@@ -18,14 +18,15 @@ from .root import (
 CLI_COMMAND = "login"
 
 
-def exec_test_login(inventory_recs: list, app_cfg, cli_opts) -> None:
+def exec_test_login(inventory_recs: list, app_cfg: AppConfig, cli_opts: dict) -> None:
     """
-    Execute login tests for the given inventory records.
+    This function performs login tests on the provided inventory records using
+    the specified application configuration and command-line options.
 
     Args:
         inventory_recs (list): List of inventory records to test.
-        app_cfg: Application configuration.
-        cli_opts (dict): Command-line options.
+        app_cfg (AppConfig): Application configuration object.
+        cli_opts (dict): Command-line options dictionary.
 
     Returns:
         None
