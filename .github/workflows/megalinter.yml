@@ -20,10 +20,10 @@ env: # Comment env block if you don't want to apply fixes
   REPOSITORY_KICS_DISABLE_ERRORS: true # Only warn for kics
   REPOSITORY_DEVSKIM_DISABLE_ERRORS: true # Only warn for devskim
   PYTHON_FLAKE8_CONFIG_FILE: tox.ini
-  PYTHON_PYLINT_FILTER_REGEX_EXCLUDE: tests\
-  PYTHON_BANDIT_FILTER_REGEX_EXCLUDE: tests\
-  PYTHON_MYPY_FILTER_REGEX_EXCLUDE: tests\
-  PYTHON_PYRIGHT_FILTER_REGEX_EXCLUDE: tests\
+  #PYTHON_PYLINT_FILTER_REGEX_EXCLUDE: tests\
+  #PYTHON_BANDIT_FILTER_REGEX_EXCLUDE: tests\
+  #PYTHON_MYPY_FILTER_REGEX_EXCLUDE: tests\
+  #PYTHON_PYRIGHT_FILTER_REGEX_EXCLUDE: tests\
 
 concurrency:
   group: ${{ github.ref }}-${{ github.workflow }}
