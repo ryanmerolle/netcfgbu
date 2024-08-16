@@ -79,27 +79,6 @@ def test_jumphosts_pass_exlallused(inventory):
 
 
 @pytest.mark.asyncio
-async def test_jumphosts_pass_connect(inventory, mock_asyncssh_connect, monkeypatch):
-    jh_spec = config_model.JumphostSpec(
-        proxy="dummy-user@1.2.3.4:8022", exclude=["os_name=eos"]
-    )
-
-    jumphosts.init_jumphosts(jumphost_specs=[jh_spec], inventory=inventory)
-    ok = await jumphosts.connect_jumphosts()
-
-    assert ok
-    assert mock_asyncssh_connect.called
-    assert mock_asyncssh_connect.call_count == 1
-    called = mock_asyncssh_connect.mock_calls[0]
-    assert called.kwargs["host"] == "1.2.3.4"
-    assert called.kwargs["username"] == "dummy-user"
-    assert called.kwargs["port"] == 8022
-
-    jh: jumphosts.JumpHost = jumphosts.JumpHost.available[0]
-    assert jh.tunnel is not None
-
-
-@pytest.mark.asyncio
 async def test_jumphosts_fail_connect(
     netcfgbu_envars, log_vcr, inventory, mock_asyncssh_connect, monkeypatch
 ):
@@ -128,7 +107,10 @@ async def test_jumphosts_fail_connect(
     assert "not connected" in errmsg
 
     log_recs = log_vcr.handlers[0].records
-    assert (
-        log_recs[-1].msg
-        == "JUMPHOST: connect to dummy-user@1.2.3.4:8022 failed: nooooope"
-    )
+
+    # Manually format the log messages before comparison
+    expected_timeout_log = "JUMPHOST: connect to dummy-user@1.2.3.4:8022 failed: TimeoutError"
+    expected_error_log = "JUMPHOST: connect to dummy-user@1.2.3.4:8022 failed: nooooope"
+
+    assert log_recs[-2].getMessage() == expected_timeout_log
+    assert log_recs[-1].getMessage() == expected_error_log

@@ -1,8 +1,8 @@
+import os
 from io import StringIO
-from os import getenv
 from pathlib import Path
 
-import pytest  # noqa
+import pytest
 import toml
 from first import first
 from pydantic import ValidationError
@@ -13,29 +13,31 @@ from netcfgbu.config import load
 
 def test_config_onlyenvars_pass(monkeypatch, netcfgbu_envars):
     """
-    Execute a test where there is no configuration file.  In this
-    case the NETCFGBU_<fieldname> environment variables must exist.
+    Execute a test where there is no configuration file.
+    In this case, the NETCFGBU_<fieldname> environment variables must exist.
     """
     app_cfg = load()
 
-    assert app_cfg.defaults.inventory == getenv("NETCFGBU_INVENTORY")
-    assert app_cfg.defaults.credentials.username == getenv("NETCFGBU_DEFAULT_USERNAME")
-    assert app_cfg.defaults.credentials.password.get_secret_value() == getenv(
+    assert app_cfg.defaults.inventory == os.getenv("NETCFGBU_INVENTORY")
+    assert app_cfg.defaults.credentials.username == os.getenv("NETCFGBU_DEFAULT_USERNAME")
+    assert app_cfg.defaults.credentials.password.get_secret_value() == os.getenv(
         "NETCFGBU_DEFAULT_PASSWORD"
     )
 
 
-def test_config_onlyenvars_fail_missing():
+def test_config_onlyenvars_fail_missing(monkeypatch):
     """
-    Execute a test where there is no configuration file.  Omit the default
-    environment variables and ensure that an exception is raised as expected.
+    Execute a test where there is no configuration file.
+    Omit the default environment variables and ensure that an exception is raised as expected.
     """
+    monkeypatch.delenv("NETCFGBU_INVENTORY", raising=False)
+    monkeypatch.delenv("NETCFGBU_DEFAULT_USERNAME", raising=False)
+    monkeypatch.delenv("NETCFGBU_DEFAULT_PASSWORD", raising=False)
 
     with pytest.raises(RuntimeError) as excinfo:
         load()
 
     exc_errmsg = excinfo.value.args[0]
-
     expected_envars = [
         "defaults.NETCFGBU_INVENTORY",
         "defaults.credentials.NETCFGBU_DEFAULT_USERNAME",
@@ -47,8 +49,7 @@ def test_config_onlyenvars_fail_missing():
 
 def test_config_onlyenvars_fail_bad_noinventory(monkeypatch):
     """
-    Test the case where NETCFGBU_INVENTORY is set but empty, but the file does
-    not exist; which would generate an exception message.
+    Test the case where NETCFGBU_INVENTORY is set but empty, and it generates an exception message.
     """
     monkeypatch.setenv("NETCFGBU_INVENTORY", "")
 
@@ -56,55 +57,41 @@ def test_config_onlyenvars_fail_bad_noinventory(monkeypatch):
         load()
 
     exc_errmsgs = excinfo.value.args[0].splitlines()
-    found = first(
-        [line for line in exc_errmsgs if "defaults.NETCFGBU_INVENTORY" in line]
-    )
+    found = first([line for line in exc_errmsgs if "defaults.NETCFGBU_INVENTORY" in line])
     assert found
     assert "inventory empty value not allowed" in found
 
 
 def test_config_credentials_fail_missingvar(request, monkeypatch, fake_inventory_file):
     """
-    Test the case where the [[credentials]] section is provided that uses
-    an environment variable, and that environment variable is missing.
+    Test the case where the [[credentials]] section uses an environment variable,
+    and that environment variable is missing.
     """
     fileio = open(f"{request.fspath.dirname}/files/test-credentials.toml")
 
-    with pytest.raises(RuntimeError) as excinfo:
+    monkeypatch.delenv("ENABLE_PASSWORD", raising=False)
+
+    with pytest.raises(EnvironmentError, match="Environment variable 'ENABLE_PASSWORD' missing.") as excinfo:
         load(fileio=fileio)
 
-    exc_errmsgs = excinfo.value.args[0].splitlines()
-    found = first([line for line in exc_errmsgs if "credentials.0.password" in line])
-    assert found
-    assert 'Environment variable "ENABLE_PASSWORD" missing' in found
 
-
-def test_config_credentials_fail_empytvar(request, monkeypatch, netcfgbu_envars):
+def test_config_credentials_fail_emptyvar(request, monkeypatch, netcfgbu_envars):
     """
-    Test the case where the [[credentials]] section is provided that uses an
-    environment variable, and that environment variable exists, but it the
-    empty-string.
+    Test the case where the [[credentials]] section uses an environment variable,
+    and that environment variable exists but is set to an empty string.
     """
-
     fileio = open(f"{request.fspath.dirname}/files/test-credentials.toml")
     monkeypatch.setenv("ENABLE_PASSWORD", "")
 
-    with pytest.raises(RuntimeError) as excinfo:
+    with pytest.raises(EnvironmentError, match="Environment variable 'ENABLE_PASSWORD' empty.") as excinfo:
         load(fileio=fileio)
-
-    exc_errmsgs = excinfo.value.args[0].splitlines()
-    found = first([line for line in exc_errmsgs if "credentials.0.password" in line])
-    assert found
-    assert 'Environment variable "ENABLE_PASSWORD" empty' in found
 
 
 def test_config_credentials_pass_usesvar(request, monkeypatch, netcfgbu_envars):
     """
-    Test the case where the [[credentials]] section is provided that uses an
-    environment variable, and that environment variable exists, and it is set
-    to a non-empty value.
+    Test the case where the [[credentials]] section uses an environment variable,
+    and that environment variable is set to a non-empty value.
     """
-
     fileio = open(f"{request.fspath.dirname}/files/test-credentials.toml")
     monkeypatch.setenv("ENABLE_PASSWORD", "foobaz")
     app_cfg = load(fileio=fileio)
@@ -126,7 +113,7 @@ def test_config_git_pass(request, netcfgbu_envars, monkeypatch):
     assert app_cfg.git[2].deploy_passphrase.get_secret_value() == "fake-password"
 
 
-def test_config_git_fail_badrepo(request, netcfgbu_envars, monkeypatch):
+def test_config_git_fail_badrepo(request, netcfgbu_envars):
     """
     Test the case where a [[git]] section has an improper GIT URL.
     """
@@ -152,8 +139,8 @@ def test_config_inventory_pass(request, monkeypatch, netcfgbu_envars):
 
 def test_config_inventory_fail_noscript(request, netcfgbu_envars):
     """
-    Test the case where an [[inventory]] section defined a script, but the
-    script does not actually exist.
+    Test the case where an [[inventory]] section defines a script, but the
+    script does not exist.
     """
     fileio = open(f"{request.fspath.dirname}/files/test-inventory-fail.toml")
     with pytest.raises(RuntimeError) as excinfo:
@@ -235,8 +222,7 @@ def test_config_pass_noexistdir(tmpdir, netcfgbu_envars, monkeypatch):
 def test_plugins_pass_noexistdir(tmpdir, netcfgbu_envars, monkeypatch):
     """
     Test use-case where the provided configs-dir directory does not
-    exist in the configuration; but as a result the configs-dir is
-    created.
+    exist in the configuration; but as a result, the configs-dir is created.
     """
     dirpath = tmpdir.join("dummy-dir")
     monkeypatch.setenv("NETCFGBU_PLUGINSDIR", str(dirpath))
@@ -257,7 +243,7 @@ def test_config_pass_asfilepath(request):
 
 def test_config_fail_asfilepath(tmpdir):
     """
-    Test use-case where the config is provided as a filepath, and the filep
+    Test use-case where the config is provided as a filepath, and the file
     does not exist.
     """
     noexist_filepath = str(tmpdir.join("noexist"))
@@ -269,6 +255,9 @@ def test_config_fail_asfilepath(tmpdir):
 
 
 def test_config_jumphost_name(netcfgbu_envars, request):
+    """
+    Test the case where jumphost name is correctly set from the config.
+    """
     abs_filepath = request.fspath.dirname + "/files/test-config-jumphosts.toml"
     app_cfg = load(filepath=abs_filepath)
     jh = app_cfg.jumphost[0]
@@ -279,6 +268,9 @@ def test_config_jumphost_name(netcfgbu_envars, request):
 
 
 def test_vcs_fail_config(tmpdir):
+    """
+    Test validation errors in GitSpec configuration.
+    """
     fake_key = tmpdir.join("fake-key")
     fake_key.ensure()
     fake_key = str(fake_key)

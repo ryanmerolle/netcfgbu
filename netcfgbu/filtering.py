@@ -5,6 +5,7 @@ not specific to the netcfgbu inventory column names, can could be re-used for
 other CSV related tools and use-cases.
 """
 
+import csv
 import ipaddress
 import operator
 import re
@@ -116,17 +117,25 @@ def create_filter_function(op_filters, optest_fn):
 
 def mk_file_filter(filepath, key):
     if filepath.endswith(".csv"):
-        filter_hostnames = [
-            rec[key]
-            for rec in CommentedCsvReader(open(filepath, "r", encoding="utf-8"))
-        ]
+        with open(filepath, "r", encoding="utf-8") as csvfile:
+            reader = csv.DictReader(csvfile)
+            if reader.fieldnames is None:
+                raise ValueError(
+                    f"File '{filepath}' does not contain headers or is empty."
+                )
+            if key not in reader.fieldnames:
+                raise ValueError(
+                    f"File '{filepath}' does not contain {key} content as expected"
+                )
+            filter_hostnames = [rec[key] for rec in reader if rec.get(key)]
+            print(f"Filter hostnames: {filter_hostnames}")  # Debugging print
     else:
         raise ValueError(
             f"File '{filepath}' not a CSV file. Only CSV files are supported."
         )
 
     def op_filter(rec):
-        return rec[key] in filter_hostnames
+        return rec.get(key) in filter_hostnames
 
     return op_filter
 

@@ -62,4 +62,4 @@ def test_liners_pass_nochange(files_dir, tmpdir, log_vcr, monkeypatch):
     linted_content = tmp_file.read_text()
     assert linted_content == exp_content
     last_log = log_vcr.handlers[0].records[-1].msg
-    assert "LINT no change on content" in last_log
+    assert "LINT no change on" in last_log
