@@ -9,10 +9,10 @@
 # Flake8: https://flake8.pycqa.org/en/latest/user/configuration.html
 
 
-from invoke import task, exceptions
-import contextlib
 import os
 import shutil
+
+from invoke import exceptions, task
 
 
 @task
@@ -33,21 +33,21 @@ def precheck(ctx):
 def clean(ctx):
     """Clean up the project."""
     DIRS_TO_CLEAN = [
-        '.mypy_cache',
-        '.pytest_cache',
-        '.pytest_tmpdir',
-        '.ruff_cache',
-        'htmlcov',
-        'netcfgbu.egg-info',
-        'netcfgbu/__pycache__',
-        'netcfgbu/cli/__pycache__',
-        'netcfgbu/connectors/__pycache__',
-        'netcfgbu/vcs/__pycache__',
-        'tests/__pycache__',
-        'tests/files/plugins/__pycache__'
+        ".mypy_cache",
+        ".pytest_cache",
+        ".pytest_tmpdir",
+        ".ruff_cache",
+        "htmlcov",
+        "netcfgbu.egg-info",
+        "netcfgbu/__pycache__",
+        "netcfgbu/cli/__pycache__",
+        "netcfgbu/connectors/__pycache__",
+        "netcfgbu/vcs/__pycache__",
+        "tests/__pycache__",
+        "tests/files/plugins/__pycache__",
     ]
     FILES_TO_CLEAN = [
-        '.coverage',
+        ".coverage",
     ]
 
     for folder in DIRS_TO_CLEAN:

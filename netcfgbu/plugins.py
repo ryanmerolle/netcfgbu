@@ -1,11 +1,22 @@
 from collections import defaultdict
+from pathlib import Path
 
 _registered_plugins = defaultdict(dict)
 
 _PLUGIN_NAME = "hooks"
 
 
-def load_plugins(plugins_dir):
+def load_plugins(plugins_dir: Path) -> None:
+    """
+    Loads all Python files in the specified directory as plugins and registers
+    subclasses of the Plugin class.
+
+    Args:
+        plugins_dir (Path): The directory containing plugin Python files.
+
+    Returns:
+        None
+    """
     if not plugins_dir.is_dir():
         return
 
@@ -28,19 +39,19 @@ class Plugin(object):
     name = None
 
     def report(report):
-        """returns a report specific plugin once the netcfgbu backup process has completed"""
+        """returns a report specific plugin once the netcfgbu backup process completes"""
         pass
 
     def backup_success(rec: dict, res: bool):
-        """returns a backup success specific plugin once the netcfgbu backup process has completed"""
+        """returns a backup success specific plugin once the netcfgbu backup process completes"""
         pass
 
     def backup_failed(rec: dict, exc: str):
-        """returns a backup failed specific plugin once the netcfgbu backup process has completed"""
+        """returns a backup failed specific plugin once the netcfgbu backup process completes"""
         pass
 
     def git_report(success: bool, message: str):
-        """returns a git report specific plugin once the netcfgbu vcs save process has completed"""
+        """returns a git report specific plugin once the netcfgbu vcs save process completes"""
         pass
 
     def run_backup_failed(rec: dict, exc: str) -> None:

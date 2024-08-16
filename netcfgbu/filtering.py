@@ -17,7 +17,7 @@ from .filetypes import CommentedCsvReader
 __all__ = ["create_filter"]
 
 
-value_pattern = r"(?P<value>\S+)$"
+VALUE_PATTERN = r"(?P<value>\S+)$"
 file_reg = re.compile(r"@(?P<filename>.+)$")
 wordsep_re = re.compile(r"\s+|,")
 
@@ -116,7 +116,10 @@ def create_filter_function(op_filters, optest_fn):
 
 def mk_file_filter(filepath, key):
     if filepath.endswith(".csv"):
-        filter_hostnames = [rec[key] for rec in CommentedCsvReader(open(filepath))]
+        filter_hostnames = [
+            rec[key]
+            for rec in CommentedCsvReader(open(filepath, "r", encoding="utf-8"))
+        ]
     else:
         raise ValueError(
             f"File '{filepath}' not a CSV file. Only CSV files are supported."
@@ -158,7 +161,7 @@ def create_filter(
     input parameter, and the function returns True/False on match.
     """
     fieldn_pattern = "^(?P<keyword>" + "|".join(fieldn for fieldn in field_names) + ")"
-    field_value_reg = re.compile(fieldn_pattern + "=" + value_pattern)
+    field_value_reg = re.compile(fieldn_pattern + "=" + VALUE_PATTERN)
 
     op_filters = [
         parse_constraint(constraint, field_value_reg, field_names)

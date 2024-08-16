@@ -42,7 +42,7 @@ from netcfgbu.plugins import Plugin
 # -----------------------------------------------------------------------------
 
 
-git_bin = "git"
+GIT_BIN = "git"
 
 
 def message_timestamp() -> str:
@@ -66,8 +66,8 @@ def vcs_save(
     add_tag: bool = False,
     message: Optional[str] = None,
 ) -> bool:
-    logr = get_logger()
-    logr.info(f"VCS update git: {gh_cfg.repo}")
+    log = get_logger()
+    log.info("VCS update git: %s", gh_cfg.repo)
 
     ghr = git_runner(gh_cfg, repo_dir)
     if not message:
@@ -75,11 +75,11 @@ def vcs_save(
 
     output = ghr.run("status")
     if "nothing to commit" in output:
-        logr.info("VCS no changes, skipping")
+        log.info("VCS no changes, skipping")
         Plugin.run_git_report(success=False, message=message if add_tag else None)
         return False
 
-    logr.info(f"VCS saving changes{', tag=' + message if add_tag else ''}")
+    log.info("VCS saving changes%s", f", tag={message}" if add_tag else "")
 
     # Always execute these commands
     commands = [("add -A", False), (f"commit -m '{message}'", False), ("push", True)]
@@ -101,8 +101,8 @@ def vcs_save(
 
 
 def vcs_prepare(spec: GitSpec, repo_dir: Path) -> None:
-    logr = get_logger()
-    logr.info(f"VCS prepare git: {spec.repo}")
+    log = get_logger()
+    log.info("VCS prepare git: %s", spec.repo)
 
     ghr = git_runner(spec, repo_dir)
     ghr.git_init()
@@ -110,12 +110,14 @@ def vcs_prepare(spec: GitSpec, repo_dir: Path) -> None:
 
 
 def vcs_status(spec: GitSpec, repo_dir: Path):
-    logr = get_logger()
-    logr.info(
-        f"""
-VCS diffs git: {spec.repo}
-             dir: {str(repo_dir)}
-"""
+    log = get_logger()
+    log.info(
+        """
+VCS diffs git: %s
+             dir: %s
+""",
+        spec.repo,
+        str(repo_dir),
     )
 
     ghr = git_runner(spec, repo_dir)
@@ -160,7 +162,7 @@ class GitRunner(object):
         Run the git command that does not require any user authentication
         """
         output, rc = pexpect.run(
-            command=f"{git_bin} {cmd}",
+            command=f"{GIT_BIN} {cmd}",
             withexitstatus=True,
             cwd=self.repo_dir,
             encoding="utf-8",
@@ -220,7 +222,7 @@ class GitAuthRunner(GitRunner):
 
     def run_auth(self, cmd):
         output, rc = pexpect.run(
-            command=f"{git_bin} {cmd}",
+            command=f"{GIT_BIN} {cmd}",
             cwd=self.repo_dir,
             withexitstatus=True,
             encoding="utf-8",
@@ -270,11 +272,11 @@ def git_runner(gh_cfg: GitSpec, repo_dir: Path) -> GitRunner:
     if gh_cfg.token:
         return GitTokenRunner(gh_cfg, repo_dir)
 
-    elif gh_cfg.deploy_key:
+    if gh_cfg.deploy_key:
         if not gh_cfg.deploy_passphrase:
             return GitDeployKeyRunner(gh_cfg, repo_dir)
-        else:
-            return GitSecuredDeployKeyRunner(gh_cfg, repo_dir)
+
+        return GitSecuredDeployKeyRunner(gh_cfg, repo_dir)
 
     # Note: this is unreachable code since the config-model validation should
     # have ensured the proper fields exist in the spec.

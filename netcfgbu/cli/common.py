@@ -72,7 +72,7 @@ async def process_login_task(task, report, done_msg, rec, failure_callback):
             rec["login_user"] = reason
             rec["attempts"] = rec.get("attempts", 1)
             report.task_results[False].append((rec, reason))
-            log.error(done_msg + reason)
+            log.error("%s%s", done_msg, reason)
     except Exception as exc:
         await handle_exception(exc, rec, done_msg, report)
         if failure_callback:
@@ -86,7 +86,7 @@ async def process_generic_task(
         result = task.result()
         if result:
             report.task_results[True].append((rec, result))
-            log.info(done_msg + " - PASS")
+            log.info("%s - PASS", done_msg)
             if success_callback:
                 success_callback(rec, result)
         else:
@@ -110,7 +110,7 @@ def execute_command(
     failure_callback=None,
 ):
     device_count = len(inventory_recs)
-    log.info(f"{cli_command.capitalize()} {device_count} devices ...")
+    log.info("%s %d devices ...", cli_command.capitalize(), device_count)
 
     loop = asyncio.get_event_loop()
 

@@ -30,5 +30,5 @@ def test_config_os_name_prompt_pattern(netcfgbu_envars, request):  # noqa
     test_prompt_value = "cumulus@leaf01:mgmt-vrf:~$"
 
     assert isinstance(conn, BasicSSHConnector)
-    assert expected_re.pattern == conn.PROMPT_PATTERN.pattern
+    assert expected_re.pattern == conn.prompt_pattern.pattern
     assert expected_re.match(test_prompt_value.encode("utf-8"))

@@ -28,15 +28,18 @@ def copy_example_files() -> None:
     if existing_files:
         existing_files_names = ", ".join(file_path.name for file_path in existing_files)
         print(
-            f"ERROR: No files were copied. The following file(s) already exist in the current directory: {existing_files_names}"
+            "ERROR: No files were copied. ",
+            f"The following file(s) already exist in the current directory: {existing_files_names}",
         )
         raise SystemExit(1)
 
     # If no existing files were found, proceed to copy
     for file_path in examples_path.iterdir():
         if file_path.is_file():
-            with importlib.resources.as_file(file_path) as source_file, open(Path.cwd() / file_path.name, 'wb') as dest_file:
-                shutil.copyfileobj(source_file.open('rb'), dest_file)
+            with importlib.resources.as_file(file_path) as source_file, open(
+                Path.cwd() / file_path.name, "wb"
+            ) as dest_file:
+                shutil.copyfileobj(source_file.open("rb"), dest_file)
                 print(f"Copied {file_path.name} to the current directory.")
 
 

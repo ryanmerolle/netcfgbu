@@ -35,11 +35,11 @@ def validation_errors(filepath, errors):
 
 
 def load(*, filepath=None, fileio=None) -> AppConfig:
-    app_cfg = dict()
+    app_cfg = {}
 
     if filepath:
         app_cfg_file = Path(filepath)
-        fileio = app_cfg_file.open()
+        fileio = app_cfg_file.open(mode="r", encoding="utf-8")
 
     if fileio:
         app_cfg = toml.load(fileio)
@@ -48,7 +48,7 @@ def load(*, filepath=None, fileio=None) -> AppConfig:
 
     app_defaults = app_cfg.get("defaults")
     if not app_defaults:
-        app_cfg["defaults"] = dict(credentials={})
+        app_cfg["defaults"] = {"credentials": {}}
 
     try:
         cfg_obj = AppConfig.model_validate(app_cfg)

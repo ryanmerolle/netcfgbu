@@ -32,7 +32,7 @@ class JumpHost(object):
     device in the inventory that requires one can use it.
     """
 
-    available = list()
+    available = []
 
     def __init__(self, spec: JumphostSpec, field_names: List[AnyStr]):
         """
@@ -48,7 +48,7 @@ class JumpHost(object):
             necessary filtering functionality
         """
         self._spec = spec
-        self.filters = list()
+        self.filters = []
         self._conn = None
         self._init_filters(field_names)
 
@@ -99,7 +99,7 @@ class JumpHost(object):
         """
         proxy_parts = urlparse("ssh://" + self._spec.proxy)
 
-        conn_args = dict(host=proxy_parts.hostname, known_hosts=None)
+        conn_args = {"host": proxy_parts.hostname, "known_hosts": None}
         if proxy_parts.username:
             conn_args["username"] = proxy_parts.username
 
@@ -176,11 +176,11 @@ async def connect_jumphosts():
     for jh in JumpHost.available:
         try:
             await jh.connect()
-            log.info(f"JUMPHOST: connected to {jh.name}")
+            log.info("JUMPHOST: connected to %s", jh.name)
 
         except (asyncio.TimeoutError, asyncssh.Error) as exc:
             errmsg = str(exc) or exc.__class__.__name__
-            log.error(f"JUMPHOST: connect to {jh.name} failed: {errmsg}")
+            log.error("JUMPHOST: connect to %s failed: %s", jh.name, errmsg)
             ok = False
 
     return ok

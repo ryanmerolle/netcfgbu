@@ -112,7 +112,7 @@ def test_filtering_pass_csv_filecontents(tmpdir):
         dict(host="switch4.dc1", os_name="ios"),
     ]
 
-    with open(tmpfile, "w+") as ofile:
+    with open(tmpfile, "w+", encoding="utf-8") as ofile:
         csv_wr = csv.DictWriter(ofile, fieldnames=["host", "os_name"])
         csv_wr.writeheader()
         csv_wr.writerows(inventory_recs)
@@ -152,7 +152,7 @@ def test_filtering_fail_csv_missinghostfield(tmpdir):
         dict(hostname="switch2.dc1", os_name="ios"),
     ]
 
-    with open(tmpfile, "w+") as ofile:
+    with open(tmpfile, "w+", encoding="utf-8") as ofile:
         csv_wr = csv.DictWriter(ofile, fieldnames=["hostname", "os_name"])
         csv_wr.writeheader()
         csv_wr.writerows(inventory_recs)

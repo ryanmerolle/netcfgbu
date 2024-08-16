@@ -41,7 +41,7 @@ def lint_file(fileobj: Path, lint_spec) -> bool:
 
     config_content = lint_content(orig_config_content, lint_spec)
     if config_content == orig_config_content:
-        log.debug(f"LINT no change on {fileobj.name}")
+        log.debug("LINT no change on %s", fileobj.name)
         return False
 
     fileobj.rename(str(fileobj.absolute()) + ".orig")

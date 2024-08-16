@@ -118,7 +118,7 @@ class Defaults(DefaultBaseSettings):
         return Path(value).absolute()
 
 
-"""A FilePath field whose value can be interpolated from env vars"""
+# A FilePath field whose value can be interpolated from env vars
 FilePathEnvExpand = Annotated[FilePath, BeforeValidator(expand_env_str)]
 
 
@@ -273,7 +273,7 @@ class AppConfig(NoExtraBaseModel):
         if (linters := info.data.get("linters")) is None:
             # sometimes it's still None
             # see tests/test_config.py::test_config_linter_fail
-            linters = dict()
+            linters = {}
         if v is not None:
             for os_name, os_spec in v.items():
                 if os_spec.linter and os_spec.linter not in linters:

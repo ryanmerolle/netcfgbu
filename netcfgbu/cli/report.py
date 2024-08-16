@@ -14,9 +14,9 @@ SPACES_4 = " " * 4
 def err_reason(exc):
     return {
         str: lambda: exc,
-        asyncio.TimeoutError: lambda: "TIMEOUT%s" % (str(exc.args or "")),
+        asyncio.TimeoutError: lambda: f"TIMEOUT{str(exc.args or '')}",
         OSError: lambda: errorcode[exc.errno],
-    }.get(exc.__class__, lambda: "%s: %s" % (str(exc.__class__.__name__), str(exc)))()
+    }.get(exc.__class__, lambda: f"{exc.__class__.__name__}: {str(exc)}")()
 
 
 class Report(object):
@@ -54,7 +54,7 @@ class Report(object):
     ) -> None:
         data.sort(key=lambda x: x[0])  # Sorting by the first column (usually 'host')
 
-        with open(filename, "w+") as ofile:
+        with open(filename, "w+", encoding="utf-8") as ofile:
             wr_csv = csv.writer(ofile)
             wr_csv.writerow(headers)
             wr_csv.writerows(data)

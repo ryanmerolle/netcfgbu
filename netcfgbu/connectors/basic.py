@@ -32,7 +32,7 @@ class BasicSSHConnector(object):
 
     Attributes
     ----------
-    cls.PROMPT_PATTERN: re.Pattern
+    cls.prompt_pattern: re.Pattern
         compiled regular expression this used to find the CLI prompt
 
     cls.get_config: str
@@ -45,7 +45,7 @@ class BasicSSHConnector(object):
         blocked with a "--More--" user prompt.
     """
 
-    PROMPT_PATTERN = re.compile(
+    prompt_pattern = re.compile(
         (
             "^\r?(["
             + consts.PROMPT_VALID_CHARS
@@ -97,7 +97,7 @@ class BasicSSHConnector(object):
             self.conn_args.update(os_spec.ssh_configs)
 
         if os_spec.prompt_pattern:
-            self.PROMPT_PATTERN = re.compile(
+            self.prompt_pattern = re.compile(
                 (r"^\r?(" + os_spec.prompt_pattern + r")\s*$").encode("utf-8"),
                 flags=(re.M | re.I),
             )
@@ -197,12 +197,12 @@ class BasicSSHConnector(object):
             res = await asyncio.wait_for(self.read_until_prompt(), timeout=60)
             at_prompt = True
             # TODO - Add hostname to debug of AT-PROMPT
-            self.log.debug(f"AT-PROMPT: {res}")
+            self.log.debug("AT-PROMPT: %s", res)
 
             res = await asyncio.wait_for(self.run_disable_paging(), timeout=timeout)
             paging_disabled = True
             # TODO - Add hostname to debug of AFTER-PRE-GET-RUNNING
-            self.log.debug(f"AFTER-PRE-GET-RUNNING: {res}")
+            self.log.debug("AFTER-PRE-GET-RUNNING: %s", res)
 
             self.log.info(log_msg)
             self.config = await asyncio.wait_for(
@@ -226,7 +226,7 @@ class BasicSSHConnector(object):
     # -------------------------------------------------------------------------
 
     def _setup_creds(self):
-        creds = list()
+        creds = []
 
         # use credential from inventory host record first, if defined
         # TODO: bug-fix where these values are None; but exist in dict :-(
@@ -266,9 +266,9 @@ class BasicSSHConnector(object):
 
         Returns
         -------
-        The AsyncSSH will obtain a protocol connection instance from asyncio.loop.create_connection(), and
-        then enrobe it with an async context manager so that the Caller can either use the instnace
-        directly or as a context manager.
+        The AsyncSSH will obtain a protocol connection instance from
+        asyncio.loop.create_connection(), and then enrobe it with an async context manager so
+        that the Caller can either use the instnace directly or as a context manager.
 
         Raises
         ------
@@ -310,7 +310,7 @@ class BasicSSHConnector(object):
                     self.conn = await asyncio.wait_for(
                         asyncssh.connect(**self.conn_args), timeout
                     )
-                    self.log.info(f"CONNECTED: {self.name}")
+                    self.log.info("CONNECTED: %s", self.name)
 
                     if self.os_spec.pre_get_config:
                         self.process = await self.conn.create_process(
@@ -333,7 +333,7 @@ class BasicSSHConnector(object):
     async def close(self):
         self.conn.close()
         await self.conn.wait_closed()
-        self.log.info(f"CLOSED: {self.name}")
+        self.log.info("CLOSED: %s", self.name)
 
     # -------------------------------------------------------------------------
     #
@@ -344,10 +344,10 @@ class BasicSSHConnector(object):
     async def read_until_prompt(self):
         output = b""
         while True:
-            self.log.debug(f"{self.name} - {output}")
+            self.log.debug("%s - %s", self.name, output)
             output += await self.process.stdout.read(io.DEFAULT_BUFFER_SIZE)
             nl_at = output.rfind(b"\n")
-            if mobj := self.PROMPT_PATTERN.match(output[nl_at + 1 :]):
+            if mobj := self.prompt_pattern.match(output[nl_at + 1 :]):
                 self._cur_prompt = mobj.group(1)
                 return output[0:nl_at]
 
@@ -388,11 +388,11 @@ class BasicSSHConnector(object):
             orig = config_content
             config_content = linter.lint_content(config_content, lint_spec)
             if orig == config_content:
-                self.log.debug(f"LINT no change on {self.name}")
+                self.log.debug("LINT no change on %s", self.name)
 
         self.save_file = Path(self.app_cfg.defaults.configs_dir) / f"{self.name}.cfg"
 
-        async with aiofiles.open(self.save_file, mode="w+") as ofile:
+        async with aiofiles.open(self.save_file, mode="w+", encoding="utf-8") as ofile:
             await ofile.write(config_content)
             await ofile.write("\n")
 

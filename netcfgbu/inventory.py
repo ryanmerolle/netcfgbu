@@ -14,7 +14,7 @@ def load(app_cfg: AppConfig, limits=None, excludes=None):
             f"Inventory file does not exist: {inventory_file.absolute()}"
         )
 
-    iter_recs = CommentedCsvReader(inventory_file.open())
+    iter_recs = CommentedCsvReader(inventory_file.open(mode="r", encoding="utf-8"))
     field_names = iter_recs.fieldnames
 
     if limits:
@@ -37,15 +37,15 @@ def build(inv_def: InventorySpec) -> int:
     # config-load-validation.
 
     script = inv_def.script
-    lgr.info(f"Executing script: [{script}]")
+    lgr.info("Executing script: [%s]", script)
 
     # Note: if you want to check the pass/fail of this call os.system() will
     # return 0 or non-zero as the exit code from the underlying script.  There
     # is no exception handling.  If you want to do exception handling, then
     # you'll need to use subprocess.call in place of os.system.
 
-    rc = os.system(script) #nosec
-    if rc != 0: #nosec
-        lgr.warning(f"inventory script returned non-zero return code: {rc}")
+    rc = os.system(script)  # nosec
+    if rc != 0:  # nosec
+        lgr.warning("inventory script returned non-zero return code: %s", rc)
 
     return rc
