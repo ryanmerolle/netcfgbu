@@ -81,9 +81,7 @@ class WithInventoryCommand(click.Command):
             )
 
             if not inv:
-                raise RuntimeError(
-                    f"No inventory matching limits in: {app_cfg.defaults.inventory}"
-                )
+                raise RuntimeError(f"No inventory matching limits in: {app_cfg.defaults.inventory}")
 
             # if there is jump host configuraiton then prepare for later use.
             if app_cfg.jumphost:
@@ -184,9 +182,7 @@ def opts_inventory(in_fn_deco):
     Returns:
         The decorated command function with inventory options applied.
     """
-    return reduce(
-        lambda _d, fn: fn(_d), [opt_inventory, opt_limits, opt_excludes], in_fn_deco
-    )
+    return reduce(lambda _d, fn: fn(_d), [opt_inventory, opt_limits, opt_excludes], in_fn_deco)
 
 
 opt_batch = click.option(
@@ -196,13 +192,9 @@ opt_batch = click.option(
     help="inventory record processing batch size",
 )
 
-opt_timeout = click.option(
-    "--timeout", "-t", help="timeout(s)", type=click.IntRange(0, 5 * 60)
-)
+opt_timeout = click.option("--timeout", "-t", help="timeout(s)", type=click.IntRange(0, 5 * 60))
 
-opt_debug_ssh = click.option(
-    "--debug-ssh", help="enable SSH debugging", type=click.IntRange(1, 3)
-)
+opt_debug_ssh = click.option("--debug-ssh", help="enable SSH debugging", type=click.IntRange(1, 3))
 
 
 @click.group()

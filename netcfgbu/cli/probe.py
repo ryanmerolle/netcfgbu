@@ -37,9 +37,7 @@ def exec_probe(inventory_recs: list, timeout=None) -> None:
         Returns:
             A probe task configured with the IP address or hostname from the inventory record.
         """
-        return probe(
-            rec.get("ipaddr") or rec.get("host"), timeout=timeout, raise_exc=True
-        )
+        return probe(rec.get("ipaddr") or rec.get("host"), timeout=timeout, raise_exc=True)
 
     execute_command(inventory_recs, None, CLI_COMMAND, task_creator)
 

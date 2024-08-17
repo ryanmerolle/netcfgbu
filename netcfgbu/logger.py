@@ -14,7 +14,6 @@ import sys
 from logging import getLogger
 from logging.config import dictConfig
 from queue import SimpleQueue as Queue
-from typing import Set
 
 __all__ = ["setup_logging", "get_logger", "stop_aiologging"]
 
@@ -51,7 +50,7 @@ class LocalQueueHandler(logging.handlers.QueueHandler):
             self.handleError(record)
 
 
-def setup_logging_queue(logger_names: Set[str]) -> None:
+def setup_logging_queue(logger_names: set[str]) -> None:
     """
     Set up a logging queue to move log handling to a separate thread.
 
@@ -63,7 +62,7 @@ def setup_logging_queue(logger_names: Set[str]) -> None:
     """
     global _G_QUELGR_LISTENER
     queue = Queue()
-    handlers: Set[logging.Handler] = set()
+    handlers: set[logging.Handler] = set()
     que_handler = LocalQueueHandler(queue)
 
     for lname in logger_names:

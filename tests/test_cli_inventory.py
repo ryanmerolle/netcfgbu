@@ -48,9 +48,7 @@ def test_cli_inventory_fail_limits_zero(files_dir, monkeypatch):
     monkeypatch.setenv("NETCFGBU_INVENTORY", str(test_inv))
 
     runner = CliRunner()
-    res = runner.invoke(
-        inventory.cli_inventory_list, obj={}, args=["--exclude", "os_name=.*"]
-    )
+    res = runner.invoke(inventory.cli_inventory_list, obj={}, args=["--exclude", "os_name=.*"])
 
     assert res.exit_code != 0
     assert "No inventory matching limits" in res.output
@@ -61,9 +59,7 @@ def test_cli_inventory_fail_limits_invalid(files_dir, monkeypatch):
     monkeypatch.setenv("NETCFGBU_INVENTORY", str(test_inv))
 
     runner = CliRunner()
-    res = runner.invoke(
-        inventory.cli_inventory_list, obj={}, args=["--limit", "foo=bar"]
-    )
+    res = runner.invoke(inventory.cli_inventory_list, obj={}, args=["--limit", "foo=bar"])
 
     assert res.exit_code != 0
     assert "Invalid filter expression" in res.output
@@ -114,6 +110,4 @@ def test_cli_inventory_fail_build_badname(files_dir, monkeypatch):
     runner = CliRunner()
     res = runner.invoke(inventory.cli_inventory_build, obj={}, args=["--name=noexists"])
     assert res.exit_code != 0
-    assert (
-        "Inventory section 'noexists' not defined in configuration file" in res.output
-    )
+    assert "Inventory section 'noexists' not defined in configuration file" in res.output

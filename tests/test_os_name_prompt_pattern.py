@@ -12,9 +12,7 @@ def test_config_os_name_prompt_pattern(netcfgbu_envars, request):  # noqa
     SSH connector instance.
     """
     rec = {"host": "dummy", "os_name": "cumulus"}
-    abs_filepath = (
-        request.fspath.dirname + "/files/test-config-os-name-prompt-pattern.toml"
-    )
+    abs_filepath = request.fspath.dirname + "/files/test-config-os-name-prompt-pattern.toml"
     app_cfg = load(filepath=abs_filepath)
     conn = os_specs.make_host_connector(rec, app_cfg)
 

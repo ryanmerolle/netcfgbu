@@ -95,8 +95,6 @@ def test_cli_vcs_pass_save_tag_notgiven(mock_git: Mock, config_file, monkeypatch
     res = runner.invoke(vcs.cli_vcs_save, obj={}, args=["-C", str(config_file)])
     assert res.exit_code == 0
     assert mock_git.vcs_save.called
-    repo_dir, message = itemgetter("repo_dir", "message")(
-        mock_git.vcs_save.mock_calls[0].kwargs
-    )
+    repo_dir, message = itemgetter("repo_dir", "message")(mock_git.vcs_save.mock_calls[0].kwargs)
     assert str(repo_dir) == "/tmp/configs"
     assert message is None

@@ -81,9 +81,7 @@ def cli_vcs_prepare(ctx: click.Context, **_cli_opts) -> None:
     can be stored in the VCS system.
     """
 
-    git.vcs_prepare(
-        spec=ctx.obj["vcs_spec"], repo_dir=ctx.obj["app_cfg"].defaults.configs_dir
-    )
+    git.vcs_prepare(spec=ctx.obj["vcs_spec"], repo_dir=ctx.obj["app_cfg"].defaults.configs_dir)
 
 
 @cli_vcs.command(name="save", cls=VCSCommand)

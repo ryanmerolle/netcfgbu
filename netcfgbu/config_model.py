@@ -3,7 +3,7 @@ import re
 from itertools import chain
 from os.path import expandvars
 from pathlib import Path
-from typing import Annotated, Dict, List, Optional, Union
+from typing import Annotated, Optional, Union
 
 from pydantic import (
     BaseModel,
@@ -58,15 +58,13 @@ def expand_env_str(env_string: str) -> str:
         EnvironmentError: If an environment variable is missing or empty.
     """
 
-    if found_variables := list(
-        filter(len, chain.from_iterable(_var_re.findall(env_string)))
-    ):
+    if found_variables := list(filter(len, chain.from_iterable(_var_re.findall(env_string)))):
         for var in found_variables:
             if (var_val := os.getenv(var)) is None:
-                raise EnvironmentError(f"Environment variable '{var}' missing.")
+                raise OSError(f"Environment variable '{var}' missing.")
 
             if not var_val:
-                raise EnvironmentError(f"Environment variable '{var}' empty.")
+                raise OSError(f"Environment variable '{var}' empty.")
 
         return expandvars(env_string)
 
@@ -232,9 +230,7 @@ class GitSpec(NoExtraBaseModel):
         """
         expected = ("https:", "git@")
         if not repo.startswith(expected):
-            raise ValueError(
-                f"Bad repo URL [{repo}]: expected to start with {expected}."
-            )
+            raise ValueError(f"Bad repo URL [{repo}]: expected to start with {expected}.")
         return repo
 
     @model_validator(mode="before")
@@ -257,9 +253,7 @@ class GitSpec(NoExtraBaseModel):
         auth_vals = list(filter(None, (values.get(auth) for auth in req)))
         auth_count = len(auth_vals)
         if auth_count == 0:
-            raise ValueError(
-                f'Missing one of required auth method fields: {"|".join(req)}'
-            )
+            raise ValueError(f'Missing one of required auth method fields: {"|".join(req)}')
 
         if auth_count > 1:
             raise ValueError(f'Only one of {"|".join(req)} allowed')
@@ -285,13 +279,13 @@ class OSNameSpec(NoExtraBaseModel):
         prompt_pattern: Pattern to match the prompt.
     """
 
-    credentials: Optional[List[Credential]] = None
-    pre_get_config: Optional[Union[str, List[str]]] = None
+    credentials: Optional[list[Credential]] = None
+    pre_get_config: Optional[Union[str, list[str]]] = None
     get_config: Optional[str] = None
     connection: Optional[str] = None
     linter: Optional[str] = None
     timeout: PositiveInt = Field(consts.DEFAULT_GETCONFIG_TIMEOUT)
-    ssh_configs: Optional[Dict] = None
+    ssh_configs: Optional[dict] = None
     prompt_pattern: Optional[str] = None
 
 
@@ -360,8 +354,8 @@ class JumphostSpec(NoExtraBaseModel):
 
     proxy: str
     name: Optional[str] = None
-    include: Optional[List[str]] = None
-    exclude: Optional[List[str]] = None
+    include: Optional[list[str]] = None
+    exclude: Optional[list[str]] = None
     timeout: PositiveInt = Field(consts.DEFAULT_LOGIN_TIMEOUT)
 
     @model_validator(mode="after")
@@ -396,20 +390,20 @@ class AppConfig(NoExtraBaseModel):
     """
 
     defaults: Defaults
-    credentials: Optional[List[Credential]] = None
-    linters: Optional[Dict[str, LinterSpec]] = None
-    os_name: Optional[Dict[str, OSNameSpec]] = None
-    inventory: Optional[List[InventorySpec]] = None
-    logging: Optional[Dict] = None
-    ssh_configs: Optional[Dict] = None
-    git: Optional[List[GitSpec]] = None
-    jumphost: Optional[List[JumphostSpec]] = None
+    credentials: Optional[list[Credential]] = None
+    linters: Optional[dict[str, LinterSpec]] = None
+    os_name: Optional[dict[str, OSNameSpec]] = None
+    inventory: Optional[list[InventorySpec]] = None
+    logging: Optional[dict] = None
+    ssh_configs: Optional[dict] = None
+    git: Optional[list[GitSpec]] = None
+    jumphost: Optional[list[JumphostSpec]] = None
 
     @field_validator("os_name")
     @classmethod
     def _linters(
-        cls, os_configs: Dict[str, OSNameSpec], info: ValidationInfo
-    ) -> Dict[str, OSNameSpec]:  # noqa
+        cls, os_configs: dict[str, OSNameSpec], info: ValidationInfo
+    ) -> dict[str, OSNameSpec]:  # noqa
         """
         Validate that the linters specified in os_name configurations are defined.
 

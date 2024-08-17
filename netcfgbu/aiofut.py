@@ -1,6 +1,7 @@
 import asyncio
 from asyncio import Task
-from typing import AsyncIterable, Coroutine, Iterable, Optional
+from collections.abc import AsyncIterable, Coroutine, Iterable
+from typing import Optional
 
 __all__ = ["as_completed"]
 
@@ -82,7 +83,5 @@ async def as_completed(
         fut.add_done_callback(wrapper.set_result)
         return wrapper
 
-    for next_completed in asyncio.as_completed(
-        [wrap_coro(coro) for coro in aws], timeout=timeout
-    ):
+    for next_completed in asyncio.as_completed([wrap_coro(coro) for coro in aws], timeout=timeout):
         yield await next_completed

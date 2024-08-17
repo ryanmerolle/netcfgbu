@@ -19,9 +19,7 @@ def test_config_onlyenvars_pass(monkeypatch, netcfgbu_envars):
     app_cfg = load()
 
     assert app_cfg.defaults.inventory == os.getenv("NETCFGBU_INVENTORY")
-    assert app_cfg.defaults.credentials.username == os.getenv(
-        "NETCFGBU_DEFAULT_USERNAME"
-    )
+    assert app_cfg.defaults.credentials.username == os.getenv("NETCFGBU_DEFAULT_USERNAME")
     assert app_cfg.defaults.credentials.password.get_secret_value() == os.getenv(
         "NETCFGBU_DEFAULT_PASSWORD"
     )
@@ -59,9 +57,7 @@ def test_config_onlyenvars_fail_bad_noinventory(monkeypatch):
         load()
 
     exc_errmsgs = excinfo.value.args[0].splitlines()
-    found = first(
-        [line for line in exc_errmsgs if "defaults.NETCFGBU_INVENTORY" in line]
-    )
+    found = first([line for line in exc_errmsgs if "defaults.NETCFGBU_INVENTORY" in line])
     assert found
     assert "inventory empty value not allowed" in found
 
@@ -75,9 +71,7 @@ def test_config_credentials_fail_missingvar(request, monkeypatch, fake_inventory
 
     monkeypatch.delenv("ENABLE_PASSWORD", raising=False)
 
-    with pytest.raises(
-        EnvironmentError, match="Environment variable 'ENABLE_PASSWORD' missing."
-    ):
+    with pytest.raises(EnvironmentError, match="Environment variable 'ENABLE_PASSWORD' missing."):
         load(fileio=fileio)
 
 
@@ -89,9 +83,7 @@ def test_config_credentials_fail_emptyvar(request, monkeypatch, netcfgbu_envars)
     fileio = open(f"{request.fspath.dirname}/files/test-credentials.toml")
     monkeypatch.setenv("ENABLE_PASSWORD", "")
 
-    with pytest.raises(
-        EnvironmentError, match="Environment variable 'ENABLE_PASSWORD' empty."
-    ):
+    with pytest.raises(EnvironmentError, match="Environment variable 'ENABLE_PASSWORD' empty."):
         load(fileio=fileio)
 
 
@@ -284,9 +276,7 @@ def test_vcs_fail_config(tmpdir):
     fake_key = str(fake_key)
 
     with pytest.raises(ValidationError) as excinfo:
-        config_model.GitSpec(
-            repo="git@dummy.git", password="fooer", deploy_passphrase="foobaz"
-        )
+        config_model.GitSpec(repo="git@dummy.git", password="fooer", deploy_passphrase="foobaz")
 
     errs = excinfo.value.errors()
     assert "deploy_key required when using deploy_passphrase" in errs[0]["msg"]

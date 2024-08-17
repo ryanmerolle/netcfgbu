@@ -10,8 +10,9 @@ import ipaddress
 import operator
 import re
 from abc import ABC, abstractmethod
+from collections.abc import Callable
 from pathlib import Path
-from typing import AnyStr, Callable, Dict, List, Optional
+from typing import AnyStr, Optional
 
 __all__ = ["create_filter"]
 
@@ -34,7 +35,7 @@ class Filter(ABC):
     """
 
     @abstractmethod
-    def __call__(self, record: Dict[str, AnyStr]) -> bool:
+    def __call__(self, record: dict[str, AnyStr]) -> bool:
         """
         Apply the filter to the given record.
 
@@ -64,11 +65,9 @@ class RegexFilter(Filter):
         try:
             self.regex = re.compile(f"^{expr}$", re.IGNORECASE)
         except re.error as exc:
-            raise ValueError(
-                f"Invalid filter regular-expression: {expr!r}: {exc}"
-            ) from None
+            raise ValueError(f"Invalid filter regular-expression: {expr!r}: {exc}") from None
 
-    def __call__(self, record: Dict[str, AnyStr]) -> bool:
+    def __call__(self, record: dict[str, AnyStr]) -> bool:
         """
         Apply the regex filter to the specified field in the record.
 
@@ -103,7 +102,7 @@ class IPFilter(Filter):
         self.fieldname = fieldname
         self.ip_address = ipaddress.ip_network(ip_address)
 
-    def __call__(self, record: Dict[str, AnyStr]) -> bool:
+    def __call__(self, record: dict[str, AnyStr]) -> bool:
         """
         Apply the IP filter to the specified field in the record.
 
@@ -120,7 +119,7 @@ class IPFilter(Filter):
 
 
 def parse_constraint(
-    constraint: str, field_value_reg: re.Pattern, field_names: List[AnyStr]
+    constraint: str, field_value_reg: re.Pattern, field_names: list[AnyStr]
 ) -> Filter:
     """
     Parse a filter constraint expression and return the appropriate Filter instance.
@@ -210,22 +209,16 @@ def mk_file_filter(filepath, key):
         Callable: A filter function that returns True if the record matches the CSV file contents.
     """
     if filepath.endswith(".csv"):
-        with open(filepath, "r", encoding="utf-8") as csvfile:
+        with open(filepath, encoding="utf-8") as csvfile:
             reader = csv.DictReader(csvfile)
             if reader.fieldnames is None:
-                raise ValueError(
-                    f"File '{filepath}' does not contain headers or is empty."
-                )
+                raise ValueError(f"File '{filepath}' does not contain headers or is empty.")
             if key not in reader.fieldnames:
-                raise ValueError(
-                    f"File '{filepath}' does not contain {key} content as expected"
-                )
+                raise ValueError(f"File '{filepath}' does not contain {key} content as expected")
             filter_hostnames = [rec[key] for rec in reader if rec.get(key)]
             print(f"Filter hostnames: {filter_hostnames}")  # Debugging print
     else:
-        raise ValueError(
-            f"File '{filepath}' not a CSV file. Only CSV files are supported."
-        )
+        raise ValueError(f"File '{filepath}' not a CSV file. Only CSV files are supported.")
 
     def op_filter(rec):
         return rec.get(key) in filter_hostnames
@@ -234,8 +227,8 @@ def mk_file_filter(filepath, key):
 
 
 def create_filter(
-    constraints: List[AnyStr], field_names: List[AnyStr], include: Optional[bool] = True
-) -> Callable[[Dict], bool]:
+    constraints: list[AnyStr], field_names: list[AnyStr], include: Optional[bool] = True
+) -> Callable[[dict], bool]:
     """
     Create a filter function based on the provided constraints.
 
@@ -253,8 +246,7 @@ def create_filter(
     field_value_reg = re.compile(fieldn_pattern + "=" + VALUE_PATTERN)
 
     op_filters = [
-        parse_constraint(constraint, field_value_reg, field_names)
-        for constraint in constraints
+        parse_constraint(constraint, field_value_reg, field_names) for constraint in constraints
     ]
 
     optest_fn = operator.not_ if include else operator.truth

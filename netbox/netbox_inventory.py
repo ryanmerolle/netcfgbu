@@ -59,12 +59,8 @@ def cli() -> argparse.Namespace:
     """
     options_parser = argparse.ArgumentParser()
     options_parser.add_argument("--site", action="store", help="limit devices to site")
-    options_parser.add_argument(
-        "--region", action="store", help="limit devices to region"
-    )
-    options_parser.add_argument(
-        "--role", action="append", help="limit devices with role(s)"
-    )
+    options_parser.add_argument("--region", action="store", help="limit devices to region")
+    options_parser.add_argument("--role", action="append", help="limit devices with role(s)")
     options_parser.add_argument(
         "--exclude-role", action="append", help="exclude devices with role(s)"
     )

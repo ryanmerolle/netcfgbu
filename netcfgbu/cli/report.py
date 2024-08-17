@@ -4,7 +4,7 @@ from collections import defaultdict
 from datetime import datetime
 from errno import errorcode
 from time import monotonic
-from typing import Any, Dict, List, Union
+from typing import Any, Union
 
 from tabulate import tabulate
 
@@ -45,7 +45,7 @@ class Report:
         self.start_tm: float = 0.0
         self.stop_ts: Union[None, datetime] = None
         self.stop_tm: float = 0.0
-        self.task_results: Dict[bool, List[Dict[str, Any]]] = defaultdict(list)
+        self.task_results: dict[bool, list[dict[str, Any]]] = defaultdict(list)
 
     def start_timing(self) -> None:
         """
@@ -104,10 +104,10 @@ class Report:
     def save_report(
         self,
         filename: str,
-        headers: List[str],
-        data: List[List[Any]],
-        summary_headers: Union[None, List[str]] = None,
-        summary_data: Union[None, Dict[str, Dict[str, int]]] = None,
+        headers: list[str],
+        data: list[list[Any]],
+        summary_headers: Union[None, list[str]] = None,
+        summary_data: Union[None, dict[str, dict[str, int]]] = None,
     ) -> None:
         """
         Saves the report data to a CSV file and prints a summary if provided.
@@ -129,32 +129,26 @@ class Report:
         if summary_headers and summary_data:
             base_filename = filename.rsplit(".", 1)[0]  # Ensure this is a string
             print(f"\n\n{base_filename.upper()} SUMMARY")
-            summary_tabular_data: List[List[Any]] = []
+            summary_tabular_data: list[list[Any]] = []
             total_count = 0
             for key1, key2_data in summary_data.items():
                 for key2, count in key2_data.items():
                     summary_tabular_data.append([key1, key2, count])
                     total_count += count
 
-            summary_tabular_data.sort(
-                key=lambda x: (x[0], x[1])
-            )  # Sort by key1, then key2
+            summary_tabular_data.sort(key=lambda x: (x[0], x[1]))  # Sort by key1, then key2
             summary_tabular_data.append(["-" * 7, "-" * 10, "-" * 5])  # Separator line
             summary_tabular_data.append(["TOTAL", "", total_count])
 
-            print(
-                tabulate(
-                    summary_tabular_data, headers=summary_headers, tablefmt="pretty"
-                )
-            )
+            print(tabulate(summary_tabular_data, headers=summary_headers, tablefmt="pretty"))
 
     def save_login_report(self) -> None:
         """
         Generates and saves the login report as a CSV file, including a summary of login attempts.
         """
         headers = ["host", "os_name", "num_of_attempts", "login_used"]
-        login_tabular_data: List[List[Any]] = []
-        summary_data: Dict[str, Dict[str, int]] = defaultdict(lambda: defaultdict(int))
+        login_tabular_data: list[list[Any]] = []
+        summary_data: dict[str, dict[str, int]] = defaultdict(lambda: defaultdict(int))
 
         for rec in self.task_results[True]:
             host = rec["host"]
@@ -178,12 +172,11 @@ class Report:
         Generates & saves the failure report as a CSV file, including a summary of failure reasons.
         """
         headers = ["host", "os_name", "reason"]
-        failure_tabular_data: List[List[Any]] = [
-            [rec["host"], rec["os_name"], err_reason(exc)]
-            for rec, exc in self.task_results[False]
+        failure_tabular_data: list[list[Any]] = [
+            [rec["host"], rec["os_name"], err_reason(exc)] for rec, exc in self.task_results[False]
         ]
 
-        summary_data: Dict[str, Dict[str, int]] = defaultdict(lambda: defaultdict(int))
+        summary_data: dict[str, dict[str, int]] = defaultdict(lambda: defaultdict(int))
         for _, os_name, reason in failure_tabular_data:
             summary_data[os_name][reason] += 1
 

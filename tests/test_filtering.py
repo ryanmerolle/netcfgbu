@@ -13,9 +13,7 @@ def test_filtering_pass_include():
     constraints = [f"{key}={val}" for key, val in key_values]
     field_names = [key for key, _ in key_values]
 
-    filter_fn = create_filter(
-        constraints=constraints, field_names=field_names, include=True
-    )
+    filter_fn = create_filter(constraints=constraints, field_names=field_names, include=True)
 
     assert filter_fn(dict(os_name="eos", host="switch1.nyc1")) is True
     assert filter_fn(dict(os_name="ios", host="switch1.nyc1")) is False
@@ -30,9 +28,7 @@ def test_filtering_pass_exclude():
     constraints = [f"{key}={val}" for key, val in key_values]
     field_names = [key for key, _ in key_values]
 
-    filter_fn = create_filter(
-        constraints=constraints, field_names=field_names, include=False
-    )
+    filter_fn = create_filter(constraints=constraints, field_names=field_names, include=False)
 
     assert filter_fn(dict(os_name="ios", host="switch1.nyc1")) is False
     assert filter_fn(dict(os_name="eos", host="switch1.dc1")) is False
@@ -60,9 +56,7 @@ def test_filtering_fail_constraint_regex():
     Test the case where the constraint value is an invalid regular-expression.
     """
     with pytest.raises(ValueError) as excinfo:
-        create_filter(
-            constraints=["os_name=***"], field_names=["os_name"], include=False
-        )
+        create_filter(constraints=["os_name=***"], field_names=["os_name"], include=False)
 
     errmsg = excinfo.value.args[0]
     assert "Invalid filter regular-expression" in errmsg
@@ -82,7 +76,7 @@ def test_filtering_pass_filepath(tmpdir):
         ofile.write("switch2.dc1,ios\n")
 
     # Read and print the CSV file content to ensure correctness
-    with open(tmpfile, "r", encoding="utf-8") as ofile:
+    with open(tmpfile, encoding="utf-8") as ofile:
         content = ofile.read()
         print(f"CSV content:\n{content}")
 
@@ -130,7 +124,7 @@ def test_filtering_pass_csv_filecontents(tmpdir):
         csv_wr.writerows(inventory_recs)
 
     # Read and print the CSV file content to ensure correctness
-    with open(tmpfile, "r", encoding="utf-8") as ofile:
+    with open(tmpfile, encoding="utf-8") as ofile:
         content = ofile.read()
         print(f"CSV content:\n{content}")
 

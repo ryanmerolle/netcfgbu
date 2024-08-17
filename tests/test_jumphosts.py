@@ -46,9 +46,7 @@ def test_jumphosts_pass_incused(inventory):
     jumphosts.init_jumphosts(jumphost_specs=[jh_spec], inventory=inventory)
     assert len(jumphosts.JumpHost.available) == 1
 
-    jh_use_count = Counter(
-        getattr(jumphosts.get_jumphost(rec), "name", None) for rec in inventory
-    )
+    jh_use_count = Counter(getattr(jumphosts.get_jumphost(rec), "name", None) for rec in inventory)
 
     assert jh_use_count["1.2.3.4"] == 2
 
@@ -62,9 +60,7 @@ def test_jumphosts_pass_exlused(inventory):
     jumphosts.init_jumphosts(jumphost_specs=[jh_spec], inventory=inventory)
     assert len(jumphosts.JumpHost.available) == 1
 
-    jh_use_count = Counter(
-        getattr(jumphosts.get_jumphost(rec), "name", None) for rec in inventory
-    )
+    jh_use_count = Counter(getattr(jumphosts.get_jumphost(rec), "name", None) for rec in inventory)
 
     assert jh_use_count["1.2.3.4"] == 4
 
@@ -84,9 +80,7 @@ async def test_jumphosts_fail_connect(
 ):
     monkeypatch.setattr(jumphosts, "get_logger", Mock(return_value=log_vcr))
 
-    jh_spec = config_model.JumphostSpec(
-        proxy="dummy-user@1.2.3.4:8022", exclude=["os_name=eos"]
-    )
+    jh_spec = config_model.JumphostSpec(proxy="dummy-user@1.2.3.4:8022", exclude=["os_name=eos"])
 
     jumphosts.init_jumphosts(jumphost_specs=[jh_spec], inventory=inventory)
 
@@ -109,9 +103,7 @@ async def test_jumphosts_fail_connect(
     log_recs = log_vcr.handlers[0].records
 
     # Manually format the log messages before comparison
-    expected_timeout_log = (
-        "JUMPHOST: connect to dummy-user@1.2.3.4:8022 failed: TimeoutError"
-    )
+    expected_timeout_log = "JUMPHOST: connect to dummy-user@1.2.3.4:8022 failed: TimeoutError"
     expected_error_log = "JUMPHOST: connect to dummy-user@1.2.3.4:8022 failed: nooooope"
 
     assert log_recs[-2].getMessage() == expected_timeout_log

@@ -9,7 +9,7 @@ import asyncio
 # -----------------------------------------------------------------------------
 # System Imports
 # -----------------------------------------------------------------------------
-from typing import AnyStr, Dict, List, Optional
+from typing import AnyStr, Optional
 from urllib.parse import urlparse
 
 # -----------------------------------------------------------------------------
@@ -34,7 +34,7 @@ class JumpHost:
 
     available = []
 
-    def __init__(self, spec: JumphostSpec, field_names: List[AnyStr]):
+    def __init__(self, spec: JumphostSpec, field_names: list[AnyStr]):
         """
         Prepare a jump host instance for potential use.  This method
         does not connect to the proxy system.
@@ -60,9 +60,7 @@ class JumpHost:
         a RuntimeError.
         """
         if not self.is_active:
-            raise RuntimeError(
-                f"Attempting to use JumpHost {self.name}, but not connected"
-            )
+            raise RuntimeError(f"Attempting to use JumpHost {self.name}, but not connected")
         return self._conn
 
     @property
@@ -80,16 +78,12 @@ class JumpHost:
         include, exclude = self._spec.include, self._spec.exclude
         if include:
             self.filters.append(
-                create_filter(
-                    constraints=include, field_names=field_names, include=True
-                )
+                create_filter(constraints=include, field_names=field_names, include=True)
             )
 
         if exclude:
             self.filters.append(
-                create_filter(
-                    constraints=exclude, field_names=field_names, include=False
-                )
+                create_filter(constraints=exclude, field_names=field_names, include=False)
             )
 
     async def connect(self):
@@ -127,7 +121,7 @@ class JumpHost:
 # -----------------------------------------------------------------------------
 
 
-def init_jumphosts(jumphost_specs: List[JumphostSpec], inventory: List[Dict]):
+def init_jumphosts(jumphost_specs: list[JumphostSpec], inventory: list[dict]):
     """
     Initialize the required set of Jump Host instances so that they can be used
     when netcfgbu attempts to access devices that require the use of jump
@@ -151,9 +145,7 @@ def init_jumphosts(jumphost_specs: List[JumphostSpec], inventory: List[Dict]):
     jh_list = [JumpHost(spec, field_names=field_names) for spec in jumphost_specs]
 
     req_jh = {
-        use_jh
-        for rec in inventory
-        if (use_jh := first(jh for jh in jh_list if jh.filter(rec)))
+        use_jh for rec in inventory if (use_jh := first(jh for jh in jh_list if jh.filter(rec)))
     }
 
     JumpHost.available = list(req_jh)

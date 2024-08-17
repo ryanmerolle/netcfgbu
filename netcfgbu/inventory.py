@@ -24,11 +24,9 @@ def load(app_cfg: AppConfig, limits=None, excludes=None):
     """
     inventory_file = Path(app_cfg.defaults.inventory)
     if not inventory_file.exists():
-        raise FileNotFoundError(
-            f"Inventory file does not exist: {inventory_file.absolute()}"
-        )
+        raise FileNotFoundError(f"Inventory file does not exist: {inventory_file.absolute()}")
 
-    iter_recs = CommentedCsvReader(inventory_file.open(mode="r", encoding="utf-8"))
+    iter_recs = CommentedCsvReader(inventory_file.open(encoding="utf-8"))
     field_names = iter_recs.fieldnames
 
     if limits:
@@ -36,9 +34,7 @@ def load(app_cfg: AppConfig, limits=None, excludes=None):
         iter_recs = filter(filter_fn, iter_recs)
 
     if excludes:
-        filter_fn = create_filter(
-            constraints=excludes, field_names=field_names, include=False
-        )
+        filter_fn = create_filter(constraints=excludes, field_names=field_names, include=False)
         iter_recs = filter(filter_fn, iter_recs)
 
     return list(iter_recs)

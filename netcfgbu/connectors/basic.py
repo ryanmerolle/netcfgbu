@@ -220,9 +220,7 @@ class BasicSSHConnector:
             self.log.debug("AFTER-PRE-GET-RUNNING: %s", res)
 
             self.log.info(log_msg)
-            self.config = await asyncio.wait_for(
-                self.run_command(command), timeout=timeout
-            )
+            self.config = await asyncio.wait_for(self.run_command(command), timeout=timeout)
 
         except asyncio.TimeoutError as exc:
             if not at_prompt:
@@ -314,9 +312,7 @@ class BasicSSHConnector:
                     )
 
                     self.log.info(login_msg)
-                    self.conn = await asyncio.wait_for(
-                        asyncssh.connect(**self.conn_args), timeout
-                    )
+                    self.conn = await asyncio.wait_for(asyncssh.connect(**self.conn_args), timeout)
                     self.log.info("CONNECTED: %s", self.name)
 
                     if self.os_spec.pre_get_config:

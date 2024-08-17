@@ -19,9 +19,7 @@ def test_inventory_pass(request, monkeypatch, netcfgbu_envars):
     assert len(inv_recs) == 6
 
     # filter records
-    inv_recs = inventory.load(
-        app_cfg, limits=["os_name=eos"], excludes=["host=switch1"]
-    )
+    inv_recs = inventory.load(app_cfg, limits=["os_name=eos"], excludes=["host=switch1"])
     assert len(inv_recs) == 1
     assert inv_recs[0]["host"] == "switch2"
 

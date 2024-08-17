@@ -48,7 +48,7 @@ def load(*, filepath: str = None, fileio=None) -> AppConfig:
 
     if filepath:
         app_cfg_file = Path(filepath)
-        fileio = app_cfg_file.open(mode="r", encoding="utf-8")
+        fileio = app_cfg_file.open(encoding="utf-8")
 
     if fileio:
         app_cfg = toml.load(fileio)
@@ -63,9 +63,7 @@ def load(*, filepath: str = None, fileio=None) -> AppConfig:
         cfg_obj = AppConfig.model_validate(app_cfg)
     except ValidationError as exc:
         filepath = fileio.name if fileio else ""
-        raise RuntimeError(
-            validation_errors(filepath=filepath, errors=exc.errors())
-        ) from exc
+        raise RuntimeError(validation_errors(filepath=filepath, errors=exc.errors())) from exc
 
     configs_dir: Path = cfg_obj.defaults.configs_dir
     if not configs_dir.is_dir():

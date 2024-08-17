@@ -365,9 +365,7 @@ class GitDeployKeyRunner(GitRunner):
         if not ssh_key_path.exists():
             raise FileNotFoundError(f"Deploy key file not found: {ssh_key_path}")
         ssh_key = str(ssh_key_path)
-        self.run(
-            f"config --local core.sshCommand 'ssh -i {ssh_key} -o StrictHostKeyChecking=no'"
-        )
+        self.run(f"config --local core.sshCommand 'ssh -i {ssh_key} -o StrictHostKeyChecking=no'")
 
 
 class GitSecuredDeployKeyRunner(GitDeployKeyRunner, GitAuthRunner):

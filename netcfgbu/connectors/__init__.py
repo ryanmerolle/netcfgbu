@@ -4,7 +4,7 @@ from importlib import import_module
 from .basic import BasicSSHConnector, set_max_startups  # noqa: F401
 
 
-@lru_cache()
+@lru_cache
 def get_connector_class(mod_cls_name=None):
     """
     Retrieves the connector class based on the provided module and class name.

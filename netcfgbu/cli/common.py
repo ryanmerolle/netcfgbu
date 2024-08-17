@@ -178,9 +178,7 @@ def execute_command(
     report = Report()
     report.start_timing()
     loop.run_until_complete(
-        process_tasks(
-            tasks, app_cfg, report, cli_command, success_callback, failure_callback
-        )
+        process_tasks(tasks, app_cfg, report, cli_command, success_callback, failure_callback)
     )
     report.stop_timing()
     stop_aiologging()
