@@ -21,11 +21,10 @@ def lint_content(config_content, lint_spec: LinterSpec) -> str:
     start_offset = 0
     end_offset = None
 
-    if not start_offset and lint_spec.config_starts_after:
-        if start_mo := re.search(
-            f"^{lint_spec.config_starts_after}.*$", config_content, re.MULTILINE
-        ):
-            start_offset = start_mo.end() + 1
+    if not start_offset and lint_spec.config_starts_after and (start_mo := re.search(
+        f"^{lint_spec.config_starts_after}.*$", config_content, re.MULTILINE
+    )):
+        start_offset = start_mo.end() + 1
 
     if lint_spec.config_ends_at:
         # if not found, rfind returns -1 to indciate; therefore need to make
