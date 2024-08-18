@@ -4,8 +4,7 @@ from netcfgbu.connectors.basic import BasicSSHConnector
 
 
 class LoginPromptUserPass(BasicSSHConnector):
-    """
-    A custom SSH connector that handles login prompts for both username and password.
+    """A custom SSH connector that handles login prompts for both username and password.
 
     This class extends `BasicSSHConnector` and is used to handle devices that
     prompt for a username and password separately during the SSH login process.
@@ -15,8 +14,7 @@ class LoginPromptUserPass(BasicSSHConnector):
     """
 
     async def login(self):
-        """
-        Perform the SSH login process by handling prompts for username and password.
+        """Perform the SSH login process by handling prompts for username and password.
 
         This method waits for the "User:" and "Password:" prompts, and then sends the
         corresponding username and password from the connection arguments.

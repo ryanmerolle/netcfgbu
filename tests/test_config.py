@@ -12,8 +12,7 @@ from netcfgbu.config import load
 
 
 def test_config_onlyenvars_pass(monkeypatch, netcfgbu_envars):
-    """
-    Execute a test where there is no configuration file.
+    """Execute a test where there is no configuration file.
     In this case, the NETCFGBU_<fieldname> environment variables must exist.
     """
     app_cfg = load()
@@ -26,8 +25,7 @@ def test_config_onlyenvars_pass(monkeypatch, netcfgbu_envars):
 
 
 def test_config_onlyenvars_fail_missing(monkeypatch):
-    """
-    Execute a test where there is no configuration file.
+    """Execute a test where there is no configuration file.
     Omit the default environment variables and ensure that an exception is raised as expected.
     """
     monkeypatch.delenv("NETCFGBU_INVENTORY", raising=False)
@@ -48,9 +46,7 @@ def test_config_onlyenvars_fail_missing(monkeypatch):
 
 
 def test_config_onlyenvars_fail_bad_noinventory(monkeypatch):
-    """
-    Test the case where NETCFGBU_INVENTORY is set but empty, and it generates an exception message.
-    """
+    """Test the case where NETCFGBU_INVENTORY is set but empty, and it generates an exception message."""
     monkeypatch.setenv("NETCFGBU_INVENTORY", "")
 
     with pytest.raises(RuntimeError) as excinfo:
@@ -63,8 +59,7 @@ def test_config_onlyenvars_fail_bad_noinventory(monkeypatch):
 
 
 def test_config_credentials_fail_missingvar(request, monkeypatch, fake_inventory_file):
-    """
-    Test the case where the [[credentials]] section uses an environment variable,
+    """Test the case where the [[credentials]] section uses an environment variable,
     and that environment variable is missing.
     """
     fileio = open(f"{request.fspath.dirname}/files/test-credentials.toml")
@@ -76,8 +71,7 @@ def test_config_credentials_fail_missingvar(request, monkeypatch, fake_inventory
 
 
 def test_config_credentials_fail_emptyvar(request, monkeypatch, netcfgbu_envars):
-    """
-    Test the case where the [[credentials]] section uses an environment variable,
+    """Test the case where the [[credentials]] section uses an environment variable,
     and that environment variable exists but is set to an empty string.
     """
     fileio = open(f"{request.fspath.dirname}/files/test-credentials.toml")
@@ -88,8 +82,7 @@ def test_config_credentials_fail_emptyvar(request, monkeypatch, netcfgbu_envars)
 
 
 def test_config_credentials_pass_usesvar(request, monkeypatch, netcfgbu_envars):
-    """
-    Test the case where the [[credentials]] section uses an environment variable,
+    """Test the case where the [[credentials]] section uses an environment variable,
     and that environment variable is set to a non-empty value.
     """
     fileio = open(f"{request.fspath.dirname}/files/test-credentials.toml")
@@ -99,9 +92,7 @@ def test_config_credentials_pass_usesvar(request, monkeypatch, netcfgbu_envars):
 
 
 def test_config_git_pass(request, netcfgbu_envars, monkeypatch):
-    """
-    Test the case where a [[git]] section is properly configured.
-    """
+    """Test the case where a [[git]] section is properly configured."""
     files_dir = Path(request.fspath.dirname).joinpath("files")
     monkeypatch.setenv("GIT_TOKEN", "fake-token")
     monkeypatch.setenv("GITKEY_PASSWORD", "fake-password")
@@ -114,9 +105,7 @@ def test_config_git_pass(request, netcfgbu_envars, monkeypatch):
 
 
 def test_config_git_fail_badrepo(request, netcfgbu_envars):
-    """
-    Test the case where a [[git]] section has an improper GIT URL.
-    """
+    """Test the case where a [[git]] section has an improper GIT URL."""
     fileio = open(f"{request.fspath.dirname}/files/test-gitspec-badrepo.toml")
     with pytest.raises(RuntimeError) as excinfo:
         load(fileio=fileio)
@@ -128,9 +117,7 @@ def test_config_git_fail_badrepo(request, netcfgbu_envars):
 
 
 def test_config_inventory_pass(request, monkeypatch, netcfgbu_envars):
-    """
-    Test the case where an [[inventory]] section is properly configured.
-    """
+    """Test the case where an [[inventory]] section is properly configured."""
     files_dir = request.fspath.dirname + "/files"
     monkeypatch.setenv("SCRIPT_DIR", files_dir)
     fileio = open(f"{files_dir}/test-inventory.toml")
@@ -138,8 +125,7 @@ def test_config_inventory_pass(request, monkeypatch, netcfgbu_envars):
 
 
 def test_config_inventory_fail_noscript(request, netcfgbu_envars):
-    """
-    Test the case where an [[inventory]] section defines a script, but the
+    """Test the case where an [[inventory]] section defines a script, but the
     script does not exist.
     """
     fileio = open(f"{request.fspath.dirname}/files/test-inventory-fail.toml")
@@ -153,8 +139,7 @@ def test_config_inventory_fail_noscript(request, netcfgbu_envars):
 
 
 def test_config_inventory_fail_script_noexec(netcfgbu_envars, tmpdir):
-    """
-    Test the case where an [[inventory]] section defines a script, the script
+    """Test the case where an [[inventory]] section defines a script, the script
     file exists, but the script file is not executable.
     """
     fake_script = tmpdir.join("dummy-script.sh")
@@ -177,8 +162,7 @@ def test_config_inventory_fail_script_noexec(netcfgbu_envars, tmpdir):
 
 
 def test_config_linter_pass(netcfgbu_envars, request):
-    """
-    Test the case where an [os_name] section defines a linter, and that
+    """Test the case where an [os_name] section defines a linter, and that
     linter exists; no errors expected.
     """
     fileio = open(f"{request.fspath.dirname}/files/test-linter.toml")
@@ -190,8 +174,7 @@ def test_config_linter_pass(netcfgbu_envars, request):
 
 
 def test_config_linter_fail(netcfgbu_envars, request):
-    """
-    Test the case where an [os_name] section defines a linter, but that
+    """Test the case where an [os_name] section defines a linter, but that
     linter is not defined in the configuration.
     """
     fileio = open(f"{request.fspath.dirname}/files/test-linter-fail.toml")
@@ -205,8 +188,7 @@ def test_config_linter_fail(netcfgbu_envars, request):
 
 
 def test_config_pass_noexistdir(tmpdir, netcfgbu_envars, monkeypatch):
-    """
-    Test use-case where the provided configs-dir directory does not
+    """Test use-case where the provided configs-dir directory does not
     exist in the configuration; but as a result the configs-dir is
     created.
     """
@@ -220,8 +202,7 @@ def test_config_pass_noexistdir(tmpdir, netcfgbu_envars, monkeypatch):
 
 
 def test_plugins_pass_noexistdir(tmpdir, netcfgbu_envars, monkeypatch):
-    """
-    Test use-case where the provided configs-dir directory does not
+    """Test use-case where the provided configs-dir directory does not
     exist in the configuration; but as a result, the configs-dir is created.
     """
     dirpath = tmpdir.join("dummy-dir")
@@ -234,16 +215,13 @@ def test_plugins_pass_noexistdir(tmpdir, netcfgbu_envars, monkeypatch):
 
 
 def test_config_pass_asfilepath(request):
-    """
-    Test use-case where the config is provided as a filepath, and the file exists.
-    """
+    """Test use-case where the config is provided as a filepath, and the file exists."""
     abs_filepath = f"{request.fspath.dirname}/files/test-just-defaults.toml"
     load(filepath=abs_filepath)
 
 
 def test_config_fail_asfilepath(tmpdir):
-    """
-    Test use-case where the config is provided as a filepath, and the file
+    """Test use-case where the config is provided as a filepath, and the file
     does not exist.
     """
     noexist_filepath = str(tmpdir.join("noexist"))
@@ -255,9 +233,7 @@ def test_config_fail_asfilepath(tmpdir):
 
 
 def test_config_jumphost_name(netcfgbu_envars, request):
-    """
-    Test the case where jumphost name is correctly set from the config.
-    """
+    """Test the case where jumphost name is correctly set from the config."""
     abs_filepath = request.fspath.dirname + "/files/test-config-jumphosts.toml"
     app_cfg = load(filepath=abs_filepath)
     jh = app_cfg.jumphost[0]
@@ -268,9 +244,7 @@ def test_config_jumphost_name(netcfgbu_envars, request):
 
 
 def test_vcs_fail_config(tmpdir):
-    """
-    Test validation errors in GitSpec configuration.
-    """
+    """Test validation errors in GitSpec configuration."""
     fake_key = tmpdir.join("fake-key")
     fake_key.ensure()
     fake_key = str(fake_key)

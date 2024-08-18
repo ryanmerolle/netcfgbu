@@ -2,8 +2,7 @@ import csv
 
 
 class CommentedCsvReader(csv.DictReader):
-    """
-    A CSV reader that skips rows starting with a comment character ('#').
+    """A CSV reader that skips rows starting with a comment character ('#').
 
     This class extends `csv.DictReader` to ignore lines where the first column
     starts with the comment character '#'. It processes the CSV file and returns
@@ -19,8 +18,7 @@ class CommentedCsvReader(csv.DictReader):
     """
 
     def __next__(self):
-        """
-        Return the next row from the CSV file, skipping rows where the first column
+        """Return the next row from the CSV file, skipping rows where the first column
         starts with the comment character '#'.
 
         Returns:
@@ -39,27 +37,59 @@ class CommentedCsvReader(csv.DictReader):
 
 # TODO: not in use just yet.
 # class TextFileReader:
-#     wordsep_re = re.compile(r"\s+|,")
+#    """A text file reader that iterates over lines and returns specific indexed words,
+#    while skipping commented lines.
 #
-#     def __init__(self, fileio, index=0):
-#         self._index = index
-#         self._lines = fileio.readlines()
+#    This class reads a text file, skips lines starting with the comment character '#',
+#    and returns the word at the specified index for each valid line.
 #
-#     def __iter__(self):
-#         return self
+#    Attributes:
+#        wordsep_re (re.Pattern): A compiled regular expression for splitting lines into words.
+#    """
 #
-#     def __next__(self):
-#         try:
-#             line_item = self._lines.pop(0)
-#         except IndexError:
-#             raise StopIteration
+#    wordsep_re = re.compile(r"\s+|,")
 #
-#         if line_item.startswith("#"):
-#             return self.__next__()
+#    def __init__(self, fileio, index=0):
+#        """Initialize the TextFileReader with a file object and an optional index.
 #
-#         try:
-#             return self.wordsep_re.split(line_item)[self._index]
-#         except IndexError:
-#             pass
+#        Args:
+#            fileio (file-like object): The file object to read from.
+#            index (int, optional): The index of the word to return from each valid line. Defaults to 0.
+#        """
+#        self._index = index
+#        self._lines = fileio.readlines()
 #
-#         return self.__next__()
+#    def __iter__(self):
+#        """Return the iterator object itself.
+#
+#        Returns:
+#            TextFileReader: The instance of the class.
+#        """
+#        return self
+#
+#    def __next__(self):
+#        """Return the next valid word from the file, based on the specified index.
+#
+#        This method skips lines that start with the comment character '#'. It splits
+#        valid lines into words and returns the word at the specified index.
+#
+#        Returns:
+#            str: The word at the specified index.
+#
+#        Raises:
+#            StopIteration: When there are no more lines to return.
+#        """
+#        try:
+#            line_item = self._lines.pop(0)
+#        except IndexError:
+#            raise StopIteration
+#
+#        if line_item.startswith("#"):
+#            return self.__next__()
+#        try:
+#
+#            return self.wordsep_re.split(line_item)[self._index]
+#        except IndexError:
+#            pass
+#
+#        return self.__next__()

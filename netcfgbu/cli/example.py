@@ -8,8 +8,7 @@ from .root import cli
 
 
 def copy_example_files() -> None:
-    """
-    Check if any example file already exists in the current working directory.
+    """Check if any example file already exists in the current working directory.
     If so, print an error message and do not copy any files.
     Otherwise, copy all files from the 'src/examples/' directory within the package.
     """
@@ -45,8 +44,7 @@ def copy_example_files() -> None:
 @cli.command(name="example")
 @click.pass_context
 def cli_example(ctx: click.Context) -> None:
-    """
-    Generate example inventory & configuration files.
+    """Generate example inventory & configuration files.
 
     These files can be edited and used for setting up netcfgbu.
     """

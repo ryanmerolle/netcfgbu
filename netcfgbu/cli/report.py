@@ -13,8 +13,7 @@ SPACES_4 = " " * 4
 
 
 def err_reason(exc) -> str:
-    """
-    Returns a string representation of the error reason based on the exception type.
+    """Returns a string representation of the error reason based on the exception type.
 
     Args:
         exc: The exception to handle.
@@ -30,17 +29,14 @@ def err_reason(exc) -> str:
 
 
 class Report:
-    """
-    A class to handle reporting of task results, including timing, saving reports to files,
+    """A class to handle reporting of task results, including timing, saving reports to files,
     and printing summaries.
     """
 
     TIME_FORMAT = "%Y-%b-%d %I:%M:%S %p"
 
     def __init__(self) -> None:
-        """
-        Initializes a new instance of the Report class.
-        """
+        """Initializes a new instance of the Report class."""
         self.start_ts: Union[None, datetime] = None
         self.start_tm: float = 0.0
         self.stop_ts: Union[None, datetime] = None
@@ -48,23 +44,18 @@ class Report:
         self.task_results: dict[bool, list[dict[str, Any]]] = defaultdict(list)
 
     def start_timing(self) -> None:
-        """
-        Starts the timing for the report.
-        """
+        """Starts the timing for the report."""
         self.start_ts = datetime.now()
         self.start_tm = monotonic()
 
     def stop_timing(self) -> None:
-        """
-        Stops the timing for the report.
-        """
+        """Stops the timing for the report."""
         self.stop_ts = datetime.now()
         self.stop_tm = monotonic()
 
     @property
     def start_time(self) -> str:
-        """
-        Returns the formatted start time of the report.
+        """Returns the formatted start time of the report.
 
         Raises:
             ValueError: If the start time has not been set.
@@ -78,8 +69,7 @@ class Report:
 
     @property
     def stop_time(self) -> str:
-        """
-        Returns the formatted stop time of the report.
+        """Returns the formatted stop time of the report.
 
         Raises:
             ValueError: If the stop time has not been set.
@@ -93,8 +83,7 @@ class Report:
 
     @property
     def duration(self) -> float:
-        """
-        Returns the duration between the start and stop times.
+        """Returns the duration between the start and stop times.
 
         Returns:
             float: The duration in seconds.
@@ -109,8 +98,7 @@ class Report:
         summary_headers: Union[None, list[str]] = None,
         summary_data: Union[None, dict[str, dict[str, int]]] = None,
     ) -> None:
-        """
-        Saves the report data to a CSV file and prints a summary if provided.
+        """Saves the report data to a CSV file and prints a summary if provided.
 
         Args:
             filename: The name of the CSV file to save the report to.
@@ -143,9 +131,7 @@ class Report:
             print(tabulate(summary_tabular_data, headers=summary_headers, tablefmt="pretty"))
 
     def save_login_report(self) -> None:
-        """
-        Generates and saves the login report as a CSV file, including a summary of login attempts.
-        """
+        """Generates and saves the login report as a CSV file, including a summary of login attempts."""
         headers = ["host", "os_name", "num_of_attempts", "login_used"]
         login_tabular_data: list[list[Any]] = []
         summary_data: dict[str, dict[str, int]] = defaultdict(lambda: defaultdict(int))
@@ -168,9 +154,7 @@ class Report:
         )
 
     def save_failure_report(self) -> None:
-        """
-        Generates & saves the failure report as a CSV file, including a summary of failure reasons.
-        """
+        """Generates & saves the failure report as a CSV file, including a summary of failure reasons."""
         headers = ["host", "os_name", "reason"]
         failure_tabular_data: list[list[Any]] = [
             [rec["host"], rec["os_name"], err_reason(exc)] for rec, exc in self.task_results[False]
@@ -189,8 +173,7 @@ class Report:
         )
 
     def print_report(self, reports_type: str) -> None:
-        """
-        Prints a summary report of the task results and saves the appropriate reports to files.
+        """Prints a summary report of the task results and saves the appropriate reports to files.
 
         Args:
             reports_type: The type of report to generate ("login" or other types).

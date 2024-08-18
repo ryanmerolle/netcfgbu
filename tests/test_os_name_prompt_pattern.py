@@ -6,8 +6,7 @@ from netcfgbu.connectors import BasicSSHConnector
 
 
 def test_config_os_name_prompt_pattern(netcfgbu_envars, request):  # noqa
-    """
-    This test validates that a User provided prompt_pattern in the [os_name.$name]
+    """This test validates that a User provided prompt_pattern in the [os_name.$name]
     configuration section results in the User defined pattern used by the
     SSH connector instance.
     """

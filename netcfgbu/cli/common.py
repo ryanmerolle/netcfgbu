@@ -14,8 +14,7 @@ log = get_logger()
 
 
 async def handle_exception(exc, rec, done_msg, report) -> None:
-    """
-    Handles exceptions during task execution and logs the error.
+    """Handles exceptions during task execution and logs the error.
 
     Args:
         exc: The exception that occurred.
@@ -43,8 +42,7 @@ async def handle_exception(exc, rec, done_msg, report) -> None:
 async def process_tasks(
     tasks, app_cfg, report, cli_command, success_callback=None, failure_callback=None
 ):
-    """
-    Processes tasks in the provided task list, handling both login and generic tasks.
+    """Processes tasks in the provided task list, handling both login and generic tasks.
 
     Args:
         tasks: A list of tasks to process.
@@ -81,8 +79,7 @@ async def process_tasks(
 
 
 async def process_login_task(task, report, done_msg, rec, failure_callback):
-    """
-    Processes a login task, handling the results and exceptions.
+    """Processes a login task, handling the results and exceptions.
 
     Args:
         task: The task to process.
@@ -112,8 +109,7 @@ async def process_login_task(task, report, done_msg, rec, failure_callback):
 async def process_generic_task(
     task, report, cli_command, done_msg, rec, success_callback, failure_callback
 ):
-    """
-    Processes a generic task, handling the results and exceptions.
+    """Processes a generic task, handling the results and exceptions.
 
     Args:
         task: The task to process.
@@ -151,8 +147,7 @@ def execute_command(
     success_callback=None,
     failure_callback=None,
 ):
-    """
-    Executes the specified CLI command on the provided inventory records.
+    """Executes the specified CLI command on the provided inventory records.
 
     Args:
         inventory_recs: List of inventory records to process.

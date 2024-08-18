@@ -1,8 +1,8 @@
-"""
-This file contains the filtering functions that are using to process the
-'--include' and '--exclude' command line options.  The code in this module is
-not specific to the netcfgbu inventory column names, can could be re-used for
-other CSV related tools and use-cases.
+"""This file contains the filtering functions that are used to process the
+'--include' and '--exclude' command line options.
+
+The code in this module is not specific to the netcfgbu inventory column names and can be
+re-used for other CSV-related tools and use cases.
 """
 
 import csv
@@ -16,15 +16,13 @@ from typing import AnyStr, Optional
 
 __all__ = ["create_filter"]
 
-
 VALUE_PATTERN = r"(?P<value>\S+)$"
 file_reg = re.compile(r"@(?P<filename>.+)$")
 wordsep_re = re.compile(r"\s+|,")
 
 
 class Filter(ABC):
-    """
-    Filter is a type that supports comparisons against inventory fields.
+    """Filter is a type that supports comparisons against inventory fields.
 
     An implementation of Filter should capture:
      - The record fieldname to compare
@@ -36,8 +34,7 @@ class Filter(ABC):
 
     @abstractmethod
     def __call__(self, record: dict[str, AnyStr]) -> bool:
-        """
-        Apply the filter to the given record.
+        """Apply the filter to the given record.
 
         Args:
             record: The inventory record to filter.
@@ -49,13 +46,10 @@ class Filter(ABC):
 
 
 class RegexFilter(Filter):
-    """
-    Filter an inventory record field with a given regex pattern.
-    """
+    """Filter an inventory record field with a given regex pattern."""
 
     def __init__(self, fieldname: str, expr: str) -> None:
-        """
-        Initialize the RegexFilter.
+        """Initialize the RegexFilter.
 
         Args:
             fieldname: The name of the field to filter on.
@@ -68,8 +62,7 @@ class RegexFilter(Filter):
             raise ValueError(f"Invalid filter regular-expression: {expr!r}: {exc}") from None
 
     def __call__(self, record: dict[str, AnyStr]) -> bool:
-        """
-        Apply the regex filter to the specified field in the record.
+        """Apply the regex filter to the specified field in the record.
 
         Args:
             record: The inventory record to filter.
@@ -80,20 +73,26 @@ class RegexFilter(Filter):
         return bool(self.regex.match(record[self.fieldname]))
 
     def __repr__(self) -> str:
+        """Return a string representation of the RegexFilter.
+
+        This method provides a clear and concise description of the filter, including
+        the field name and the regular expression being used.
+
+        Returns:
+            str: A string representation of the RegexFilter instance.
+        """
         return f"RegexFilter(fieldname={self.fieldname!r}, expr={self.regex})"
 
 
 class IPFilter(Filter):
-    """
-    Filter an inventory record field based on an IP address or IP prefix.
+    """Filter an inventory record field based on an IP address or IP prefix.
 
     This filter checks whether the specified field's IP address is within a
     given IP range or matches a specific IP address.
     """
 
     def __init__(self, fieldname: str, ip_address: str) -> None:
-        """
-        Initialize the IPFilter.
+        """Initialize the IPFilter.
 
         Args:
             fieldname: The name of the field containing the IP address.
@@ -103,8 +102,7 @@ class IPFilter(Filter):
         self.ip_address = ipaddress.ip_network(ip_address)
 
     def __call__(self, record: dict[str, AnyStr]) -> bool:
-        """
-        Apply the IP filter to the specified field in the record.
+        """Apply the IP filter to the specified field in the record.
 
         Args:
             record: The inventory record to filter.
@@ -115,19 +113,26 @@ class IPFilter(Filter):
         return ipaddress.ip_address(record[self.fieldname]) in self.ip_address
 
     def __repr__(self) -> str:
-        return f"IpFilter(fieldname={self.fieldname!r}, ip='{self.ip_address}')"
+        """Return a string representation of the IPFilter.
+
+        This method provides a clear and concise description of the filter, including
+        the field name and the IP address or IP prefix being used for filtering.
+
+        Returns:
+            str: A string representation of the IPFilter instance.
+        """
+        return f"IPFilter(fieldname={self.fieldname!r}, ip='{self.ip_address}')"
 
 
 def parse_constraint(
-    constraint: str, field_value_reg: re.Pattern, field_names: list[AnyStr]
+    constraint: str, field_value_reg: re.Pattern, field_names: Optional[list[AnyStr]] = None
 ) -> Filter:
-    """
-    Parse a filter constraint expression and return the appropriate Filter instance.
+    """Parse a filter constraint expression and return the appropriate Filter instance.
 
     Args:
         constraint: The constraint expression in the form "<field-name>=<value>".
         field_value_reg: Compiled regular expression to match field-value constraints.
-        field_names: List of valid field names for filtering.
+        field_names: List of valid field names for filtering (optional).
 
     Returns:
         Filter: The corresponding Filter instance (RegexFilter or IPFilter).
@@ -147,8 +152,7 @@ def parse_constraint(
 
 
 def handle_file_filter(match_obj: re.Match) -> Filter:
-    """
-    Handle a file-based filter specified by the "@filename" syntax.
+    """Handle a file-based filter specified by the "@filename" syntax.
 
     Args:
         match_obj: The regex match object containing the filename.
@@ -163,8 +167,7 @@ def handle_file_filter(match_obj: re.Match) -> Filter:
 
 
 def create_ip_or_regex_filter(fieldn: str, value: str) -> Filter:
-    """
-    Create an IPFilter or RegexFilter based on the value provided.
+    """Create an IPFilter or RegexFilter based on the value provided.
 
     Args:
         fieldn: The field name to filter.
@@ -180,8 +183,7 @@ def create_ip_or_regex_filter(fieldn: str, value: str) -> Filter:
 
 
 def create_filter_function(op_filters, optest_fn):
-    """
-    Create a filter function that applies a list of filters to a record.
+    """Create a filter function that applies a list of filters to a record.
 
     Args:
         op_filters: List of filter functions.
@@ -192,14 +194,25 @@ def create_filter_function(op_filters, optest_fn):
     """
 
     def filter_fn(rec):
+        """Apply the list of filters to a given record.
+
+        This function iterates over the filters in `op_filters` and applies each one to the
+        provided record. It uses the `optest_fn` to determine whether any of the filters match.
+        If any filter matches, the function returns False; otherwise, it returns True.
+
+        Args:
+            rec (dict): The inventory record to filter.
+
+        Returns:
+            bool: True if none of the filters match the record, False otherwise.
+        """
         return not any(optest_fn(op_fn(rec)) for op_fn in op_filters)
 
     return filter_fn
 
 
 def mk_file_filter(filepath, key):
-    """
-    Create a filter function based on the contents of a CSV file.
+    """Create a filter function based on the contents of a CSV file.
 
     Args:
         filepath: Path to the CSV file containing filter criteria.
@@ -221,6 +234,14 @@ def mk_file_filter(filepath, key):
         raise ValueError(f"File '{filepath}' not a CSV file. Only CSV files are supported.")
 
     def op_filter(rec):
+        """Check if the record matches any of the hostnames in the CSV file.
+
+        Args:
+            rec (dict): The inventory record to check.
+
+        Returns:
+            bool: True if the record matches the filter criteria from the CSV file, False otherwise.
+        """
         return rec.get(key) in filter_hostnames
 
     return op_filter
@@ -229,8 +250,7 @@ def mk_file_filter(filepath, key):
 def create_filter(
     constraints: list[AnyStr], field_names: list[AnyStr], include: Optional[bool] = True
 ) -> Callable[[dict], bool]:
-    """
-    Create a filter function based on the provided constraints.
+    """Create a filter function based on the provided constraints.
 
     Args:
         constraints: A list of constraint expressions in the form "<field-name>=<value>".

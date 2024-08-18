@@ -5,8 +5,7 @@ from netcfgbu import config, inventory
 
 
 def test_inventory_pass(request, monkeypatch, netcfgbu_envars):
-    """
-    Test the use-case where there is a small inventory file that is properlly
+    """Test the use-case where there is a small inventory file that is properlly
     formatted.  Load the entire inventory as one subtest.  Load a filtered
     set of records as another subtest.
     """
@@ -25,8 +24,7 @@ def test_inventory_pass(request, monkeypatch, netcfgbu_envars):
 
 
 def test_inventory_fail_nofilegiven(tmpdir, netcfgbu_envars):
-    """
-    Test the use-case where the inventory is given in configuration file,
+    """Test the use-case where the inventory is given in configuration file,
     but the inventory file does not actually exist.
     """
     app_cfg = config.load()
@@ -39,8 +37,7 @@ def test_inventory_fail_nofilegiven(tmpdir, netcfgbu_envars):
 
 
 def test_inventory_pass_build(request, monkeypatch, netcfgbu_envars):
-    """
-    Test the use-case where the configuraiton contains an inventory build
+    """Test the use-case where the configuraiton contains an inventory build
     script.  The script exists, it runs without error.
     """
     files_dir = request.fspath.dirname + "/files"
@@ -53,8 +50,7 @@ def test_inventory_pass_build(request, monkeypatch, netcfgbu_envars):
 
 
 def test_inventory_fail_build_exitnozero(request, monkeypatch, netcfgbu_envars):
-    """
-    Test the use-case where the configuraiton contains an inventory build
+    """Test the use-case where the configuraiton contains an inventory build
     script.  The script exists, it runs but exists with non-zero return code.
     """
     files_dir = request.fspath.dirname + "/files"
@@ -69,8 +65,7 @@ def test_inventory_fail_build_exitnozero(request, monkeypatch, netcfgbu_envars):
 
 
 def test_inventory_fail_build_noscript(request, netcfgbu_envars):
-    """
-    Test the use-case where the configuraiton contains an inventory build
+    """Test the use-case where the configuraiton contains an inventory build
     script.  The script exists, it runs without error.
     """
     config_fpath = f"{request.fspath.dirname}/files/test-inventory-noscript.toml"

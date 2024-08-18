@@ -36,14 +36,20 @@ indent-width = 4
 target-version = "py39"
 
 [lint]
-# Enable Pyflakes (`F`) and a subset of the pycodestyle (`E`)  codes by default.
+# Enable Pyflakes (`F`), pycodestyle (`E`), and additional rules by default.
 select = [
+    # flake8-docstrings
+    "D",
     # pycodestyle
     "E",
     # Pyflakes
     "F",
     # pyupgrade
     "UP",
+    # PEP8 Naming conventions
+    "N",
+    # flake8-comprehensions
+    "C",
     # flake8-bugbear
     "B",
     # flake8-simplify
@@ -57,8 +63,17 @@ ignore = []
 fixable = ["ALL"]
 unfixable = []
 
-# Allow unused variables when underscore-prefixed.
-dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+# Disallow unused variables, even if underscore-prefixed.
+dummy-variable-rgx = "^_$"
+
+[lint.pydocstyle]
+convention = "google"
+
+[lint.flake8-quotes]
+docstring-quotes = "double"
+
+[lint.isort]
+case-sensitive = true
 
 [format]
 # Like Black, use double quotes for strings.
@@ -72,3 +87,5 @@ skip-magic-trailing-comma = false
 
 # Like Black, automatically detect the appropriate line ending.
 line-ending = "auto"
+
+docstring-code-format = true

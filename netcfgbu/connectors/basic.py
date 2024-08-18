@@ -14,10 +14,11 @@ from netcfgbu.logger import get_logger
 
 __all__ = ["BasicSSHConnector", "set_max_startups"]
 
+# TODO: FIX mypy errors
+
 
 class BasicSSHConnector:
-    """
-    The BasicSSHConnector class is used to define and process the
+    """The BasicSSHConnector class is used to define and process the
     configuration file backup process over SSH.  The primary usage is to
     initialize the class with the host configuration, the operating system
     specification, and the application configuration.  Once initialized the
@@ -30,7 +31,7 @@ class BasicSSHConnector:
     then only the `get_config` command will be executed.
 
 
-    Attributes
+    Attributes:
     ----------
     cls.prompt_pattern: re.Pattern
         compiled regular expression this used to find the CLI prompt
@@ -49,7 +50,7 @@ class BasicSSHConnector:
         (
             "^\r?(["
             + consts.PROMPT_VALID_CHARS
-            + "]{%s,%s}" % (1, consts.PROMPT_MAX_CHARS)  # pylint: disable=C0209
+            + f"]{{{1},{consts.PROMPT_MAX_CHARS}}}"  # pylint: disable=C0209
             + r"\s*[#>$])\s*$"
         ).encode("utf-8"),
         flags=(re.M | re.I),
@@ -61,8 +62,7 @@ class BasicSSHConnector:
     _max_startups_sem4 = asyncio.Semaphore(consts.DEFAULT_MAX_STARTUPS)
 
     def __init__(self, host_cfg: dict, os_spec: OSNameSpec, app_cfg: AppConfig):
-        """
-        Initialize the BasicSSHConnector with host configuration, OS specification
+        """Initialize the BasicSSHConnector with host configuration, OS specification
         , and app configuration.
 
         Args:
@@ -115,8 +115,7 @@ class BasicSSHConnector:
 
     @classmethod
     def set_max_startups(cls, max_startups):
-        """
-        Sets the maximum number of concurrent SSH connections.
+        """Sets the maximum number of concurrent SSH connections.
 
         Args:
             max_startups: The maximum number of concurrent SSH connections allowed.
@@ -130,13 +129,11 @@ class BasicSSHConnector:
     # -------------------------------------------------------------------------
 
     async def backup_config(self) -> Optional[bool]:
-        """
-        Main coroutine to back up the running configuration to a text file.
+        """Main coroutine to back up the running configuration to a text file.
 
         Returns:
             True if the backup process succeeds, otherwise returns an exception.
         """
-
         async with await self.login():
             try:
                 await self.get_running_config()
@@ -159,8 +156,7 @@ class BasicSSHConnector:
     # -------------------------------------------------------------------------
 
     async def test_login(self, timeout: int) -> Optional[str]:
-        """
-        Tests SSH login to the target device.
+        """Tests SSH login to the target device.
 
         Args:
             timeout: Timeout for the login attempt.
@@ -187,8 +183,7 @@ class BasicSSHConnector:
     # -------------------------------------------------------------------------
 
     async def get_running_config(self) -> None:
-        """
-        Retrieves the running configuration from the device.
+        """Retrieves the running configuration from the device.
 
         Raises:
             asyncio.TimeoutError: If any step of the process times out.
@@ -239,8 +234,7 @@ class BasicSSHConnector:
     # -------------------------------------------------------------------------
 
     def _setup_creds(self) -> list:
-        """
-        Sets up the credentials for the SSH connection.
+        """Sets up the credentials for the SSH connection.
 
         Returns:
             List of credentials to try for the connection.
@@ -271,8 +265,7 @@ class BasicSSHConnector:
         return creds
 
     async def login(self) -> asyncssh.SSHClientConnection:
-        """
-        Executes the SSH login process to the target device.
+        """Executes the SSH login process to the target device.
 
         Tries each credential provided in the app configuration in order.
 
@@ -283,7 +276,6 @@ class BasicSSHConnector:
             asyncssh.PermissionDenied: If none of the credentials result in a successful login.
             asyncio.TimeoutError: If attempting to connect to a device exceeds the timeout value.
         """
-
         timeout: int = self.os_spec.timeout
 
         # if this host requires the use of a JumpHost, then configure the
@@ -334,9 +326,7 @@ class BasicSSHConnector:
         )
 
     async def close(self) -> None:
-        """
-        Closes the SSH connection.
-        """
+        """Closes the SSH connection."""
         self.conn.close()
         await self.conn.wait_closed()
         self.log.info("CLOSED: %s", self.name)
@@ -348,8 +338,7 @@ class BasicSSHConnector:
     # -------------------------------------------------------------------------
 
     async def read_until_prompt(self) -> bytes:
-        """
-        Reads from the SSH process until the prompt is detected.
+        """Reads from the SSH process until the prompt is detected.
 
         Returns:
             The output read until the prompt is found as a byte string.
@@ -364,8 +353,7 @@ class BasicSSHConnector:
                 return output[0:nl_at]
 
     async def run_command(self, command: str) -> bytes:
-        """
-        Runs a command on the SSH process and reads the output until the prompt is detected.
+        """Runs a command on the SSH process and reads the output until the prompt is detected.
 
         Args:
             command: The command to run on the SSH device.
@@ -379,10 +367,7 @@ class BasicSSHConnector:
         return output[len(wr_cmd) + 1 :]
 
     async def run_disable_paging(self) -> None:
-        """
-        Executes the pre-get configuration commands to disable paging on the device.
-        """
-
+        """Executes the pre-get configuration commands to disable paging on the device."""
         disable_paging_commands = self.os_spec.pre_get_config
         if not isinstance(disable_paging_commands, list):
             disable_paging_commands = [disable_paging_commands]
@@ -398,8 +383,7 @@ class BasicSSHConnector:
     # -------------------------------------------------------------------------
 
     async def save_config(self) -> None:
-        """
-        Saves the retrieved configuration to a file on the filesystem.
+        """Saves the retrieved configuration to a file on the filesystem.
 
         If a linter is specified in the OS spec, the configuration content is processed by the
         linter before saving.
@@ -424,8 +408,7 @@ class BasicSSHConnector:
 
 
 def set_max_startups(count: int, cls=BasicSSHConnector) -> None:
-    """
-    Sets the maximum number of concurrent SSH connections for the specified class.
+    """Sets the maximum number of concurrent SSH connections for the specified class.
 
     Args:
         count: The maximum number of concurrent connections.

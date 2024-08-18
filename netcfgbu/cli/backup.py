@@ -18,8 +18,7 @@ CLI_COMMAND = "backup"
 
 
 def exec_backup(inventory_recs: list, app_cfg: AppConfig) -> None:
-    """
-    Executes the backup command on the provided inventory records.
+    """Executes the backup command on the provided inventory records.
 
     Args:
         inventory_recs: List of inventory records to back up.
@@ -27,8 +26,7 @@ def exec_backup(inventory_recs: list, app_cfg: AppConfig) -> None:
     """
 
     def task_creator(rec: dict, app_cfg: AppConfig):
-        """
-        Creates a backup task for the given inventory record.
+        """Creates a backup task for the given inventory record.
 
         Args:
             rec: A dictionary representing an inventory record.
@@ -40,8 +38,7 @@ def exec_backup(inventory_recs: list, app_cfg: AppConfig) -> None:
         return make_host_connector(rec, app_cfg).backup_config()
 
     def success_callback(rec, result):
-        """
-        Callback function executed on a successful backup.
+        """Callback function executed on a successful backup.
 
         Args:
             rec: A dictionary representing an inventory record.
@@ -50,8 +47,7 @@ def exec_backup(inventory_recs: list, app_cfg: AppConfig) -> None:
         Plugin.run_backup_success(rec, result)
 
     def failure_callback(rec, exc):
-        """
-        Callback function executed on a failed backup.
+        """Callback function executed on a failed backup.
 
         Args:
             rec: A dictionary representing an inventory record.
@@ -76,8 +72,6 @@ def exec_backup(inventory_recs: list, app_cfg: AppConfig) -> None:
 @opt_batch
 @click.pass_context
 def cli_backup(ctx: click.Context, **_cli_opts) -> None:
-    """
-    Backup network configurations.
-    """
+    """Backup network configurations."""
     load_plugins(ctx.obj["app_cfg"].defaults.plugins_dir)
     exec_backup(inventory_recs=ctx.obj["inventory_recs"], app_cfg=ctx.obj["app_cfg"])

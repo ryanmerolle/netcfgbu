@@ -6,9 +6,7 @@ from netcfgbu.filtering import create_filter
 
 
 def test_filtering_pass_include():
-    """
-    Test the use-case where the constraint is a valid set of "limits"
-    """
+    """Test the use-case where the constraint is a valid set of "limits" """
     key_values = [("os_name", "eos"), ("host", ".*nyc1")]
     constraints = [f"{key}={val}" for key, val in key_values]
     field_names = [key for key, _ in key_values]
@@ -21,9 +19,7 @@ def test_filtering_pass_include():
 
 
 def test_filtering_pass_exclude():
-    """
-    Test use-case where the constraint is a valid set of "excludes"
-    """
+    """Test use-case where the constraint is a valid set of "excludes" """
     key_values = [("os_name", "eos"), ("host", ".*nyc1")]
     constraints = [f"{key}={val}" for key, val in key_values]
     field_names = [key for key, _ in key_values]
@@ -36,8 +32,7 @@ def test_filtering_pass_exclude():
 
 
 def test_filtering_fail_constraint_field():
-    """
-    Test the use-case where the constraint form is invalid due to a
+    """Test the use-case where the constraint form is invalid due to a
     field name being incorrect.
     """
     key_values = [("os_name2", "eos"), ("host", ".*nyc1")]
@@ -52,9 +47,7 @@ def test_filtering_fail_constraint_field():
 
 
 def test_filtering_fail_constraint_regex():
-    """
-    Test the case where the constraint value is an invalid regular-expression.
-    """
+    """Test the case where the constraint value is an invalid regular-expression."""
     with pytest.raises(ValueError) as excinfo:
         create_filter(constraints=["os_name=***"], field_names=["os_name"], include=False)
 
@@ -63,9 +56,7 @@ def test_filtering_fail_constraint_regex():
 
 
 def test_filtering_pass_filepath(tmpdir):
-    """
-    Test use-case where a filepath constraint is provided, and the file exists.
-    """
+    """Test use-case where a filepath constraint is provided, and the file exists."""
     filename = "failures.csv"
     tmpfile = tmpdir.join(filename)
 
@@ -86,9 +77,7 @@ def test_filtering_pass_filepath(tmpdir):
 
 
 def test_filtering_fail_filepath(tmpdir):
-    """
-    Test use-case where a filepath constraint is provide, and the file does not exist.
-    """
+    """Test use-case where a filepath constraint is provide, and the file does not exist."""
     filename = "failures.csv"
     tmpfile = tmpdir.join(filename)
     abs_filepath = str(tmpfile)
@@ -101,9 +90,7 @@ def test_filtering_fail_filepath(tmpdir):
 
 
 def test_filtering_pass_csv_filecontents(tmpdir):
-    """
-    Test use-case where the constraint is a valid CSV file.
-    """
+    """Test use-case where the constraint is a valid CSV file."""
     filename = "failures.csv"
     tmpfile = tmpdir.join(filename)
 
@@ -142,8 +129,7 @@ def test_filtering_pass_csv_filecontents(tmpdir):
 
 
 def test_filtering_fail_csv_missinghostfield(tmpdir):
-    """
-    Test use-case where the constraint is an invalid CSV file; meaning that there
+    """Test use-case where the constraint is an invalid CSV file; meaning that there
     is no `host` field.
     """
     filename = "failures.csv"
@@ -172,12 +158,10 @@ def test_filtering_fail_csv_missinghostfield(tmpdir):
 
 
 def test_filtering_fail_csv_filecontentsnotcsv(tmpdir):
-    """
-    Test use-case where the constraint expects a CSV file, but the file is not
+    """Test use-case where the constraint expects a CSV file, but the file is not
     a CSV file due to contents; i.e. when attempting to read the CSV file it fails
     to load content.
     """
-
     # rather than provide a CSV file, provide this python file (not a CSV file).
     # but call it a CSV file.
 
@@ -192,8 +176,7 @@ def test_filtering_fail_csv_filecontentsnotcsv(tmpdir):
 
 
 def test_filtering_fail_csv_notcsvfile():
-    """
-    Test use-case when the provided file is not a CSV, and indicated by the
+    """Test use-case when the provided file is not a CSV, and indicated by the
     filename suffix not being '.csv'
     """
     with pytest.raises(ValueError) as excinfo:
@@ -204,9 +187,7 @@ def test_filtering_fail_csv_notcsvfile():
 
 
 def test_filtering_ipaddr_v4_include():
-    """
-    Test the ipaddr (Ipv4) include network address/prefix use-case
-    """
+    """Test the ipaddr (Ipv4) include network address/prefix use-case"""
     filter_fn = create_filter(
         constraints=["ipaddr=10.10.0.2"], field_names=["ipaddr"], include=True
     )
@@ -233,9 +214,7 @@ def test_filtering_ipaddr_v4_include():
 
 
 def test_filtering_ipaddr_v4_exclude():
-    """
-    Test the ipaddr (Ipv4) exclude network address/prefix use-case
-    """
+    """Test the ipaddr (Ipv4) exclude network address/prefix use-case"""
     filter_fn = create_filter(
         constraints=["ipaddr=10.10.0.2"], field_names=["ipaddr"], include=False
     )
@@ -262,9 +241,7 @@ def test_filtering_ipaddr_v4_exclude():
 
 
 def test_filtering_ipaddr_v6_include():
-    """
-    Test the ipaddr (Ipv6) include network address/prefix use-case
-    """
+    """Test the ipaddr (Ipv6) include network address/prefix use-case"""
     filter_fn = create_filter(
         constraints=["ipaddr=3001:10:10::2"], field_names=["ipaddr"], include=True
     )
@@ -291,9 +268,7 @@ def test_filtering_ipaddr_v6_include():
 
 
 def test_filtering_ipaddr_v6_exclude():
-    """
-    Test the ipaddr (Ipv6) exclude network address/prefix use-case
-    """
+    """Test the ipaddr (Ipv6) exclude network address/prefix use-case"""
     filter_fn = create_filter(
         constraints=["ipaddr=3001:10:10::2"], field_names=["ipaddr"], include=False
     )
@@ -320,9 +295,7 @@ def test_filtering_ipaddr_v6_exclude():
 
 
 def test_filtering_ipaddr_regex_fallback():
-    """
-    Test the use-case of ipaddr filtering when a regex is used
-    """
+    """Test the use-case of ipaddr filtering when a regex is used"""
     filter_fn = create_filter(
         constraints=["ipaddr=3001:10:(10|20)::2"], field_names=["ipaddr"], include=True
     )

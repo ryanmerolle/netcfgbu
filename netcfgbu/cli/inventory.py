@@ -23,9 +23,7 @@ from .root import (
 
 @cli.group(name="inventory")
 def cli_inventory() -> None:
-    """
-    Inventory subcommands.
-    """
+    """Inventory subcommands."""
     pass  # pragma: no cover
 
 
@@ -35,9 +33,7 @@ def cli_inventory() -> None:
 @click.option("--brief", "-b", is_flag=True)
 @click.pass_context
 def cli_inventory_list(ctx: click.Context, **cli_opts):
-    """
-    List inventory.
-    """
+    """List inventory."""
     inventory_recs = ctx.obj["inventory_recs"]
     inventory_tabular_data = []
     os_name_counter = {}
@@ -85,13 +81,11 @@ def cli_inventory_list(ctx: click.Context, **cli_opts):
 @click.option("--brief", is_flag=True)
 @click.pass_context
 def cli_inventory_build(ctx: click.Context, **cli_opts) -> None:
-    """
-    Build the inventory file.
+    """Build the inventory file.
 
     If the netcfgbu configuraiton file contains inventory definitions then you
     can use this command to the script to build the inventory.
     """
-
     app_cfg: AppConfig = ctx.obj["app_cfg"]
 
     if not (spec := get_spec_nameorfirst(app_cfg.inventory, cli_opts["name"])):

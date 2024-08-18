@@ -1,4 +1,12 @@
+"""This module handles the loading and validation of the application configuration from a TOML file.
+
+The module provides functionality to read a TOML configuration file, validate its contents using
+Pydantic, and set up logging based on the configuration. If any validation errors occur, they are
+formatted into a human-readable string and raised as a RuntimeError.
+"""
+
 from pathlib import Path
+from typing import Optional
 
 import toml
 from pydantic import ValidationError
@@ -10,8 +18,7 @@ __all__ = ["load"]
 
 
 def validation_errors(filepath: str, errors: list) -> str:
-    """
-    Format validation errors into a human-readable string.
+    """Format validation errors into a human-readable string.
 
     Args:
         filepath: The path to the configuration file.
@@ -30,9 +37,8 @@ def validation_errors(filepath: str, errors: list) -> str:
     return "\n".join(as_human)
 
 
-def load(*, filepath: str = None, fileio=None) -> AppConfig:
-    """
-    Load and validate the application configuration from a TOML file.
+def load(*, filepath: Optional[str] = None, fileio=None) -> AppConfig:
+    """Load and validate the application configuration from a TOML file.
 
     Args:
         filepath: Optional path to the configuration file.

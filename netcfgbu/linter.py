@@ -8,8 +8,7 @@ log = get_logger()
 
 
 def lint_content(config_content, lint_spec: LinterSpec) -> str:
-    """
-    Lint the configuration content based on the provided linting specification.
+    """Lint the configuration content based on the provided linting specification.
 
     Args:
         config_content: The original configuration content as a string.
@@ -21,9 +20,15 @@ def lint_content(config_content, lint_spec: LinterSpec) -> str:
     start_offset = 0
     end_offset = None
 
-    if not start_offset and lint_spec.config_starts_after and (start_mo := re.search(
-        f"^{lint_spec.config_starts_after}.*$", config_content, re.MULTILINE
-    )):
+    if (
+        not start_offset
+        and lint_spec.config_starts_after
+        and (
+            start_mo := re.search(
+                f"^{lint_spec.config_starts_after}.*$", config_content, re.MULTILINE
+            )
+        )
+    ):
         start_offset = start_mo.end() + 1
 
     if lint_spec.config_ends_at:
@@ -42,8 +47,7 @@ def lint_content(config_content, lint_spec: LinterSpec) -> str:
 
 
 def lint_file(fileobj: Path, lint_spec) -> bool:
-    """
-    Perform the linting function on the content of the given file.
+    """Perform the linting function on the content of the given file.
 
     Args:
         fileobj: A Path object representing the file to lint.

@@ -8,8 +8,7 @@ from .logger import get_logger
 
 
 def load(app_cfg: AppConfig, limits=None, excludes=None):
-    """
-    Load and filter inventory records based on the provided limits and excludes.
+    """Load and filter inventory records based on the provided limits and excludes.
 
     Args:
         app_cfg: The application configuration containing the inventory file path.
@@ -41,8 +40,7 @@ def load(app_cfg: AppConfig, limits=None, excludes=None):
 
 
 def build(inv_def: InventorySpec) -> int:
-    """
-    Execute the script defined in the inventory specification.
+    """Execute the script defined in the inventory specification.
 
     Args:
         inv_def: The inventory specification containing the script to execute.

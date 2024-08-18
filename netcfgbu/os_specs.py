@@ -3,8 +3,7 @@ from netcfgbu.connectors import get_connector_class
 
 
 def get_os_spec(rec: dict, app_cfg: AppConfig) -> OSNameSpec:
-    """
-    Retrieve the OS specification for a given record from the application configuration.
+    """Retrieve the OS specification for a given record from the application configuration.
 
     Args:
         rec: A dictionary representing an inventory record.
@@ -19,8 +18,7 @@ def get_os_spec(rec: dict, app_cfg: AppConfig) -> OSNameSpec:
 
 
 def make_host_connector(rec: dict, app_cfg: AppConfig):
-    """
-    Create a host connector instance based on the inventory record and application configuration.
+    """Create a host connector instance based on the inventory record and application configuration.
 
     Args:
         rec: A dictionary representing an inventory record.

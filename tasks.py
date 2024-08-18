@@ -3,14 +3,11 @@
 # For use with the invoke tool, see: http://www.pyinvoke.org/
 #
 # References
-# ----------
-#
-# Black:
-# Flake8: https://flake8.pycqa.org/en/latest/user/configuration.html
 
-
+import io
 import os
 import shutil
+import sys
 
 from invoke import exceptions, task
 
@@ -33,12 +30,25 @@ FILES_TO_CLEAN = [
 ]
 
 
+def write_to_file(output: str, filename: str = "lint.tmp") -> None:
+    """Write output to a specified file.
+
+    Args:
+        output (str): The content to write to the file.
+        filename (str, optional): The name of the file to write to. Defaults to "lint.tmp".
+    """
+    with open(filename, "w", encoding="utf-8") as file:
+        file.write(output)
+
+
 @task
-def precheck(ctx):
-    """Run pre-checks on the project."""
-    # ctx.run("black .")
-    # ctx.run("flake8 .")
-    ctx.run("poetry run ruff check . --select I --fix")
+def precheck(ctx, help="Run pre-checks on the project.") -> None:
+    """Run pre-checks on the project.
+
+    Args:
+        ctx (invoke.Context): The context instance (passed automatically by Invoke).
+    """
+    ctx.run("poetry run ruff check . --fix")
     ctx.run("poetry run ruff format .")
     ctx.run("poetry run pre-commit run -a")
     ctx.run(
@@ -48,8 +58,12 @@ def precheck(ctx):
 
 
 @task
-def clean(ctx):
-    """Clean up the project."""
+def clean(ctx, help="Clean up the project of cache & temp files.") -> None:
+    """Clean up the project by removing specified directories & files.
+
+    Args:
+        ctx (invoke.Context): The context instance (passed automatically by Invoke).
+    """
     for folder in DIRS_TO_CLEAN:
         try:
             if os.path.exists(folder):
@@ -67,10 +81,30 @@ def clean(ctx):
 
 
 @task
-def install(ctx):
-    """Install the package locally."""
+def install(ctx, help="Install the package locally.") -> None:
+    """Install the package locally.
+
+    Args:
+        ctx (invoke.Context): The context instance (passed automatically by Invoke).
+    """
     try:
         ctx.run("pip install . --force")
-    except exceptions.UnexpectedExit as e:
-        print(f"Installation failed: {e}")
+    except exceptions.UnexpectedExit as exc:
+        print(f"Installation failed: {exc}")
         raise
+
+
+def write_result(output: io.StringIO, result: str) -> None:
+    """Write the result of a linter check to the output buffer.
+
+    Args:
+        output (io.StringIO): The buffer to write the result to.
+        result (str): The result string to write.
+    """
+    if result:
+        output.write(result + "\n")
+    else:
+        output.write("No issues found.\n\n")
+
+    output.write("-" * 120 + "\n")
+

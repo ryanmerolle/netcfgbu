@@ -1,3 +1,7 @@
+"""This module provides an asynchronous generator that mimics the behavior of
+concurrent.futures.as_completed, allowing retrieval of originating coroutines.
+"""
+
 import asyncio
 from asyncio import Task
 from collections.abc import AsyncIterable, Coroutine, Iterable
@@ -9,35 +13,33 @@ __all__ = ["as_completed"]
 async def as_completed(
     aws: Iterable[Coroutine], timeout: Optional[int] = None
 ) -> AsyncIterable[Task]:
-    """
-    This async generator is used to "mimic" the behavior of the
+    """This async generator is used to "mimic" the behavior of the
     concurrent.futures.as_completed functionality. Usage of this as_completed
     generator is slightly different from the builtin asyncio version; see
     example below.
 
     The builtin asyncio.as_completed yields futures such that the originating
-    coroutine can not be retrieved.  In order to obtain the originating
-    coroutine these must be wrapped in futures as explained in this Stack
-    Overflow: https://bit.ly/2AsPtJE
+    coroutine can not be retrieved. In order to obtain the originating
+    coroutine, these must be wrapped in futures as explained in this Stack
+    Overflow: https://bit.ly/2AsPtJE.
 
     Parameters
     ----------
     aws:
-        An interable of coroutines that will be wrapped into futures and
+        An iterable of coroutines that will be wrapped into futures and
         executed through the asyncio on_completed builtin.
 
     timeout: int
         (same as asyncio.as_completed):
-        If provided an asyncio.TimeoutError will be raised if all of the
+        If provided, an asyncio.TimeoutError will be raised if all of the
         coroutines have not completed within the timeout value.
 
-    Yields
+    Yields:
     ------
     asyncio.Task
 
     Examples:
-    ---------
-
+    --------
         # create a dictionary of key=coroutine, value=dict, where the value will
         # be used later when the coroutine completes
 
@@ -69,19 +71,27 @@ async def as_completed(
     """
     loop = asyncio.get_running_loop()
 
-    # The main gist is to "wrap" the coroutine into
-    # "[futureW[futureO[coroutine]]]" where the outer futureW is what is handed
-    # into the builtin asyncio.as_completed.  The inner futureO that wraps the
-    # originating coroutine will call the futureW.set_result() when the
-    # original futureO[coroutine] completes.  The call to set_result triggers
-    # the event causing the futureW to be done, which is what results in the
-    # builtin on_completed to yield the results.
-
     def wrap_coro(coro):
+        """Wrap a coroutine into a future and create a wrapper future.
+
+        This function wraps the provided coroutine in a future, and then
+        creates a separate wrapper future. The wrapper future's result
+        is set once the original future completes, allowing the outer
+        future to be used in the asyncio.as_completed loop.
+
+        Args:
+            coro (Coroutine): The coroutine to wrap.
+
+        Returns:
+            asyncio.Future: A wrapper future that will be set when the original
+            coroutine completes.
+        """
         fut = asyncio.ensure_future(coro)
         wrapper = loop.create_future()
         fut.add_done_callback(wrapper.set_result)
         return wrapper
 
     for next_completed in asyncio.as_completed([wrap_coro(coro) for coro in aws], timeout=timeout):
+        # next_completed is a Future object that represents the next coroutine that completes.
+        # We yield the result of the completed task after awaiting it.
         yield await next_completed

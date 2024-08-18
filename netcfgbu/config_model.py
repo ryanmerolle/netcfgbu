@@ -37,16 +37,13 @@ _var_re = re.compile(
 
 
 class NoExtraBaseModel(BaseModel):
-    """
-    A base model class that forbids extra fields in derived models.
-    """
+    """A base model class that forbids extra fields in derived models."""
 
     model_config = ConfigDict(extra="forbid")
 
 
 def expand_env_str(env_string: str) -> str:
-    """
-    Expand environment variables in a string.
+    """Expand environment variables in a string.
 
     Args:
         env_string: The string containing environment variable references.
@@ -57,7 +54,6 @@ def expand_env_str(env_string: str) -> str:
     Raises:
         EnvironmentError: If an environment variable is missing or empty.
     """
-
     if found_variables := list(filter(len, chain.from_iterable(_var_re.findall(env_string)))):
         for var in found_variables:
             if (var_val := os.getenv(var)) is None:
@@ -76,8 +72,7 @@ EnvSecretStr = Annotated[SecretStr, BeforeValidator(expand_env_str)]
 
 
 class Credential(NoExtraBaseModel):
-    """
-    Represents a credential with a username and password, supporting environment variable expansion.
+    """Represents a credential with a username and password, supporting environment variable expansion.
 
     Attributes:
         username: The username for the credential.
@@ -92,16 +87,13 @@ class Credential(NoExtraBaseModel):
 # https://github.com/pydantic/pydantic-settings/issues/178#issuecomment-2037795239
 # but may be fixed in a future pydantic v2 release
 class DefaultBaseSettings(BaseSettings):
-    """
-    A base settings class that ignores extra fields and supports name-based population.
-    """
+    """A base settings class that ignores extra fields and supports name-based population."""
 
     model_config = ConfigDict(extra="ignore", populate_by_name=True)
 
 
 class DefaultCredential(DefaultBaseSettings):
-    """
-    Represents default credentials loaded from environment variables.
+    """Represents default credentials loaded from environment variables.
 
     Attributes:
         username: The default username for credentials.
@@ -115,8 +107,7 @@ class DefaultCredential(DefaultBaseSettings):
 
 
 class Defaults(DefaultBaseSettings):
-    """
-    Represents default application settings.
+    """Represents default application settings.
 
     Attributes:
         configs_dir: Directory for configuration files.
@@ -133,8 +124,7 @@ class Defaults(DefaultBaseSettings):
     @field_validator("inventory")
     @classmethod
     def _inventory_provided(cls, value: str) -> str:  # noqa
-        """
-        Validate that the inventory path is not empty.
+        """Validate that the inventory path is not empty.
 
         Args:
             value: The inventory path.
@@ -152,8 +142,7 @@ class Defaults(DefaultBaseSettings):
     @field_validator("configs_dir")
     @classmethod
     def _configs_dir(cls, value: str) -> Path:  # noqa
-        """
-        Convert the configuration directory path to an absolute path.
+        """Convert the configuration directory path to an absolute path.
 
         Args:
             value: The configuration directory path.
@@ -166,8 +155,7 @@ class Defaults(DefaultBaseSettings):
     @field_validator("plugins_dir", mode="after")
     @classmethod
     def _plugins_dir(cls, value: str) -> Path:  # noqa
-        """
-        Convert the plugins directory path to an absolute path.
+        """Convert the plugins directory path to an absolute path.
 
         If the value is the current working directory and doesn't contain "/plugins",
         append "/plugins" to the path.
@@ -188,8 +176,7 @@ FilePathEnvExpand = Annotated[FilePath, BeforeValidator(expand_env_str)]
 
 
 class GitSpec(NoExtraBaseModel):
-    """
-    Represents the configuration for a Git repository.
+    """Represents the configuration for a Git repository.
 
     Attributes:
         name: Optional name for the Git configuration.
@@ -216,8 +203,7 @@ class GitSpec(NoExtraBaseModel):
     @field_validator("repo")
     @classmethod
     def validate_repo(cls, repo: str) -> str:
-        """
-        Validate the Git repository URL.
+        """Validate the Git repository URL.
 
         Args:
             repo: The repository URL.
@@ -236,8 +222,7 @@ class GitSpec(NoExtraBaseModel):
     @model_validator(mode="before")
     @classmethod
     def ensure_proper_auth(cls, values: dict) -> dict:
-        """
-        Ensure that the correct authentication method is provided.
+        """Ensure that the correct authentication method is provided.
 
         Args:
             values: The dictionary of values provided to the model.
@@ -265,8 +250,7 @@ class GitSpec(NoExtraBaseModel):
 
 
 class OSNameSpec(NoExtraBaseModel):
-    """
-    Represents the configuration for a specific OS name.
+    """Represents the configuration for a specific OS name.
 
     Attributes:
         credentials: List of credentials for this OS.
@@ -290,8 +274,7 @@ class OSNameSpec(NoExtraBaseModel):
 
 
 class LinterSpec(NoExtraBaseModel):
-    """
-    Represents the configuration for a linter.
+    """Represents the configuration for a linter.
 
     Attributes:
         config_starts_after: The marker indicating where the config starts.
@@ -303,8 +286,7 @@ class LinterSpec(NoExtraBaseModel):
 
 
 class InventorySpec(NoExtraBaseModel):
-    """
-    Represents the configuration for an inventory specification.
+    """Represents the configuration for an inventory specification.
 
     Attributes:
         name: Optional name for the inventory.
@@ -317,8 +299,7 @@ class InventorySpec(NoExtraBaseModel):
     @field_validator("script")
     @classmethod
     def validate_script(cls, script_exec: str) -> str:  # noqa
-        """
-        Validate the script field of the InventorySpec.
+        """Validate the script field of the InventorySpec.
 
         Args:
             script_exec: The script execution string.
@@ -341,8 +322,7 @@ class InventorySpec(NoExtraBaseModel):
 
 
 class JumphostSpec(NoExtraBaseModel):
-    """
-    Represents the configuration for a jumphost.
+    """Represents the configuration for a jumphost.
 
     Attributes:
         proxy: The proxy host or address for the jumphost.
@@ -360,8 +340,7 @@ class JumphostSpec(NoExtraBaseModel):
 
     @model_validator(mode="after")
     def default_name(self):  # noqa
-        """
-        Set the default name for the jumphost if not provided.
+        """Set the default name for the jumphost if not provided.
 
         If the name is not set, it will be set to the proxy value.
 
@@ -374,8 +353,7 @@ class JumphostSpec(NoExtraBaseModel):
 
 
 class AppConfig(NoExtraBaseModel):
-    """
-    Represents the overall application configuration.
+    """Represents the overall application configuration.
 
     Attributes:
         defaults: Default settings for the application.
@@ -404,8 +382,7 @@ class AppConfig(NoExtraBaseModel):
     def _linters(
         cls, os_configs: dict[str, OSNameSpec], info: ValidationInfo
     ) -> dict[str, OSNameSpec]:  # noqa
-        """
-        Validate that the linters specified in os_name configurations are defined.
+        """Validate that the linters specified in os_name configurations are defined.
 
         Args:
             os_configs: The os_name configurations.

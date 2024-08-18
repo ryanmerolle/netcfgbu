@@ -4,6 +4,14 @@ from netcfgbu import config_model, linter
 
 
 def test_linters_pass_content(files_dir):
+    """Test linter with content from a file.
+
+    Verifies that the `lint_content` function properly extracts the desired content
+    between the start and end markers.
+
+    Args:
+        files_dir: Directory containing the test files.
+    """
     good_content = files_dir.joinpath("test-content-config.txt").read_text()
     lint_spec = config_model.LinterSpec(
         config_starts_after="!Time:", config_ends_at="! end-test-marker"
@@ -24,6 +32,15 @@ def test_linters_pass_content(files_dir):
 
 
 def test_liners_pass_file(files_dir, tmpdir):
+    """Test linter with a file.
+
+    Verifies that the `lint_file` function properly processes a file and
+    extracts the desired content between the start and end markers.
+
+    Args:
+        files_dir: Directory containing the test files.
+        tmpdir: Temporary directory for storing intermediate files.
+    """
     exp_content = files_dir.joinpath("test-content-config.txt").read_text()
     lint_spec = config_model.LinterSpec(
         config_starts_after="!Time:", config_ends_at="! end-test-marker"
@@ -46,6 +63,17 @@ def test_liners_pass_file(files_dir, tmpdir):
 
 
 def test_liners_pass_nochange(files_dir, tmpdir, log_vcr, monkeypatch):
+    """Test linter with no changes in content.
+
+    Verifies that the `lint_file` function properly detects that no changes
+    are needed in the content and logs the appropriate message.
+
+    Args:
+        files_dir: Directory containing the test files.
+        tmpdir: Temporary directory for storing intermediate files.
+        log_vcr: Logger for capturing log output.
+        monkeypatch: Fixture for modifying behavior of imports.
+    """
     exp_content = files_dir.joinpath("test-content-config.txt").read_text()
     lint_spec = config_model.LinterSpec(
         config_starts_after="!Time:", config_ends_at="! end-test-marker"

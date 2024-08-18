@@ -8,8 +8,7 @@ from .vcs import cli_vcs  # noqa # pylint: disable=W0611
 
 
 def run() -> None:
-    """
-    Entry point for the CLI application.
+    """Entry point for the CLI application.
 
     This function initializes and runs the command-line interface (CLI)
     with an empty context object.

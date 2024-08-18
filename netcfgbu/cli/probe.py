@@ -17,8 +17,7 @@ CLI_COMMAND = "probe"
 
 
 def exec_probe(inventory_recs: list, timeout=None) -> None:
-    """
-    Executes the probe command on the provided inventory records.
+    """Executes the probe command on the provided inventory records.
 
     Args:
         inventory_recs: List of inventory records to probe.
@@ -27,8 +26,7 @@ def exec_probe(inventory_recs: list, timeout=None) -> None:
     timeout = timeout or DEFAULT_PROBE_TIMEOUT
 
     def task_creator(rec: dict, app_cfg: AppConfig):
-        """
-        Creates a probe task for the given inventory record.
+        """Creates a probe task for the given inventory record.
 
         Args:
             rec: A dictionary representing an inventory record.
@@ -48,7 +46,5 @@ def exec_probe(inventory_recs: list, timeout=None) -> None:
 @opt_timeout
 @click.pass_context
 def cli_check(ctx: click.Context, **cli_opts) -> None:
-    """
-    Probe device for SSH reachablility.
-    """
+    """Probe device for SSH reachablility."""
     exec_probe(ctx.obj["inventory_recs"], timeout=cli_opts["timeout"])

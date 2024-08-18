@@ -13,6 +13,17 @@ from netcfgbu.filetypes import CommentedCsvReader
 
 @pytest.fixture(scope="module", autouse=True)
 def inventory(request):
+    """Fixture to load the inventory data from a CSV file.
+
+    This fixture loads the device inventory from the specified CSV file and
+    returns it as a list of dictionaries, each representing a device record.
+
+    Args:
+        request: Pytest request object to access the module-level file path.
+
+    Returns:
+        list: A list of dictionaries representing the device inventory records.
+    """
     test_dir = Path(request.module.__file__).parent
     inv_fp = test_dir / "files/test-small-inventory.csv"
     return list(CommentedCsvReader(inv_fp.open()))
@@ -20,56 +31,79 @@ def inventory(request):
 
 @pytest.fixture()
 def mock_asyncssh_connect(monkeypatch):
-    monkeypatch.setattr(jumphosts, "asyncssh", Mock())
+    """Fixture to mock the asyncssh.connect method for testing.
 
+    This fixture replaces the asyncssh.connect method with a CoroutineMock
+    to simulate SSH connections during tests.
+
+    Args:
+        monkeypatch: Pytest's monkeypatch fixture to modify behavior.
+
+    Returns:
+        CoroutineMock: The mocked asyncssh.connect method.
+    """
+    monkeypatch.setattr(jumphosts, "asyncssh", Mock())
     jumphosts.asyncssh.Error = asyncssh.Error
     jumphosts.asyncssh.connect = CoroutineMock()
     return jumphosts.asyncssh.connect
 
 
 def test_jumphosts_pass_noused(inventory):
-    # without an include or exclude, this jump host will not be used
-    # TODO: consider this an error in config-model validation?
+    """Test the initialization of a jump host when not used.
 
+    This test verifies that a jump host is not added to the available list
+    if no include or exclude filters are specified.
+
+    Args:
+        inventory: The device inventory loaded from the fixture.
+    """
     jh_spec = config_model.JumphostSpec(proxy="1.2.3.4")
-
     jumphosts.init_jumphosts(jumphost_specs=[jh_spec], inventory=inventory)
     assert len(jumphosts.JumpHost.available) == 0
 
 
 def test_jumphosts_pass_incused(inventory):
-    # include on EOS devices to be used in the jump host, this will result in
-    # the jump host being required by 4 of the devices in the inventory
+    """Test the initialization of a jump host with an include filter.
 
+    This test verifies that a jump host is correctly assigned to devices
+    when the include filter is specified for EOS devices.
+
+    Args:
+        inventory: The device inventory loaded from the fixture.
+    """
     jh_spec = config_model.JumphostSpec(proxy="1.2.3.4", include=["os_name=eos"])
-
     jumphosts.init_jumphosts(jumphost_specs=[jh_spec], inventory=inventory)
     assert len(jumphosts.JumpHost.available) == 1
-
     jh_use_count = Counter(getattr(jumphosts.get_jumphost(rec), "name", None) for rec in inventory)
-
     assert jh_use_count["1.2.3.4"] == 2
 
 
 def test_jumphosts_pass_exlused(inventory):
-    # exclude EOS devices to be used in the jump host, this will result in the
-    # jump host being required
+    """Test the initialization of a jump host with an exclude filter.
 
+    This test verifies that a jump host is correctly assigned to devices
+    when the exclude filter is specified for EOS devices.
+
+    Args:
+        inventory: The device inventory loaded from the fixture.
+    """
     jh_spec = config_model.JumphostSpec(proxy="1.2.3.4", exclude=["os_name=eos"])
-
     jumphosts.init_jumphosts(jumphost_specs=[jh_spec], inventory=inventory)
     assert len(jumphosts.JumpHost.available) == 1
-
     jh_use_count = Counter(getattr(jumphosts.get_jumphost(rec), "name", None) for rec in inventory)
-
     assert jh_use_count["1.2.3.4"] == 4
 
 
 def test_jumphosts_pass_exlallused(inventory):
-    # exclude all OS names will result in no jump hosts required
+    """Test the exclusion of all OS types from jump host usage.
 
+    This test verifies that no jump hosts are required when all OS types
+    are excluded from being assigned to a jump host.
+
+    Args:
+        inventory: The device inventory loaded from the fixture.
+    """
     jh_spec = config_model.JumphostSpec(proxy="1.2.3.4", exclude=["os_name=.*"])
-
     jumphosts.init_jumphosts(jumphost_specs=[jh_spec], inventory=inventory)
     assert len(jumphosts.JumpHost.available) == 0
 
@@ -78,10 +112,20 @@ def test_jumphosts_pass_exlallused(inventory):
 async def test_jumphosts_fail_connect(
     netcfgbu_envars, log_vcr, inventory, mock_asyncssh_connect, monkeypatch
 ):
+    """Test the failure of SSH connection attempts to a jump host.
+
+    This test verifies that appropriate error handling occurs when SSH connections
+    to a jump host fail due to timeouts or other errors.
+
+    Args:
+        netcfgbu_envars: Pytest fixture for setting environment variables.
+        log_vcr: Pytest fixture for capturing log records.
+        inventory: The device inventory loaded from the fixture.
+        mock_asyncssh_connect: The mocked asyncssh.connect method.
+        monkeypatch: Pytest's monkeypatch fixture to modify behavior.
+    """
     monkeypatch.setattr(jumphosts, "get_logger", Mock(return_value=log_vcr))
-
     jh_spec = config_model.JumphostSpec(proxy="dummy-user@1.2.3.4:8022", exclude=["os_name=eos"])
-
     jumphosts.init_jumphosts(jumphost_specs=[jh_spec], inventory=inventory)
 
     mock_asyncssh_connect.side_effect = asyncio.TimeoutError()
@@ -89,7 +133,6 @@ async def test_jumphosts_fail_connect(
     assert ok is False
 
     mock_asyncssh_connect.side_effect = asyncssh.Error(code=10, reason="nooooope")
-
     ok = await jumphosts.connect_jumphosts()
     assert ok is False
 
@@ -101,10 +144,7 @@ async def test_jumphosts_fail_connect(
     assert "not connected" in errmsg
 
     log_recs = log_vcr.handlers[0].records
-
-    # Manually format the log messages before comparison
     expected_timeout_log = "JUMPHOST: connect to dummy-user@1.2.3.4:8022 failed: TimeoutError"
     expected_error_log = "JUMPHOST: connect to dummy-user@1.2.3.4:8022 failed: nooooope"
-
     assert log_recs[-2].getMessage() == expected_timeout_log
     assert log_recs[-1].getMessage() == expected_error_log
