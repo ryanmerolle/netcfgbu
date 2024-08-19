@@ -2,11 +2,41 @@
 
 from pathlib import Path
 from unittest.mock import Mock
+from typing import Optional
 
 import pytest  # noqa
 
 from netcfgbu import config_model
 from netcfgbu.vcs import git
+
+
+def get_expected_commands(key_file: Optional[str] = None) -> list[str]:
+    """
+    Returns a list of expected git commands.
+
+    If a keyfile is provided, includes the 'git remote add origin' command.
+    Otherwise, excludes it from the list.
+
+    Args:
+        keyfile (Optional[str]): A string representing the keyfile. Defaults to None.
+
+    Returns:
+        List[str]: A list of git commands.
+    """
+    commands = [
+        "git init",
+        "git remote add origin git@dummy.git",
+        "git config --local user.email dummy-user",
+        "git config --local user.name dummy-user",
+        "git config --local push.default matching",
+    ]
+
+    if key_file:
+        commands.append(f"git config --local core.sshCommand 'ssh -i {key_file} -o StrictHostKeyChecking=no'")
+
+    commands.append("git pull origin main")
+
+    return commands
 
 
 @pytest.fixture()
@@ -46,14 +76,7 @@ def test_vcs_pass_prepare_token(mock_pexpect, tmpdir, monkeypatch):
     assert mock_run.called
     calls = mock_run.mock_calls
 
-    expected_commands = [
-        "git init",
-        "git remote add origin git@dummy.git",
-        "git config --local user.email dummy-user",
-        "git config --local user.name dummy-user",
-        "git config --local push.default matching",
-        "git pull origin main",
-    ]
+    expected_commands = get_expected_commands()
 
     assert len(calls) == len(expected_commands)
     for cmd_i, cmd in enumerate(expected_commands):
@@ -81,15 +104,7 @@ def test_vcs_pass_prepare_deploykey(mock_pexpect, tmpdir, monkeypatch):
     assert mock_run.called
     calls = mock_run.mock_calls
 
-    expected_commands = [
-        "git init",
-        "git remote add origin git@dummy.git",
-        "git config --local user.email dummy-user",
-        "git config --local user.name dummy-user",
-        "git config --local push.default matching",
-        f"git config --local core.sshCommand 'ssh -i {key_file} -o StrictHostKeyChecking=no'",
-        "git pull origin main",
-    ]
+    expected_commands = get_expected_commands(key_file)
 
     assert len(calls) == len(expected_commands)
     for cmd_i, cmd in enumerate(expected_commands):
@@ -123,15 +138,7 @@ def test_vcs_pass_prepare_deploykey_passphrase(mock_pexpect, tmpdir, monkeypatch
     assert mock_run.called
     calls = mock_run.mock_calls
 
-    expected_commands = [
-        "git init",
-        "git remote add origin git@dummy.git",
-        "git config --local user.email dummy-user",
-        "git config --local user.name dummy-user",
-        "git config --local push.default matching",
-        f"git config --local core.sshCommand 'ssh -i {key_file} -o StrictHostKeyChecking=no'",
-        "git pull origin main",
-    ]
+    expected_commands = get_expected_commands(key_file)
 
     assert len(calls) == len(expected_commands)
     for cmd_i, cmd in enumerate(expected_commands):

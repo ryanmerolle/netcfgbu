@@ -10,6 +10,32 @@ from netcfgbu import probe
 from netcfgbu.consts import DEFAULT_PROBE_TIMEOUT
 
 
+def setup_mock_asyncio(monkeypatch, side_effect=None):
+    """Helper function to setup mock for asyncio library.
+
+    This function mocks the asyncio library and optionally sets a side effect
+    for the `wait_for` method.
+
+    Args:
+        monkeypatch: Pytest's monkeypatch fixture to modify behavior.
+        side_effect: Optional; A function to be used as the side effect of the wait_for mock.
+
+    Returns:
+        Mock: The mock object for asyncio.
+    """
+    mock_asyncio = Mock()
+    mock_asyncio.TimeoutError = asyncio.TimeoutError
+    mock_wait_for = CoroutineMock() if side_effect is None else Mock()
+
+    if side_effect:
+        mock_wait_for.side_effect = side_effect
+
+    mock_asyncio.wait_for = mock_wait_for
+    monkeypatch.setattr(probe, "asyncio", mock_asyncio)
+
+    return mock_asyncio
+
+
 @pytest.mark.asyncio
 async def test_probe_pass(monkeypatch):
     """Test that the probe function returns True on successful completion.
@@ -20,12 +46,7 @@ async def test_probe_pass(monkeypatch):
     Args:
         monkeypatch: Pytest's monkeypatch fixture to modify behavior.
     """
-    mock_asyncio = Mock()
-    mock_asyncio.TimeoutError = asyncio.TimeoutError
-    mock_wait_for = CoroutineMock()
-
-    mock_asyncio.wait_for = mock_wait_for
-    monkeypatch.setattr(probe, "asyncio", mock_asyncio)
+    setup_mock_asyncio(monkeypatch)
 
     ok = await probe.probe(host="1.2.3.4", timeout=DEFAULT_PROBE_TIMEOUT)
     assert ok is True
@@ -41,30 +62,10 @@ async def test_probe_pass_timeout(monkeypatch):
     Args:
         monkeypatch: Pytest's monkeypatch fixture to modify behavior.
     """
-    mock_asyncio = Mock()
-    mock_asyncio.TimeoutError = asyncio.TimeoutError
-    mock_wait_for = Mock()
-
-    mock_asyncio.wait_for = mock_wait_for
-
     def raises_timeout(coro, timeout):  # noqa
-        """Simulate a timeout error for the given coroutine.
-
-        This function is used as a side effect in the mock to raise an
-        asyncio.TimeoutError, simulating a timeout scenario during the execution
-        of a coroutine.
-
-        Args:
-            coro: The coroutine being executed (not used in the function).
-            timeout: The timeout value (not used in the function).
-
-        Raises:
-            asyncio.TimeoutError: Always raises this exception to simulate a timeout.
-        """
         raise asyncio.TimeoutError
 
-    mock_wait_for.side_effect = raises_timeout
-    monkeypatch.setattr(probe, "asyncio", mock_asyncio)
+    setup_mock_asyncio(monkeypatch, side_effect=raises_timeout)
 
     ok = await probe.probe(host="1.2.3.4", timeout=DEFAULT_PROBE_TIMEOUT)
     assert ok is False
@@ -81,30 +82,10 @@ async def test_probe_pass_raises_timeout(monkeypatch):
     Args:
         monkeypatch: Pytest's monkeypatch fixture to modify behavior.
     """
-    mock_asyncio = Mock()
-    mock_asyncio.TimeoutError = asyncio.TimeoutError
-    mock_wait_for = Mock()
-
-    mock_asyncio.wait_for = mock_wait_for
-
     def raises_timeout(coro, timeout):  # noqa
-        """Simulate a timeout error for the given coroutine.
-
-        This function is used as a side effect in the mock to raise an
-        asyncio.TimeoutError, simulating a timeout scenario during the execution
-        of a coroutine.
-
-        Args:
-            coro: The coroutine being executed (not used in the function).
-            timeout: The timeout value (not used in the function).
-
-        Raises:
-            asyncio.TimeoutError: Always raises this exception to simulate a timeout.
-        """
         raise asyncio.TimeoutError
 
-    mock_wait_for.side_effect = raises_timeout
-    monkeypatch.setattr(probe, "asyncio", mock_asyncio)
+    setup_mock_asyncio(monkeypatch, side_effect=raises_timeout)
 
     with pytest.raises(asyncio.TimeoutError):
         await probe.probe(host="1.2.3.4", timeout=DEFAULT_PROBE_TIMEOUT, raise_exc=True)
