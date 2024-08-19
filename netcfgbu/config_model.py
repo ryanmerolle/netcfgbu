@@ -169,7 +169,7 @@ class Defaults(DefaultBaseSettings):
             Path: The absolute path of the plugins directory.
         """
         if value == os.getenv("PWD") and "/plugins" not in value:
-            value = value + "/plugins"
+            value += "/plugins"
         return Path(value).absolute()
 
 
