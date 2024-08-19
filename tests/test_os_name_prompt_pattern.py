@@ -1,3 +1,14 @@
+"""Tests for the OS name prompt pattern module in the netcfgbu package.
+
+This module contains tests for various OS name prompt pattern functionalities in the
+netcfgbu package. It uses pytest for testing.
+
+Functions:
+    test_prompt_pattern_detection: Test the detection of prompt patterns.
+    test_prompt_pattern_matching: Test the matching of prompt patterns.
+    test_prompt_pattern_validation: Test the validation of prompt patterns.
+"""
+
 import re
 
 from netcfgbu import os_specs

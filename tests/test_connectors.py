@@ -1,3 +1,14 @@
+"""Tests for the connectors module in the netcfgbu package.
+
+This module contains tests for various connector classes and functions in the
+netcfgbu package. It uses pytest for testing.
+
+Functions:
+    test_connectors_pass: Test the default connector class retrieval.
+    test_connectors_pass_named: Test named connector class retrieval.
+    test_connectors_fail_named: Test connector class retrieval with an invalid name.
+"""
+
 import pytest  # noqa
 
 from netcfgbu import connectors

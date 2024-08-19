@@ -1,3 +1,13 @@
+"""Tests for the plugins module in the netcfgbu package.
+
+This module contains tests for various plugin functionalities in the
+netcfgbu package. It uses pytest for testing.
+
+Functions:
+    test_plugin_loading: Test the loading of plugins.
+    test_plugin_execution: Test the execution of plugins.
+    test_plugin_validation: Test the validation of plugins.
+"""
 import pytest
 
 from netcfgbu.config import load

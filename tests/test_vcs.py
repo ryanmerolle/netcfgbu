@@ -217,7 +217,7 @@ def test_vcs_pass_status(monkeypatch, tmpdir, mock_pexpect):
 
 
 def test_vcs_pass_run_auth(monkeypatch, tmpdir, mock_pexpect):
-    """Test the git_runner function with a token-based Git configuration and successful authentication.
+    """Test the git_runner function w/ a token-based Git configuration & successful authentication.
 
     This test verifies that the git_runner function correctly runs Git commands
     with authentication when using a token-based authentication method.
@@ -300,7 +300,7 @@ def test_vcs_pass_git_config(monkeypatch, tmpdir, mock_pexpect):
 
 
 def test_vcs_fail_run_noauth(monkeypatch, tmpdir, mock_pexpect):
-    """Test the run function with a non-authenticated Git configuration and failed command execution.
+    """Test the run function with a non-authenticated Git configuration & failed command execution.
 
     This test verifies that the run function correctly raises a RuntimeError
     when Git commands fail due to non-authentication issues while using a

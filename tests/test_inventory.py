@@ -4,7 +4,7 @@ from first import first
 from netcfgbu import config, inventory
 
 
-def test_inventory_pass(request, monkeypatch, netcfgbu_envars):
+def test_inventory_pass(request, monkeypatch, netcfgbu_envars) -> None:
     """Test the use-case where there is a small inventory file that is properlly
     formatted.  Load the entire inventory as one subtest.  Load a filtered
     set of records as another subtest.
@@ -23,7 +23,7 @@ def test_inventory_pass(request, monkeypatch, netcfgbu_envars):
     assert inv_recs[0]["host"] == "switch2"
 
 
-def test_inventory_fail_nofilegiven(tmpdir, netcfgbu_envars):
+def test_inventory_fail_nofilegiven(tmpdir, netcfgbu_envars) -> None:
     """Test the use-case where the inventory is given in configuration file,
     but the inventory file does not actually exist.
     """
@@ -36,7 +36,7 @@ def test_inventory_fail_nofilegiven(tmpdir, netcfgbu_envars):
     assert "Inventory file does not exist" in errmsg
 
 
-def test_inventory_pass_build(request, monkeypatch, netcfgbu_envars):
+def test_inventory_pass_build(request, monkeypatch, netcfgbu_envars) -> None:
     """Test the use-case where the configuraiton contains an inventory build
     script.  The script exists, it runs without error.
     """
@@ -49,7 +49,7 @@ def test_inventory_pass_build(request, monkeypatch, netcfgbu_envars):
     assert rc == 0
 
 
-def test_inventory_fail_build_exitnozero(request, monkeypatch, netcfgbu_envars):
+def test_inventory_fail_build_exitnozero(request, monkeypatch, netcfgbu_envars) -> None:
     """Test the use-case where the configuraiton contains an inventory build
     script.  The script exists, it runs but exists with non-zero return code.
     """
@@ -64,7 +64,7 @@ def test_inventory_fail_build_exitnozero(request, monkeypatch, netcfgbu_envars):
     assert rc != 0
 
 
-def test_inventory_fail_build_noscript(request, netcfgbu_envars):
+def test_inventory_fail_build_noscript(request, netcfgbu_envars) -> None:
     """Test the use-case where the configuraiton contains an inventory build
     script.  The script exists, it runs without error.
     """

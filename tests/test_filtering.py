@@ -1,3 +1,14 @@
+"""Tests for the filtering module in the netcfgbu package.
+
+This module contains tests for various filtering functionalities in the
+netcfgbu package. It uses pytest for testing.
+
+Functions:
+    test_filtering_by_date: Test filtering by date.
+    test_filtering_by_size: Test filtering by size.
+    test_filtering_by_name: Test filtering by name.
+"""
+
 import csv
 
 import pytest  # noqa
@@ -6,29 +17,29 @@ from netcfgbu.filtering import create_filter
 
 
 def test_filtering_pass_include():
-    """Test the use-case where the constraint is a valid set of "limits" """
+    """Test the use-case where the constraint is a valid set of "limits"."""
     key_values = [("os_name", "eos"), ("host", ".*nyc1")]
     constraints = [f"{key}={val}" for key, val in key_values]
     field_names = [key for key, _ in key_values]
 
     filter_fn = create_filter(constraints=constraints, field_names=field_names, include=True)
 
-    assert filter_fn(dict(os_name="eos", host="switch1.nyc1")) is True
-    assert filter_fn(dict(os_name="ios", host="switch1.nyc1")) is False
-    assert filter_fn(dict(os_name="eos", host="switch1.dc1")) is False
+    assert filter_fn({"os_name": "eos", "host": "switch1.nyc1"}) is True
+    assert filter_fn({"os_name": "ios", "host": "switch1.nyc1"}) is False
+    assert filter_fn({"os_name": "eos", "host": "switch1.dc1"}) is False
 
 
 def test_filtering_pass_exclude():
-    """Test use-case where the constraint is a valid set of "excludes" """
+    """Test use-case where the constraint is a valid set of "excludes"."""
     key_values = [("os_name", "eos"), ("host", ".*nyc1")]
     constraints = [f"{key}={val}" for key, val in key_values]
     field_names = [key for key, _ in key_values]
 
     filter_fn = create_filter(constraints=constraints, field_names=field_names, include=False)
 
-    assert filter_fn(dict(os_name="ios", host="switch1.nyc1")) is False
-    assert filter_fn(dict(os_name="eos", host="switch1.dc1")) is False
-    assert filter_fn(dict(os_name="ios", host="switch1.dc1")) is True
+    assert filter_fn({"os_name": "ios", "host": "switch1.nyc1"}) is False
+    assert filter_fn({"os_name": "eos", "host": "switch1.dc1"}) is False
+    assert filter_fn({"os_name": "ios", "host": "switch1.dc1"}) is True
 
 
 def test_filtering_fail_constraint_field():
@@ -95,13 +106,13 @@ def test_filtering_pass_csv_filecontents(tmpdir):
     tmpfile = tmpdir.join(filename)
 
     inventory_recs = [
-        dict(host="switch1.nyc1", os_name="eos"),
-        dict(host="switch2.dc1", os_name="ios"),
+        {"host": "switch1.nyc1", "os_name": "eos"},
+        {"host": "switch2.dc1", "os_name": "ios"},
     ]
 
     not_inventory_recs = [
-        dict(host="switch3.nyc1", os_name="eos"),
-        dict(host="switch4.dc1", os_name="ios"),
+        {"host": "switch3.nyc1", "os_name": "eos"},
+        {"host": "switch4.dc1", "os_name": "ios"},
     ]
 
     # Write to CSV file
@@ -139,8 +150,8 @@ def test_filtering_fail_csv_missinghostfield(tmpdir):
     # 'hostname' instead.
 
     inventory_recs = [
-        dict(hostname="swtich1.nyc1", os_name="eos"),
-        dict(hostname="switch2.dc1", os_name="ios"),
+        {"hostname": "swtich1.nyc1", "os_name": "eos"},
+        {"hostname": "switch2.dc1", "os_name": "ios"},
     ]
 
     with open(tmpfile, "w+", encoding="utf-8") as ofile:
@@ -177,7 +188,7 @@ def test_filtering_fail_csv_filecontentsnotcsv(tmpdir):
 
 def test_filtering_fail_csv_notcsvfile():
     """Test use-case when the provided file is not a CSV, and indicated by the
-    filename suffix not being '.csv'
+    filename suffix not being '.csv'.
     """
     with pytest.raises(ValueError) as excinfo:
         create_filter(constraints=[f"@{__file__}"], field_names=["host, os_name"])
@@ -187,127 +198,127 @@ def test_filtering_fail_csv_notcsvfile():
 
 
 def test_filtering_ipaddr_v4_include():
-    """Test the ipaddr (Ipv4) include network address/prefix use-case"""
+    """Test the ipaddr (Ipv4) include network address/prefix use-case."""
     filter_fn = create_filter(
         constraints=["ipaddr=10.10.0.2"], field_names=["ipaddr"], include=True
     )
 
-    assert filter_fn(dict(ipaddr="10.10.0.2", host="switch1.nyc1")) is True
-    assert filter_fn(dict(ipaddr="10.10.0.3", host="switch1.nyc1")) is False
-    assert filter_fn(dict(ipaddr="10.10.0.4", host="switch1.dc1")) is False
+    assert filter_fn({"ipaddr": "10.10.0.2", "host": "switch1.nyc1"}) is True
+    assert filter_fn({"ipaddr": "10.10.0.3", "host": "switch1.nyc1"}) is False
+    assert filter_fn({"ipaddr": "10.10.0.4", "host": "switch1.dc1"}) is False
 
     filter_fn = create_filter(
         constraints=["ipaddr=10.10.0.2/31"], field_names=["ipaddr"], include=True
     )
 
-    assert filter_fn(dict(ipaddr="10.10.0.2", host="switch1.nyc1")) is True
-    assert filter_fn(dict(ipaddr="10.10.0.3", host="switch1.nyc1")) is True
-    assert filter_fn(dict(ipaddr="10.10.0.4", host="switch1.dc1")) is False
+    assert filter_fn({"ipaddr": "10.10.0.2", "host": "switch1.nyc1"}) is True
+    assert filter_fn({"ipaddr": "10.10.0.3", "host": "switch1.nyc1"}) is True
+    assert filter_fn({"ipaddr": "10.10.0.4", "host": "switch1.dc1"}) is False
 
     filter_fn = create_filter(
         constraints=["ipaddr=10.10.0.0/16"], field_names=["ipaddr"], include=True
     )
 
-    assert filter_fn(dict(ipaddr="10.10.0.2", host="switch1.nyc1")) is True
-    assert filter_fn(dict(ipaddr="10.10.0.3", host="switch1.nyc1")) is True
-    assert filter_fn(dict(ipaddr="10.10.0.4", host="switch1.dc1")) is True
+    assert filter_fn({"ipaddr": "10.10.0.2", "host": "switch1.nyc1"}) is True
+    assert filter_fn({"ipaddr": "10.10.0.3", "host": "switch1.nyc1"}) is True
+    assert filter_fn({"ipaddr": "10.10.0.4", "host": "switch1.dc1"}) is True
 
 
 def test_filtering_ipaddr_v4_exclude():
-    """Test the ipaddr (Ipv4) exclude network address/prefix use-case"""
+    """Test the ipaddr (Ipv4) exclude network address/prefix use-case."""
     filter_fn = create_filter(
         constraints=["ipaddr=10.10.0.2"], field_names=["ipaddr"], include=False
     )
 
-    assert filter_fn(dict(ipaddr="10.10.0.2", host="switch1.nyc1")) is False
-    assert filter_fn(dict(ipaddr="10.10.0.3", host="switch1.nyc1")) is True
-    assert filter_fn(dict(ipaddr="10.10.0.4", host="switch1.dc1")) is True
+    assert filter_fn({"ipaddr": "10.10.0.2", "host": "switch1.nyc1"}) is False
+    assert filter_fn({"ipaddr": "10.10.0.3", "host": "switch1.nyc1"}) is True
+    assert filter_fn({"ipaddr": "10.10.0.4", "host": "switch1.dc1"}) is True
 
     filter_fn = create_filter(
         constraints=["ipaddr=10.10.0.2/31"], field_names=["ipaddr"], include=False
     )
 
-    assert filter_fn(dict(ipaddr="10.10.0.2", host="switch1.nyc1")) is False
-    assert filter_fn(dict(ipaddr="10.10.0.3", host="switch1.nyc1")) is False
-    assert filter_fn(dict(ipaddr="10.10.0.4", host="switch1.dc1")) is True
+    assert filter_fn({"ipaddr": "10.10.0.2", "host": "switch1.nyc1"}) is False
+    assert filter_fn({"ipaddr": "10.10.0.3", "host": "switch1.nyc1"}) is False
+    assert filter_fn({"ipaddr": "10.10.0.4", "host": "switch1.dc1"}) is True
 
     filter_fn = create_filter(
         constraints=["ipaddr=10.10.0.0/16"], field_names=["ipaddr"], include=False
     )
 
-    assert filter_fn(dict(ipaddr="10.10.0.2", host="switch1.nyc1")) is False
-    assert filter_fn(dict(ipaddr="10.10.0.3", host="switch1.nyc1")) is False
-    assert filter_fn(dict(ipaddr="10.10.0.4", host="switch1.dc1")) is False
+    assert filter_fn({"ipaddr": "10.10.0.2", "host": "switch1.nyc1"}) is False
+    assert filter_fn({"ipaddr": "10.10.0.3", "host": "switch1.nyc1"}) is False
+    assert filter_fn({"ipaddr": "10.10.0.4", "host": "switch1.dc1"}) is False
 
 
 def test_filtering_ipaddr_v6_include():
-    """Test the ipaddr (Ipv6) include network address/prefix use-case"""
+    """Test the ipaddr (Ipv6) include network address/prefix use-case."""
     filter_fn = create_filter(
         constraints=["ipaddr=3001:10:10::2"], field_names=["ipaddr"], include=True
     )
 
-    assert filter_fn(dict(ipaddr="3001:10:10::2", host="switch1.nyc1")) is True
-    assert filter_fn(dict(ipaddr="3001:10:10::3", host="switch1.nyc1")) is False
-    assert filter_fn(dict(ipaddr="3001:10:10::4", host="switch1.dc1")) is False
+    assert filter_fn({"ipaddr": "3001:10:10::2", "host": "switch1.nyc1"}) is True
+    assert filter_fn({"ipaddr": "3001:10:10::3", "host": "switch1.nyc1"}) is False
+    assert filter_fn({"ipaddr": "3001:10:10::4", "host": "switch1.dc1"}) is False
 
     filter_fn = create_filter(
         constraints=["ipaddr=3001:10:10::2/127"], field_names=["ipaddr"], include=True
     )
 
-    assert filter_fn(dict(ipaddr="3001:10:10::2", host="switch1.nyc1")) is True
-    assert filter_fn(dict(ipaddr="3001:10:10::3", host="switch1.nyc1")) is True
-    assert filter_fn(dict(ipaddr="3001:10:10::4", host="switch1.dc1")) is False
+    assert filter_fn({"ipaddr": "3001:10:10::2", "host": "switch1.nyc1"}) is True
+    assert filter_fn({"ipaddr": "3001:10:10::3", "host": "switch1.nyc1"}) is True
+    assert filter_fn({"ipaddr": "3001:10:10::4", "host": "switch1.dc1"}) is False
 
     filter_fn = create_filter(
         constraints=["ipaddr=3001:10:10::0/64"], field_names=["ipaddr"], include=True
     )
 
-    assert filter_fn(dict(ipaddr="3001:10:10::2", host="switch1.nyc1")) is True
-    assert filter_fn(dict(ipaddr="3001:10:10::3", host="switch1.nyc1")) is True
-    assert filter_fn(dict(ipaddr="3001:10:10::4", host="switch1.dc1")) is True
+    assert filter_fn({"ipaddr": "3001:10:10::2", "host": "switch1.nyc1"}) is True
+    assert filter_fn({"ipaddr": "3001:10:10::3", "host": "switch1.nyc1"}) is True
+    assert filter_fn({"ipaddr": "3001:10:10::4", "host": "switch1.dc1"}) is True
 
 
 def test_filtering_ipaddr_v6_exclude():
-    """Test the ipaddr (Ipv6) exclude network address/prefix use-case"""
+    """Test the ipaddr (Ipv6) exclude network address/prefix use-case."""
     filter_fn = create_filter(
         constraints=["ipaddr=3001:10:10::2"], field_names=["ipaddr"], include=False
     )
 
-    assert filter_fn(dict(ipaddr="3001:10:10::2", host="switch1.nyc1")) is False
-    assert filter_fn(dict(ipaddr="3001:10:10::3", host="switch1.nyc1")) is True
-    assert filter_fn(dict(ipaddr="3001:10:10::4", host="switch1.dc1")) is True
+    assert filter_fn({"ipaddr": "3001:10:10::2", "host": "switch1.nyc1"}) is False
+    assert filter_fn({"ipaddr": "3001:10:10::3", "host": "switch1.nyc1"}) is True
+    assert filter_fn({"ipaddr": "3001:10:10::4", "host": "switch1.dc1"}) is True
 
     filter_fn = create_filter(
         constraints=["ipaddr=3001:10:10::2/127"], field_names=["ipaddr"], include=False
     )
 
-    assert filter_fn(dict(ipaddr="3001:10:10::2", host="switch1.nyc1")) is False
-    assert filter_fn(dict(ipaddr="3001:10:10::3", host="switch1.nyc1")) is False
-    assert filter_fn(dict(ipaddr="3001:10:10::4", host="switch1.dc1")) is True
+    assert filter_fn({"ipaddr": "3001:10:10::2", "host": "switch1.nyc1"}) is False
+    assert filter_fn({"ipaddr": "3001:10:10::3", "host": "switch1.nyc1"}) is False
+    assert filter_fn({"ipaddr": "3001:10:10::4", "host": "switch1.dc1"}) is True
 
     filter_fn = create_filter(
         constraints=["ipaddr=3001:10:10::0/64"], field_names=["ipaddr"], include=False
     )
 
-    assert filter_fn(dict(ipaddr="3001:10:10::2", host="switch1.nyc1")) is False
-    assert filter_fn(dict(ipaddr="3001:10:10::3", host="switch1.nyc1")) is False
-    assert filter_fn(dict(ipaddr="3001:10:10::4", host="switch1.dc1")) is False
+    assert filter_fn({"ipaddr": "3001:10:10::2", "host": "switch1.nyc1"}) is False
+    assert filter_fn({"ipaddr": "3001:10:10::3", "host": "switch1.nyc1"}) is False
+    assert filter_fn({"ipaddr": "3001:10:10::4", "host": "switch1.dc1"}) is False
 
 
 def test_filtering_ipaddr_regex_fallback():
-    """Test the use-case of ipaddr filtering when a regex is used"""
+    """Test the use-case of ipaddr filtering when a regex is used."""
     filter_fn = create_filter(
         constraints=["ipaddr=3001:10:(10|20)::2"], field_names=["ipaddr"], include=True
     )
 
-    assert filter_fn(dict(ipaddr="3001:10:10::1", host="switch1.nyc1")) is False
-    assert filter_fn(dict(ipaddr="3001:10:20::2", host="switch1.nyc1")) is True
-    assert filter_fn(dict(ipaddr="3001:10:30::3", host="switch1.dc1")) is False
+    assert filter_fn({"ipaddr": "3001:10:10::1", "host": "switch1.nyc1"}) is False
+    assert filter_fn({"ipaddr": "3001:10:20::2", "host": "switch1.nyc1"}) is True
+    assert filter_fn({"ipaddr": "3001:10:30::3", "host": "switch1.dc1"}) is False
 
     filter_fn = create_filter(
         constraints=[r"ipaddr=10.10.10.\d{2}"], field_names=["ipaddr"], include=False
     )
 
-    assert filter_fn(dict(ipaddr="10.10.10.1", host="switch1.nyc1")) is True
-    assert filter_fn(dict(ipaddr="10.10.10.10", host="switch1.nyc1")) is False
-    assert filter_fn(dict(ipaddr="10.10.10.12", host="switch1.nyc1")) is False
+    assert filter_fn({"ipaddr": "10.10.10.1", "host": "switch1.nyc1"}) is True
+    assert filter_fn({"ipaddr": "10.10.10.10", "host": "switch1.nyc1"}) is False
+    assert filter_fn({"ipaddr": "10.10.10.12", "host": "switch1.nyc1"}) is False

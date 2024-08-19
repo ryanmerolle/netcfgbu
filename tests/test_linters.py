@@ -1,3 +1,14 @@
+"""Tests for the linters module in the netcfgbu package.
+
+This module contains tests for various linter functionalities in the
+netcfgbu package. It uses pytest for testing.
+
+Functions:
+    test_linter_detection: Test the detection of linters.
+    test_linter_execution: Test the execution of linters.
+    test_linter_output_parsing: Test the parsing of linter output.
+"""
+
 from pathlib import Path
 
 from netcfgbu import config_model, linter

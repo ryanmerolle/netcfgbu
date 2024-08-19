@@ -1,8 +1,13 @@
-"""Test suite for the CLI probe commands in the netcfgbu module.
+"""Tests for the CLI probe commands in the netcfgbu module.
 
 This module contains tests for various CLI commands related to the probe functionality.
 It uses pytest fixtures, asynctest for mocking asynchronous functions, and
 the CliRunner from the Click library to simulate command-line invocations.
+
+Functions:
+    test_cli_probe_pass: Test the CLI probe command with valid input.
+    test_cli_probe_pass_exec: Test the CLI probe command with a successful probe execution.
+    test_cli_probe_fail_exec: Test the CLI probe command with a failed probe execution.
 """
 
 import asyncio

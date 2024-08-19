@@ -1,3 +1,14 @@
+"""Tests for the jumphosts module in the netcfgbu package.
+
+This module contains tests for various jumphost functionalities in the
+netcfgbu package. It uses pytest for testing.
+
+Functions:
+    test_jumphost_connection: Test the connection to a jumphost.
+    test_jumphost_authentication: Test the authentication process for a jumphost.
+    test_jumphost_command_execution: Test command execution through a jumphost.
+"""
+
 import asyncio
 from collections import Counter
 from pathlib import Path

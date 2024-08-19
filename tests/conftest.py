@@ -28,7 +28,8 @@ def netcfgbu_envars(monkeypatch: pytest.MonkeyPatch) -> None:
 
     Args:
     ----
-        monkeypatch (pytest.MonkeyPatch): pytest's monkeypatch fixture for modifying environment variables.
+        monkeypatch (pytest.MonkeyPatch): pytest's monkeypatch fixture for modifying environment
+        variables.
 
     """
     monkeypatch.setenv("NETCFGBU_DEFAULT_USERNAME", "dummy-username")

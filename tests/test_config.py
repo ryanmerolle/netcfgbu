@@ -1,3 +1,20 @@
+"""Tests for the configuration handling in the netcfgbu package.
+
+This module contains tests for various configuration scenarios in the netcfgbu
+package. It uses pytest for testing.
+
+Functions:
+    test_config_credentials_fail_emptyvar: Test the case where a required credential environment variable is empty.
+    test_config_credentials_fail_missingvar: Test the case where a required credential environment variable is missing.
+    test_config_credentials_pass_usesvar: Test the case where credentials are correctly used from environment variables.
+    test_config_fail_asfilepath: Test the case where the configuration file path is invalid.
+    test_config_git_fail_badrepo: Test the case where the Git repository is invalid.
+    test_config_git_pass: Test the case where the Git repository is valid.
+    test_config_inventory_fail_noscript: Test the case where the inventory script is missing.
+    test_config_inventory_fail_script_noexec: Test the case where the inventory script is not executable.
+    test_config_inventory_pass: Test the case where the inventory script is valid.
+"""
+
 import os
 from io import StringIO
 from pathlib import Path
@@ -46,7 +63,9 @@ def test_config_onlyenvars_fail_missing(monkeypatch):
 
 
 def test_config_onlyenvars_fail_bad_noinventory(monkeypatch):
-    """Test the case where NETCFGBU_INVENTORY is set but empty, and it generates an exception message."""
+    """Test the case where NETCFGBU_INVENTORY is set but empty, &
+    it generates an exception message.
+    """
     monkeypatch.setenv("NETCFGBU_INVENTORY", "")
 
     with pytest.raises(RuntimeError) as excinfo:

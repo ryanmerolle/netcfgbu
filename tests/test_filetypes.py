@@ -1,3 +1,14 @@
+"""Tests for the filetypes module in the netcfgbu package.
+
+This module contains tests for various file type handling functionalities in the
+netcfgbu package. It uses pytest for testing.
+
+Functions:
+    test_filetypes_detection: Test the detection of file types.
+    test_filetypes_parsing: Test the parsing of different file types.
+    test_filetypes_validation: Test the validation of file types.
+"""
+
 from netcfgbu.filetypes import CommentedCsvReader
 
 

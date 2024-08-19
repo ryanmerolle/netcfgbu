@@ -1,8 +1,11 @@
-"""Test suite for the CLI VCS commands in the netcfgbu module.
+"""Tests for the CLI VCS commands in the netcfgbu module.
 
-This module contains tests for various CLI commands related to VCS (Version Control System)
-functionality. It uses pytest fixtures and the CliRunner from the Click library to simulate
-command-line invocations and validate the behavior of the CLI.
+This module contains tests for various CLI commands related to version control
+system (VCS) functionality. It uses pytest for testing.
+
+Functions:
+    test_cli_vcs_fail_missingconfig_file: Test the case where the VCS configuration file is missing.
+    test_cli_vcs_fail_missingconfig_section: Test the case where the VCS configuration section is missing.
 """
 
 from operator import itemgetter

@@ -47,7 +47,6 @@ async def test_probe_pass_timeout(monkeypatch):
 
     mock_asyncio.wait_for = mock_wait_for
 
-
     def raises_timeout(coro, timeout):  # noqa
         """Simulate a timeout error for the given coroutine.
 
