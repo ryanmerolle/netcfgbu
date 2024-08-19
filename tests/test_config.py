@@ -81,7 +81,7 @@ def test_config_credentials_fail_missingvar(request, monkeypatch, fake_inventory
     """Test the case where the [[credentials]] section uses an environment variable,
     and that environment variable is missing.
     """
-    fileio = open(f"{request.fspath.dirname}/files/test-credentials.toml")
+    fileio = open(f"{request.fspath.dirname}/files/test-credentials.toml", encoding="utf-8")
 
     monkeypatch.delenv("ENABLE_PASSWORD", raising=False)
 
@@ -93,7 +93,7 @@ def test_config_credentials_fail_emptyvar(request, monkeypatch, netcfgbu_envars)
     """Test the case where the [[credentials]] section uses an environment variable,
     and that environment variable exists but is set to an empty string.
     """
-    fileio = open(f"{request.fspath.dirname}/files/test-credentials.toml")
+    fileio = open(f"{request.fspath.dirname}/files/test-credentials.toml", encoding="utf-8")
     monkeypatch.setenv("ENABLE_PASSWORD", "")
 
     with pytest.raises(EnvironmentError, match="Environment variable 'ENABLE_PASSWORD' empty."):
@@ -104,7 +104,7 @@ def test_config_credentials_pass_usesvar(request, monkeypatch, netcfgbu_envars):
     """Test the case where the [[credentials]] section uses an environment variable,
     and that environment variable is set to a non-empty value.
     """
-    fileio = open(f"{request.fspath.dirname}/files/test-credentials.toml")
+    fileio = open(f"{request.fspath.dirname}/files/test-credentials.toml", encoding="utf-8")
     monkeypatch.setenv("ENABLE_PASSWORD", "foobaz")
     app_cfg = load(fileio=fileio)
     assert app_cfg.credentials[0].password.get_secret_value() == "foobaz"
@@ -125,7 +125,7 @@ def test_config_git_pass(request, netcfgbu_envars, monkeypatch):
 
 def test_config_git_fail_badrepo(request, netcfgbu_envars):
     """Test the case where a [[git]] section has an improper GIT URL."""
-    fileio = open(f"{request.fspath.dirname}/files/test-gitspec-badrepo.toml")
+    fileio = open(f"{request.fspath.dirname}/files/test-gitspec-badrepo.toml", encoding="utf-8")
     with pytest.raises(RuntimeError) as excinfo:
         load(fileio=fileio)
 
@@ -139,7 +139,7 @@ def test_config_inventory_pass(request, monkeypatch, netcfgbu_envars):
     """Test the case where an [[inventory]] section is properly configured."""
     files_dir = request.fspath.dirname + "/files"
     monkeypatch.setenv("SCRIPT_DIR", files_dir)
-    fileio = open(f"{files_dir}/test-inventory.toml")
+    fileio = open(f"{files_dir}/test-inventory.toml", encoding="utf-8")
     load(fileio=fileio)
 
 
@@ -147,7 +147,7 @@ def test_config_inventory_fail_noscript(request, netcfgbu_envars):
     """Test the case where an [[inventory]] section defines a script, but the
     script does not exist.
     """
-    fileio = open(f"{request.fspath.dirname}/files/test-inventory-fail.toml")
+    fileio = open(f"{request.fspath.dirname}/files/test-inventory-fail.toml", encoding="utf-8")
     with pytest.raises(RuntimeError) as excinfo:
         load(fileio=fileio)
 
@@ -184,7 +184,7 @@ def test_config_linter_pass(netcfgbu_envars, request):
     """Test the case where an [os_name] section defines a linter, and that
     linter exists; no errors expected.
     """
-    fileio = open(f"{request.fspath.dirname}/files/test-linter.toml")
+    fileio = open(f"{request.fspath.dirname}/files/test-linter.toml", encoding="utf-8")
     app_cfg = load(fileio=fileio)
 
     assert app_cfg.os_name["ios"]
@@ -196,7 +196,7 @@ def test_config_linter_fail(netcfgbu_envars, request):
     """Test the case where an [os_name] section defines a linter, but that
     linter is not defined in the configuration.
     """
-    fileio = open(f"{request.fspath.dirname}/files/test-linter-fail.toml")
+    fileio = open(f"{request.fspath.dirname}/files/test-linter-fail.toml", encoding="utf-8")
 
     with pytest.raises(RuntimeError) as excinfo:
         load(fileio=fileio)

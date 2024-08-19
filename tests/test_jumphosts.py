@@ -23,14 +23,14 @@ from netcfgbu.filetypes import CommentedCsvReader
 
 
 @pytest.fixture(scope="module", autouse=True)
-def inventory(request):
+def inventory(request: pytest.FixtureRequest):
     """Fixture to load the inventory data from a CSV file.
 
     This fixture loads the device inventory from the specified CSV file and
     returns it as a list of dictionaries, each representing a device record.
 
     Args:
-        request: Pytest request object to access the module-level file path.
+        request (pytest.FixtureRequest): Pytest request object to access the module-level file path.
 
     Returns:
         list: A list of dictionaries representing the device inventory records.
@@ -41,14 +41,14 @@ def inventory(request):
 
 
 @pytest.fixture()
-def mock_asyncssh_connect(monkeypatch):
+def mock_asyncssh_connect(monkeypatch: pytest.MonkeyPatch):
     """Fixture to mock the asyncssh.connect method for testing.
 
     This fixture replaces the asyncssh.connect method with a CoroutineMock
     to simulate SSH connections during tests.
 
     Args:
-        monkeypatch: Pytest's monkeypatch fixture to modify behavior.
+        monkeypatch (pytest.MonkeyPatch): Pytest's monkeypatch fixture to modify behavior.
 
     Returns:
         CoroutineMock: The mocked asyncssh.connect method.
@@ -59,60 +59,74 @@ def mock_asyncssh_connect(monkeypatch):
     return jumphosts.asyncssh.connect
 
 
-def test_jumphosts_pass_noused(inventory):
+def test_jumphosts_pass_noused(inventory: list):
     """Test the initialization of a jump host when not used.
 
     This test verifies that a jump host is not added to the available list
     if no include or exclude filters are specified.
 
     Args:
-        inventory: The device inventory loaded from the fixture.
+        inventory (list): The device inventory loaded from the fixture.
     """
     jh_spec = config_model.JumphostSpec(proxy="1.2.3.4")
     jumphosts.init_jumphosts(jumphost_specs=[jh_spec], inventory=inventory)
     assert len(jumphosts.JumpHost.available) == 0
 
 
-def test_jumphosts_pass_incused(inventory):
+def common_jumphosts_pass_used(inventory: list, jh_spec: config_model.JumphostSpec):
+    """Common test for the initialization of a jump host when used.
+
+    This test verifies that a jump host is correctly assigned to devices
+    when no filters are specified.
+
+    Args:
+        inventory (list): The device inventory loaded from the fixture.
+        jh_spec (config_model.JumphostSpec): The jump host specification to use for initialization.
+
+    Returns:
+        collections.Counter: A counter object showing the usage of the jump host across devices.
+    """
+    jumphosts.init_jumphosts(jumphost_specs=[jh_spec], inventory=inventory)
+    assert len(jumphosts.JumpHost.available) == 1
+    return Counter(getattr(jumphosts.get_jumphost(rec), "name", None) for rec in inventory)
+
+
+def test_jumphosts_pass_incused(inventory: list):
     """Test the initialization of a jump host with an include filter.
 
     This test verifies that a jump host is correctly assigned to devices
     when the include filter is specified for EOS devices.
 
     Args:
-        inventory: The device inventory loaded from the fixture.
+        inventory (list): The device inventory loaded from the fixture.
     """
     jh_spec = config_model.JumphostSpec(proxy="1.2.3.4", include=["os_name=eos"])
-    jumphosts.init_jumphosts(jumphost_specs=[jh_spec], inventory=inventory)
-    assert len(jumphosts.JumpHost.available) == 1
-    jh_use_count = Counter(getattr(jumphosts.get_jumphost(rec), "name", None) for rec in inventory)
+    jh_use_count = common_jumphosts_pass_used(inventory, jh_spec)
     assert jh_use_count["1.2.3.4"] == 2
 
 
-def test_jumphosts_pass_exlused(inventory):
+def test_jumphosts_pass_exlused(inventory: list):
     """Test the initialization of a jump host with an exclude filter.
 
     This test verifies that a jump host is correctly assigned to devices
     when the exclude filter is specified for EOS devices.
 
     Args:
-        inventory: The device inventory loaded from the fixture.
+        inventory (list): The device inventory loaded from the fixture.
     """
     jh_spec = config_model.JumphostSpec(proxy="1.2.3.4", exclude=["os_name=eos"])
-    jumphosts.init_jumphosts(jumphost_specs=[jh_spec], inventory=inventory)
-    assert len(jumphosts.JumpHost.available) == 1
-    jh_use_count = Counter(getattr(jumphosts.get_jumphost(rec), "name", None) for rec in inventory)
+    jh_use_count = common_jumphosts_pass_used(inventory, jh_spec)
     assert jh_use_count["1.2.3.4"] == 4
 
 
-def test_jumphosts_pass_exlallused(inventory):
+def test_jumphosts_pass_exlallused(inventory: list):
     """Test the exclusion of all OS types from jump host usage.
 
     This test verifies that no jump hosts are required when all OS types
     are excluded from being assigned to a jump host.
 
     Args:
-        inventory: The device inventory loaded from the fixture.
+        inventory (list): The device inventory loaded from the fixture.
     """
     jh_spec = config_model.JumphostSpec(proxy="1.2.3.4", exclude=["os_name=.*"])
     jumphosts.init_jumphosts(jumphost_specs=[jh_spec], inventory=inventory)
@@ -121,7 +135,11 @@ def test_jumphosts_pass_exlallused(inventory):
 
 @pytest.mark.asyncio
 async def test_jumphosts_fail_connect(
-    netcfgbu_envars, log_vcr, inventory, mock_asyncssh_connect, monkeypatch
+    netcfgbu_envars: pytest.FixtureRequest,
+    log_vcr: pytest.FixtureRequest,
+    inventory: list,
+    mock_asyncssh_connect: CoroutineMock,
+    monkeypatch: pytest.MonkeyPatch
 ):
     """Test the failure of SSH connection attempts to a jump host.
 
@@ -129,11 +147,11 @@ async def test_jumphosts_fail_connect(
     to a jump host fail due to timeouts or other errors.
 
     Args:
-        netcfgbu_envars: Pytest fixture for setting environment variables.
-        log_vcr: Pytest fixture for capturing log records.
-        inventory: The device inventory loaded from the fixture.
-        mock_asyncssh_connect: The mocked asyncssh.connect method.
-        monkeypatch: Pytest's monkeypatch fixture to modify behavior.
+        netcfgbu_envars (pytest.FixtureRequest): Pytest fixture for setting environment variables.
+        log_vcr (pytest.FixtureRequest): Pytest fixture for capturing log records.
+        inventory (list): The device inventory loaded from the fixture.
+        mock_asyncssh_connect (CoroutineMock): The mocked asyncssh.connect method.
+        monkeypatch (pytest.MonkeyPatch): Pytest's monkeypatch fixture to modify behavior.
     """
     monkeypatch.setattr(jumphosts, "get_logger", Mock(return_value=log_vcr))
     jh_spec = config_model.JumphostSpec(proxy="dummy-user@1.2.3.4:8022", exclude=["os_name=eos"])

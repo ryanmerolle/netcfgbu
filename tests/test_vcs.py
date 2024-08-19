@@ -1,8 +1,8 @@
 """This file contains the pytest test cases for the vcs.git module."""
 
 from pathlib import Path
-from unittest.mock import Mock
 from typing import Optional
+from unittest.mock import Mock
 
 import pytest  # noqa
 
@@ -11,8 +11,7 @@ from netcfgbu.vcs import git
 
 
 def get_expected_commands(key_file: Optional[str] = None) -> list[str]:
-    """
-    Returns a list of expected git commands.
+    """Returns a list of expected git commands.
 
     If a keyfile is provided, includes the 'git remote add origin' command.
     Otherwise, excludes it from the list.

@@ -17,7 +17,7 @@ def test_filetypes_csv_hascomments(request):
     filepath = f"{request.fspath.dirname}/files/test-csv-withcomments.csv"
 
     # Use context manager to handle file opening and closing
-    with open(filepath) as csvfile:
+    with open(filepath, encoding="utf-8") as csvfile:
         csv_data = [rec["host"] for rec in CommentedCsvReader(csvfile)]
 
     assert "switch1" in csv_data
