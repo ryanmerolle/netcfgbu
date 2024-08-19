@@ -1,3 +1,5 @@
+"""This module serves as the root command handler for the CLI."""
+
 from functools import reduce
 from importlib import metadata
 from pathlib import Path

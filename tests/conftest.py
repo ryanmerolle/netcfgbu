@@ -1,4 +1,4 @@
-# pytest configuration file
+"""Configuration and fixtures for the test suite."""
 
 import logging
 from pathlib import Path

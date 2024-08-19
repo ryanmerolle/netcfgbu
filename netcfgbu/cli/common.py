@@ -1,3 +1,5 @@
+"""This module provides common utility functions for the CLI."""
+
 import asyncio
 import socket
 

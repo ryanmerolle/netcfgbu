@@ -1,3 +1,5 @@
+"""This module handles different file types for network configurations."""
+
 import csv
 
 

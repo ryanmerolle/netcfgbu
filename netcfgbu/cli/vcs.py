@@ -1,3 +1,5 @@
+"""This module provides version control system (VCS) integration for network configurations."""
+
 import click
 
 from netcfgbu import config as _config

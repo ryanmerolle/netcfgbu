@@ -1,3 +1,5 @@
+"""This module defines constants used throughout the netcfgbu package."""
+
 DEFAULT_MAX_STARTUPS = 100
 DEFAULT_LOGIN_TIMEOUT = 30
 DEFAULT_GETCONFIG_TIMEOUT = 60

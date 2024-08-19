@@ -1,3 +1,5 @@
+"""This module generates reports based on network configuration data."""
+
 import asyncio
 import csv
 from collections import defaultdict

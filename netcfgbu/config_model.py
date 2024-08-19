@@ -1,3 +1,5 @@
+"""This module defines the data models for network configurations."""
+
 import os
 import re
 from itertools import chain

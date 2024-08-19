@@ -1,3 +1,5 @@
+"""This module provides example commands for the CLI."""
+
 import importlib.resources
 import shutil
 from pathlib import Path

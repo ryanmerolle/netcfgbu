@@ -1,3 +1,5 @@
+"""This module provides linting functionality for network configurations."""
+
 import re
 from pathlib import Path
 

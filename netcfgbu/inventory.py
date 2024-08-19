@@ -1,3 +1,5 @@
+"""This module manages the inventory of network devices."""
+
 import os
 from pathlib import Path
 

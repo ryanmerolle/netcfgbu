@@ -8,6 +8,7 @@ Functions:
     test_plugin_execution: Test the execution of plugins.
     test_plugin_validation: Test the validation of plugins.
 """
+
 import pytest
 
 from netcfgbu.config import load

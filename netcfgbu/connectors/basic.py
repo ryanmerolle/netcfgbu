@@ -1,3 +1,5 @@
+"""This module provides basic connection functionality for network devices."""
+
 import asyncio
 import io
 import re

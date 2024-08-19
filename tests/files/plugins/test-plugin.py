@@ -1,3 +1,5 @@
+"""Tests for the plugin module."""
+
 from typing import Any
 
 from netcfgbu.plugins import Plugin

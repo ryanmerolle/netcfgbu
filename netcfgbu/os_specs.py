@@ -1,3 +1,5 @@
+"""This module defines operating system specifications for network devices."""
+
 from netcfgbu.config_model import AppConfig, OSNameSpec
 from netcfgbu.connectors import get_connector_class
 

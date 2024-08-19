@@ -1,3 +1,5 @@
+"""This module provides SSH connection functionality for network devices."""
+
 import asyncio
 
 from netcfgbu.connectors.basic import BasicSSHConnector

@@ -1,3 +1,5 @@
+"""This module manages plugins for extending the functionality of netcfgbu."""
+
 from collections import defaultdict
 from pathlib import Path
 
@@ -39,28 +41,28 @@ def load_plugins(plugins_dir: Path) -> None:
 
 
 class Plugin:
-    """base plugin class to use for subclassed plugins to enable custom methods to be run"""
+    """base plugin class to use for subclassed plugins to enable custom methods to be run."""
 
     name = None
 
     def report(report):
-        """Returns a report specific plugin once the netcfgbu backup process completes"""
+        """Returns a report specific plugin once the netcfgbu backup process completes."""
         pass
 
     def backup_success(rec: dict, res: bool):
-        """Returns a backup success specific plugin once the netcfgbu backup process completes"""
+        """Returns a backup success specific plugin once the netcfgbu backup process completes."""
         pass
 
     def backup_failed(rec: dict, exc: str):
-        """Returns a backup failed specific plugin once the netcfgbu backup process completes"""
+        """Returns a backup failed specific plugin once the netcfgbu backup process completes."""
         pass
 
     def git_report(success: bool, message: str):
-        """Returns a git report specific plugin once the netcfgbu vcs save process completes"""
+        """Returns a git report specific plugin once the netcfgbu vcs save process completes."""
         pass
 
     def run_backup_failed(rec: dict, exc: str) -> None:
-        """Execute plugins submodules for backup failed plugins"""
+        """Execute plugins submodules for backup failed plugins."""
         tasks = _registered_plugins[_PLUGIN_NAME] or Plugin
         if isinstance(tasks, list):
             for task in tasks:
@@ -69,7 +71,7 @@ class Plugin:
             tasks.backup_failed(rec, exc)
 
     def run_backup_success(rec: dict, res: str) -> None:
-        """Execute plugins submodules for backup success plugins"""
+        """Execute plugins submodules for backup success plugins."""
         tasks = _registered_plugins[_PLUGIN_NAME] or Plugin
         if isinstance(tasks, list):
             for task in tasks:
@@ -78,7 +80,7 @@ class Plugin:
             tasks.backup_success(rec, res)
 
     def run_report(task_results) -> None:
-        """Execute plugins submodules for report plugins"""
+        """Execute plugins submodules for report plugins."""
         tasks = _registered_plugins[_PLUGIN_NAME] or Plugin
         if isinstance(tasks, list):
             for task in tasks:
@@ -87,7 +89,7 @@ class Plugin:
             tasks.report(task_results)
 
     def run_git_report(success: bool, message: str) -> None:
-        """Execute plugins submodules for vcs save plugins"""
+        """Execute plugins submodules for vcs save plugins."""
         tasks = _registered_plugins[_PLUGIN_NAME] or Plugin
         if isinstance(tasks, list):
             for task in tasks:

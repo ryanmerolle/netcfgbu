@@ -1,3 +1,5 @@
+"""This module handles inventory management for network devices."""
+
 from textwrap import indent
 
 import click

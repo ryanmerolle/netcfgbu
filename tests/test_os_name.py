@@ -1,3 +1,5 @@
+"""Tests for the OS name functionality."""
+
 from netcfgbu.filetypes import CommentedCsvReader
 
 

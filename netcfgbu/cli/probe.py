@@ -1,3 +1,5 @@
+"""This module provides probing functionality to check the status of network devices."""
+
 import click
 
 from netcfgbu.cli.common import execute_command

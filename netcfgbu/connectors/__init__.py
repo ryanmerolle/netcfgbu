@@ -1,3 +1,8 @@
+"""netcfgbu.connectors package.
+
+This package contains modules for connecting to various network devices.
+"""
+
 from functools import lru_cache
 from importlib import import_module
 

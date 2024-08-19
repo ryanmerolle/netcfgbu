@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+"""This module serves as the main entry point for the netcfgbu application."""
 
 from netcfgbu.cli import main as main_cli
 

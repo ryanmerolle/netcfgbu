@@ -1,3 +1,4 @@
+"""This module provides linting functionality for network configurations."""
 # def exec_lint(app_cfg, inventory) -> None:
 #
 #     lint_hosts = [

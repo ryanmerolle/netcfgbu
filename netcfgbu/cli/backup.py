@@ -1,3 +1,9 @@
+"""This module provides functionality for backing up network configurations.
+
+Functions:
+    backup_config: Backs up the configuration of a network device.
+"""
+
 import click
 
 from netcfgbu.cli.common import execute_command
