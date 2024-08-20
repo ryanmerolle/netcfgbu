@@ -1,94 +1,112 @@
-"""Tests for the filtering module in the netcfgbu package.
-
-This module contains tests for various filtering functionalities in the
-netcfgbu package. It uses pytest for testing.
-
-Functions:
-    test_filtering_by_date: Test filtering by date.
-    test_filtering_by_size: Test filtering by size.
-    test_filtering_by_name: Test filtering by name.
-"""
-
 import csv
 
 import pytest  # noqa
 
 from netcfgbu.filtering import create_filter
 
+# Test data
+TEST1 = {"ipaddr": "10.10.0.2", "host": "switch1.nyc1"}
+TEST2 = {"ipaddr": "10.10.0.3", "host": "switch1.nyc1"}
+TEST3 = {"ipaddr": "10.10.0.4", "host": "switch1.dc1"}
+TEST4 = {"ipaddr": "3001:10:10::2", "host": "switch1.nyc1"}
+TEST5 = {"ipaddr": "3001:10:10::3", "host": "switch1.nyc1"}
+TEST6 = {"ipaddr": "3001:10:10::4", "host": "switch1.dc1"}
+
+
+def create_and_test_filter(
+    constraints, field_names, include, test_data, expected_results
+):
+    """Helper function to create a filter and run assertions.
+
+    Args:
+        constraints (list): List of constraints for the filter.
+        field_names (list): List of field names used in the filter.
+        include (bool): Whether to include or exclude constraints.
+        test_data (list): List of dictionaries representing test data.
+        expected_results (list): List of expected results (True/False).
+    """
+    filter_fn = create_filter(constraints=constraints, field_names=field_names, include=include)
+    for test_rec, expected in zip(test_data, expected_results):
+        assert filter_fn(test_rec) is expected
+
+
+def write_csv(tmpfile, fieldnames, rows):
+    """Helper function to write rows to a CSV file.
+
+    Args:
+        tmpfile (Path): Path to the file.
+        fieldnames (list): List of field names for the CSV.
+        rows (list): List of dictionaries representing rows to write.
+    """
+    with open(tmpfile, "w+", encoding="utf-8") as ofile:
+        csv_wr = csv.DictWriter(ofile, fieldnames=fieldnames)
+        csv_wr.writeheader()
+        csv_wr.writerows(rows)
+
 
 def test_filtering_pass_include():
-    """Test the use-case where the constraint is a valid set of "limits"."""
-    key_values = [("os_name", "eos"), ("host", ".*nyc1")]
-    constraints = [f"{key}={val}" for key, val in key_values]
-    field_names = [key for key, _ in key_values]
-
-    filter_fn = create_filter(constraints=constraints, field_names=field_names, include=True)
-
-    assert filter_fn({"os_name": "eos", "host": "switch1.nyc1"}) is True
-    assert filter_fn({"os_name": "ios", "host": "switch1.nyc1"}) is False
-    assert filter_fn({"os_name": "eos", "host": "switch1.dc1"}) is False
+    create_and_test_filter(
+        constraints=["os_name=eos", "host=.*nyc1"],
+        field_names=["os_name", "host"],
+        include=True,
+        test_data=[
+            {"os_name": "eos", "host": "switch1.nyc1"},
+            {"os_name": "ios", "host": "switch1.nyc1"},
+            {"os_name": "eos", "host": "switch1.dc1"},
+        ],
+        expected_results=[True, False, False],
+    )
 
 
 def test_filtering_pass_exclude():
-    """Test use-case where the constraint is a valid set of "excludes"."""
-    key_values = [("os_name", "eos"), ("host", ".*nyc1")]
-    constraints = [f"{key}={val}" for key, val in key_values]
-    field_names = [key for key, _ in key_values]
-
-    filter_fn = create_filter(constraints=constraints, field_names=field_names, include=False)
-
-    assert filter_fn({"os_name": "ios", "host": "switch1.nyc1"}) is False
-    assert filter_fn({"os_name": "eos", "host": "switch1.dc1"}) is False
-    assert filter_fn({"os_name": "ios", "host": "switch1.dc1"}) is True
+    create_and_test_filter(
+        constraints=["os_name=eos", "host=.*nyc1"],
+        field_names=["os_name", "host"],
+        include=False,
+        test_data=[
+            {"os_name": "ios", "host": "switch1.nyc1"},
+            {"os_name": "eos", "host": "switch1.dc1"},
+            {"os_name": "ios", "host": "switch1.dc1"},
+        ],
+        expected_results=[False, False, True],
+    )
 
 
 def test_filtering_fail_constraint_field():
-    """Test the use-case where the constraint form is invalid due to a
-    field name being incorrect.
-    """
-    key_values = [("os_name2", "eos"), ("host", ".*nyc1")]
-    constraints = [f"{key}={val}" for key, val in key_values]
+    constraints = ["os_name2=eos", "host=.*nyc1"]
     field_names = ["os_name", "host"]
 
     with pytest.raises(ValueError) as excinfo:
         create_filter(constraints=constraints, field_names=field_names, include=False)
 
-    errmsg = excinfo.value.args[0]
-    assert "Invalid filter expression: os_name2=eos" in errmsg
+    assert "Invalid filter expression: os_name2=eos" in excinfo.value.args[0]
 
 
 def test_filtering_fail_constraint_regex():
-    """Test the case where the constraint value is an invalid regular-expression."""
     with pytest.raises(ValueError) as excinfo:
         create_filter(constraints=["os_name=***"], field_names=["os_name"], include=False)
 
-    errmsg = excinfo.value.args[0]
-    assert "Invalid filter regular-expression" in errmsg
+    assert "Invalid filter regular-expression" in excinfo.value.args[0]
 
 
 def test_filtering_pass_filepath(tmpdir):
-    """Test use-case where a filepath constraint is provided, and the file exists."""
     filename = "failures.csv"
     tmpfile = tmpdir.join(filename)
 
-    # Ensure the CSV file is created with the correct headers and data
-    with open(tmpfile, "w+", encoding="utf-8") as ofile:
-        ofile.write("host,os_name\n")
-        ofile.write("switch1.nyc1,eos\n")
-        ofile.write("switch2.dc1,ios\n")
-
-    # Read and print the CSV file content to ensure correctness
-    with open(tmpfile, encoding="utf-8") as ofile:
-        content = ofile.read()
-        print(f"CSV content:\n{content}")
+    write_csv(
+        tmpfile,
+        ["host", "os_name"],
+        [
+            {"host": "switch1.nyc1", "os_name": "eos"},
+            {"host": "switch2.dc1", "os_name": "ios"},
+        ],
+    )
 
     abs_filepath = str(tmpfile)
-
     create_filter(constraints=[f"@{abs_filepath}"], field_names=["host"])
 
 
 def test_filtering_fail_filepath(tmpdir):
-    """Test use-case where a filepath constraint is provide, and the file does not exist."""
     filename = "failures.csv"
     tmpfile = tmpdir.join(filename)
     abs_filepath = str(tmpfile)
@@ -96,12 +114,10 @@ def test_filtering_fail_filepath(tmpdir):
     with pytest.raises(FileNotFoundError) as excinfo:
         create_filter(constraints=[f"@{abs_filepath}"], field_names=["host"])
 
-    errmsg = excinfo.value.args[0]
-    assert errmsg == abs_filepath
+    assert excinfo.value.args[0] == abs_filepath
 
 
 def test_filtering_pass_csv_filecontents(tmpdir):
-    """Test use-case where the constraint is a valid CSV file."""
     filename = "failures.csv"
     tmpfile = tmpdir.join(filename)
 
@@ -115,210 +131,174 @@ def test_filtering_pass_csv_filecontents(tmpdir):
         {"host": "switch4.dc1", "os_name": "ios"},
     ]
 
-    # Write to CSV file
-    with open(tmpfile, "w+", encoding="utf-8") as ofile:
-        csv_wr = csv.DictWriter(ofile, fieldnames=["host", "os_name"])
-        csv_wr.writeheader()
-        csv_wr.writerows(inventory_recs)
-
-    # Read and print the CSV file content to ensure correctness
-    with open(tmpfile, encoding="utf-8") as ofile:
-        content = ofile.read()
-        print(f"CSV content:\n{content}")
+    write_csv(tmpfile, ["host", "os_name"], inventory_recs)
 
     abs_filepath = str(tmpfile)
-
     filter_fn = create_filter(constraints=[f"@{abs_filepath}"], field_names=["host"])
 
     for rec in inventory_recs:
-        print(f"Filtering record: {rec}")
-        assert filter_fn(rec) is True  # This should pass
+        assert filter_fn(rec) is True
 
     for rec in not_inventory_recs:
-        print(f"Filtering record (not in inventory): {rec}")
-        assert filter_fn(rec) is False  # This should pass
+        assert filter_fn(rec) is False
 
 
 def test_filtering_fail_csv_missinghostfield(tmpdir):
-    """Test use-case where the constraint is an invalid CSV file; meaning that there
-    is no `host` field.
-    """
     filename = "failures.csv"
     tmpfile = tmpdir.join(filename)
 
-    # create an inventory that does not use 'host' as required, but uses
-    # 'hostname' instead.
-
-    inventory_recs = [
-        {"hostname": "swtich1.nyc1", "os_name": "eos"},
-        {"hostname": "switch2.dc1", "os_name": "ios"},
-    ]
-
-    with open(tmpfile, "w+", encoding="utf-8") as ofile:
-        csv_wr = csv.DictWriter(ofile, fieldnames=["hostname", "os_name"])
-        csv_wr.writeheader()
-        csv_wr.writerows(inventory_recs)
+    write_csv(
+        tmpfile,
+        ["hostname", "os_name"],
+        [
+            {"hostname": "switch1.nyc1", "os_name": "eos"},
+            {"hostname": "switch2.dc1", "os_name": "ios"},
+        ],
+    )
 
     abs_filepath = str(tmpfile)
 
     with pytest.raises(ValueError) as excinfo:
         create_filter(constraints=[f"@{abs_filepath}"], field_names=["hostname"])
 
-    errmsg = excinfo.value.args[0]
-    assert "does not contain host content as expected" in errmsg
+    assert "does not contain host content as expected" in excinfo.value.args[0]
 
 
 def test_filtering_fail_csv_filecontentsnotcsv(tmpdir):
-    """Test use-case where the constraint expects a CSV file, but the file is not
-    a CSV file due to contents; i.e. when attempting to read the CSV file it fails
-    to load content.
-    """
-    # rather than provide a CSV file, provide this python file (not a CSV file).
-    # but call it a CSV file.
-
     filepath = tmpdir.join("dummy.csv")
     filepath.mklinkto(__file__)
 
     with pytest.raises(ValueError) as excinfo:
         create_filter(constraints=[f"@{filepath}"], field_names=["host"])
 
-    errmsg = excinfo.value.args[0]
-    assert "does not contain host content as expected" in errmsg
+    assert "does not contain host content as expected" in excinfo.value.args[0]
 
 
 def test_filtering_fail_csv_notcsvfile():
-    """Test use-case when the provided file is not a CSV, and indicated by the
-    filename suffix not being '.csv'.
-    """
     with pytest.raises(ValueError) as excinfo:
         create_filter(constraints=[f"@{__file__}"], field_names=["host, os_name"])
 
-    errmsg = excinfo.value.args[0]
-    assert "not a CSV file." in errmsg
+    assert "not a CSV file." in excinfo.value.args[0]
 
 
 def test_filtering_ipaddr_v4_include():
-    """Test the ipaddr (Ipv4) include network address/prefix use-case."""
-    filter_fn = create_filter(
-        constraints=["ipaddr=10.10.0.2"], field_names=["ipaddr"], include=True
+    create_and_test_filter(
+        constraints=["ipaddr=10.10.0.2"],
+        field_names=["ipaddr"],
+        include=True,
+        test_data=[TEST1, TEST2, TEST3],
+        expected_results=[True, False, False],
     )
-
-    assert filter_fn({"ipaddr": "10.10.0.2", "host": "switch1.nyc1"}) is True
-    assert filter_fn({"ipaddr": "10.10.0.3", "host": "switch1.nyc1"}) is False
-    assert filter_fn({"ipaddr": "10.10.0.4", "host": "switch1.dc1"}) is False
-
-    filter_fn = create_filter(
-        constraints=["ipaddr=10.10.0.2/31"], field_names=["ipaddr"], include=True
+    create_and_test_filter(
+        constraints=["ipaddr=10.10.0.2/31"],
+        field_names=["ipaddr"],
+        include=True,
+        test_data=[TEST1, TEST2, TEST3],
+        expected_results=[True, True, False],
     )
-
-    assert filter_fn({"ipaddr": "10.10.0.2", "host": "switch1.nyc1"}) is True
-    assert filter_fn({"ipaddr": "10.10.0.3", "host": "switch1.nyc1"}) is True
-    assert filter_fn({"ipaddr": "10.10.0.4", "host": "switch1.dc1"}) is False
-
-    filter_fn = create_filter(
-        constraints=["ipaddr=10.10.0.0/16"], field_names=["ipaddr"], include=True
+    create_and_test_filter(
+        constraints=["ipaddr=10.10.0.0/16"],
+        field_names=["ipaddr"],
+        include=True,
+        test_data=[TEST1, TEST2, TEST3],
+        expected_results=[True, True, True],
     )
-
-    assert filter_fn({"ipaddr": "10.10.0.2", "host": "switch1.nyc1"}) is True
-    assert filter_fn({"ipaddr": "10.10.0.3", "host": "switch1.nyc1"}) is True
-    assert filter_fn({"ipaddr": "10.10.0.4", "host": "switch1.dc1"}) is True
 
 
 def test_filtering_ipaddr_v4_exclude():
-    """Test the ipaddr (Ipv4) exclude network address/prefix use-case."""
-    filter_fn = create_filter(
-        constraints=["ipaddr=10.10.0.2"], field_names=["ipaddr"], include=False
+    create_and_test_filter(
+        constraints=["ipaddr=10.10.0.2"],
+        field_names=["ipaddr"],
+        include=False,
+        test_data=[TEST1, TEST2, TEST3],
+        expected_results=[False, True, True],
     )
-
-    assert filter_fn({"ipaddr": "10.10.0.2", "host": "switch1.nyc1"}) is False
-    assert filter_fn({"ipaddr": "10.10.0.3", "host": "switch1.nyc1"}) is True
-    assert filter_fn({"ipaddr": "10.10.0.4", "host": "switch1.dc1"}) is True
-
-    filter_fn = create_filter(
-        constraints=["ipaddr=10.10.0.2/31"], field_names=["ipaddr"], include=False
+    create_and_test_filter(
+        constraints=["ipaddr=10.10.0.2/31"],
+        field_names=["ipaddr"],
+        include=False,
+        test_data=[TEST1, TEST2, TEST3],
+        expected_results=[False, False, True],
     )
-
-    assert filter_fn({"ipaddr": "10.10.0.2", "host": "switch1.nyc1"}) is False
-    assert filter_fn({"ipaddr": "10.10.0.3", "host": "switch1.nyc1"}) is False
-    assert filter_fn({"ipaddr": "10.10.0.4", "host": "switch1.dc1"}) is True
-
-    filter_fn = create_filter(
-        constraints=["ipaddr=10.10.0.0/16"], field_names=["ipaddr"], include=False
+    create_and_test_filter(
+        constraints=["ipaddr=10.10.0.0/16"],
+        field_names=["ipaddr"],
+        include=False,
+        test_data=[TEST1, TEST2, TEST3],
+        expected_results=[False, False, False],
     )
-
-    assert filter_fn({"ipaddr": "10.10.0.2", "host": "switch1.nyc1"}) is False
-    assert filter_fn({"ipaddr": "10.10.0.3", "host": "switch1.nyc1"}) is False
-    assert filter_fn({"ipaddr": "10.10.0.4", "host": "switch1.dc1"}) is False
 
 
 def test_filtering_ipaddr_v6_include():
-    """Test the ipaddr (Ipv6) include network address/prefix use-case."""
-    filter_fn = create_filter(
-        constraints=["ipaddr=3001:10:10::2"], field_names=["ipaddr"], include=True
+    create_and_test_filter(
+        constraints=["ipaddr=3001:10:10::2"],
+        field_names=["ipaddr"],
+        include=True,
+        test_data=[TEST4, TEST5, TEST6],
+        expected_results=[True, False, False],
     )
-
-    assert filter_fn({"ipaddr": "3001:10:10::2", "host": "switch1.nyc1"}) is True
-    assert filter_fn({"ipaddr": "3001:10:10::3", "host": "switch1.nyc1"}) is False
-    assert filter_fn({"ipaddr": "3001:10:10::4", "host": "switch1.dc1"}) is False
-
-    filter_fn = create_filter(
-        constraints=["ipaddr=3001:10:10::2/127"], field_names=["ipaddr"], include=True
+    create_and_test_filter(
+        constraints=["ipaddr=3001:10:10::2/127"],
+        field_names=["ipaddr"],
+        include=True,
+        test_data=[TEST4, TEST5, TEST6],
+        expected_results=[True, True, False],
     )
-
-    assert filter_fn({"ipaddr": "3001:10:10::2", "host": "switch1.nyc1"}) is True
-    assert filter_fn({"ipaddr": "3001:10:10::3", "host": "switch1.nyc1"}) is True
-    assert filter_fn({"ipaddr": "3001:10:10::4", "host": "switch1.dc1"}) is False
-
-    filter_fn = create_filter(
-        constraints=["ipaddr=3001:10:10::0/64"], field_names=["ipaddr"], include=True
+    create_and_test_filter(
+        constraints=["ipaddr=3001:10:10::0/64"],
+        field_names=["ipaddr"],
+        include=True,
+        test_data=[TEST4, TEST5, TEST6],
+        expected_results=[True, True, True],
     )
-
-    assert filter_fn({"ipaddr": "3001:10:10::2", "host": "switch1.nyc1"}) is True
-    assert filter_fn({"ipaddr": "3001:10:10::3", "host": "switch1.nyc1"}) is True
-    assert filter_fn({"ipaddr": "3001:10:10::4", "host": "switch1.dc1"}) is True
 
 
 def test_filtering_ipaddr_v6_exclude():
-    """Test the ipaddr (Ipv6) exclude network address/prefix use-case."""
-    filter_fn = create_filter(
-        constraints=["ipaddr=3001:10:10::2"], field_names=["ipaddr"], include=False
+    create_and_test_filter(
+        constraints=["ipaddr=3001:10:10::2"],
+        field_names=["ipaddr"],
+        include=False,
+        test_data=[TEST4, TEST5, TEST6],
+        expected_results=[False, True, True],
     )
-
-    assert filter_fn({"ipaddr": "3001:10:10::2", "host": "switch1.nyc1"}) is False
-    assert filter_fn({"ipaddr": "3001:10:10::3", "host": "switch1.nyc1"}) is True
-    assert filter_fn({"ipaddr": "3001:10:10::4", "host": "switch1.dc1"}) is True
-
-    filter_fn = create_filter(
-        constraints=["ipaddr=3001:10:10::2/127"], field_names=["ipaddr"], include=False
+    create_and_test_filter(
+        constraints=["ipaddr=3001:10:10::2/127"],
+        field_names=["ipaddr"],
+        include=False,
+        test_data=[TEST4, TEST5, TEST6],
+        expected_results=[False, False, True],
     )
-
-    assert filter_fn({"ipaddr": "3001:10:10::2", "host": "switch1.nyc1"}) is False
-    assert filter_fn({"ipaddr": "3001:10:10::3", "host": "switch1.nyc1"}) is False
-    assert filter_fn({"ipaddr": "3001:10:10::4", "host": "switch1.dc1"}) is True
-
-    filter_fn = create_filter(
-        constraints=["ipaddr=3001:10:10::0/64"], field_names=["ipaddr"], include=False
+    create_and_test_filter(
+        constraints=["ipaddr=3001:10:10::0/64"],
+        field_names=["ipaddr"],
+        include=False,
+        test_data=[TEST4, TEST5, TEST6],
+        expected_results=[False, False, False],
     )
-
-    assert filter_fn({"ipaddr": "3001:10:10::2", "host": "switch1.nyc1"}) is False
-    assert filter_fn({"ipaddr": "3001:10:10::3", "host": "switch1.nyc1"}) is False
-    assert filter_fn({"ipaddr": "3001:10:10::4", "host": "switch1.dc1"}) is False
 
 
 def test_filtering_ipaddr_regex_fallback():
     """Test the use-case of ipaddr filtering when a regex is used."""
-    filter_fn = create_filter(
-        constraints=["ipaddr=3001:10:(10|20)::2"], field_names=["ipaddr"], include=True
+    create_and_test_filter(
+        constraints=["ipaddr=3001:10:(10|20)::2"],
+        field_names=["ipaddr"],
+        include=True,
+        test_data=[
+            {"ipaddr": "3001:10:10::1", "host": "switch1.nyc1"},
+            {"ipaddr": "3001:10:20::2", "host": "switch1.nyc1"},
+            {"ipaddr": "3001:10:30::3", "host": "switch1.dc1"},
+        ],
+        expected_results=[False, True, False],
     )
 
-    assert filter_fn({"ipaddr": "3001:10:10::1", "host": "switch1.nyc1"}) is False
-    assert filter_fn({"ipaddr": "3001:10:20::2", "host": "switch1.nyc1"}) is True
-    assert filter_fn({"ipaddr": "3001:10:30::3", "host": "switch1.dc1"}) is False
-
-    filter_fn = create_filter(
-        constraints=[r"ipaddr=10.10.10.\d{2}"], field_names=["ipaddr"], include=False
+    create_and_test_filter(
+        constraints=[r"ipaddr=10.10.10.\d{2}"],
+        field_names=["ipaddr"],
+        include=False,
+        test_data=[
+            {"ipaddr": "10.10.10.1", "host": "switch1.nyc1"},
+            {"ipaddr": "10.10.10.10", "host": "switch1.nyc1"},
+            {"ipaddr": "10.10.10.12", "host": "switch1.nyc1"},
+        ],
+        expected_results=[True, False, False],
     )
-
-    assert filter_fn({"ipaddr": "10.10.10.1", "host": "switch1.nyc1"}) is True
-    assert filter_fn({"ipaddr": "10.10.10.10", "host": "switch1.nyc1"}) is False
-    assert filter_fn({"ipaddr": "10.10.10.12", "host": "switch1.nyc1"}) is False
