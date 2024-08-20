@@ -31,7 +31,7 @@ async def handle_exception(exc, rec, done_msg, report) -> None:
         socket.gaierror: "NameResolutionError",
         asyncio.TimeoutError: "TimeoutError",
         asyncssh.TimeoutError: "TimeoutError",
-        OSError: "NoRouteToHost" if exc.errno == 113 else "OSError",
+        OSError: "NoRouteToHost" if getattr(exc, 'errno', None) == 113 else "OSError",
     }
 
     reason = exception_map.get(type(exc), type(exc).__name__)
