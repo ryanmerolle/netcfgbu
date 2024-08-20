@@ -277,6 +277,8 @@ class BasicSSHConnector:
         Raises:
             asyncssh.PermissionDenied: If none of the credentials result in a successful login.
             asyncio.TimeoutError: If attempting to connect to a device exceeds the timeout value.
+            Exception: If a specific exception is raised other than the above, it will raise it so
+            we can fail the ssh connection quicker. Examples: DNS resolution issues & no route to host.
         """
         timeout: int = self.os_spec.timeout
 
@@ -319,6 +321,8 @@ class BasicSSHConnector:
             except asyncssh.PermissionDenied as exc:
                 self.failed = exc
                 continue
+            except Exception as exc:
+                raise exc  # Re-raise any other exceptions
 
         # Indicate that the login failed with the number of credential
         # attempts.
