@@ -82,55 +82,37 @@ def test_vcs_pass_prepare_token(mock_pexpect, tmpdir, monkeypatch):
         assert calls[cmd_i].kwargs["command"] == cmd
 
 
-def test_vcs_pass_prepare_deploykey(mock_pexpect, tmpdir, monkeypatch):
-    """Test the vcs_prepare function with a deploy key-based Git configuration.
+def run_vcs_prepare_test(
+    mock_pexpect: Mock,
+    tmpdir: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    deploy_key: Optional[str] = None,
+    deploy_passphrase: Optional[str] = None
+):
+    """Helper function to run the vcs_prepare test with the given parameters.
 
-    This test verifies that the vcs_prepare function correctly initializes the
-    Git repository and configures the user, remote origin, and SSH key when using
-    a deploy key for authentication.
+    Args:
+        mock_pexpect (Mock): The mocked pexpect module.
+        tmpdir (Path): Temporary directory for test files.
+        monkeypatch (pytest.MonkeyPatch): Pytest's monkeypatch fixture.
+        deploy_key (Optional[str]): The deploy key for the Git configuration.
+        deploy_passphrase (Optional[str]): The deploy key passphrase for the Git configuration.
     """
     monkeypatch.setenv("USER", "dummy-user")
 
-    key_file = tmpdir.join("dummy-keyfile")
-    key_file.ensure()
-    git_cfg = config_model.GitSpec(repo="git@dummy.git", deploy_key=str(key_file))
-
-    repo_dir = tmpdir.join("repo")
-
-    git.vcs_prepare(spec=git_cfg, repo_dir=Path(repo_dir))
-
-    mock_run = mock_pexpect.run
-    assert mock_run.called
-    calls = mock_run.mock_calls
-
-    expected_commands = get_expected_commands(key_file)
-
-    assert len(calls) == len(expected_commands)
-    for cmd_i, cmd in enumerate(expected_commands):
-        assert calls[cmd_i].kwargs["command"] == cmd
-
-
-def test_vcs_pass_prepare_deploykey_passphrase(mock_pexpect, tmpdir, monkeypatch):
-    """Test the vcs_prepare function with a deploy key and passphrase-based Git configuration.
-
-    This test verifies that the vcs_prepare function correctly initializes the
-    Git repository and configures the user, remote origin, and SSH key with passphrase
-    when using a deploy key with a passphrase for authentication.
-    """
-    monkeypatch.setenv("USER", "dummy-user")
-
-    key_file = tmpdir.join("dummy-keyfile")
-    key_file.ensure()
-    key_file = str(key_file)
+    key_file = None
+    if deploy_key:
+        key_file = tmpdir.join("dummy-keyfile")
+        key_file.ensure()
+        key_file = str(key_file)
 
     git_cfg = config_model.GitSpec(
         repo="git@dummy.git",
-        deploy_key=key_file,
-        deploy_passphrase="dummy-key-passphrase",
+        deploy_key=key_file if deploy_key else None,
+        deploy_passphrase=deploy_passphrase,
     )
 
     repo_dir = tmpdir.join("repo")
-
     git.vcs_prepare(spec=git_cfg, repo_dir=Path(repo_dir))
 
     mock_run = mock_pexpect.run
@@ -142,6 +124,18 @@ def test_vcs_pass_prepare_deploykey_passphrase(mock_pexpect, tmpdir, monkeypatch
     assert len(calls) == len(expected_commands)
     for cmd_i, cmd in enumerate(expected_commands):
         assert calls[cmd_i].kwargs["command"] == cmd
+
+
+def test_vcs_pass_prepare_deploykey(mock_pexpect, tmpdir, monkeypatch):
+    """Test the vcs_prepare function with a deploy key-based Git configuration."""
+    run_vcs_prepare_test(mock_pexpect, tmpdir, monkeypatch, deploy_key="dummy-keyfile")
+
+
+def test_vcs_pass_prepare_deploykey_passphrase(mock_pexpect, tmpdir, monkeypatch):
+    """Test the vcs_prepare function with a deploy key and passphrase-based Git configuration."""
+    run_vcs_prepare_test(
+        mock_pexpect, tmpdir, monkeypatch, deploy_key="dummy-keyfile", deploy_passphrase="dummy-key-passphrase"
+    )
 
 
 def test_vcs_pass_save(mock_pexpect, tmpdir, monkeypatch):
