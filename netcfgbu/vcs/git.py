@@ -3,7 +3,8 @@ using Git as the backend. The following functions are exported for use:
 
    * vcs_prepare: Used to prepare the repo directory for VCS use.
 
-   * vcs_save: Used to save files in the repo directory into VCS and tag the collection with a git tag.
+   * vcs_save: Used to save files in the repo directory into VCS and tag the
+   collection with a git tag.
 
    * vcs_status: Used to show the current target status of file changes.
 """

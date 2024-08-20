@@ -27,7 +27,7 @@ def load(app_cfg: AppConfig, limits=None, excludes=None):
     if not inventory_file.exists():
         raise FileNotFoundError(f"Inventory file does not exist: {inventory_file.absolute()}")
 
-    iter_recs = CommentedCsvReader(inventory_file.open(encoding="utf-8"))
+    iter_recs = CommentedCsvReader(inventory_file.open(mode="r", encoding="utf-8"))
     field_names = iter_recs.fieldnames
 
     if limits:

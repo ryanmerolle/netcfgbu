@@ -56,7 +56,8 @@ class CommentedCsvReader(csv.DictReader):
 #
 #        Args:
 #            fileio (file-like object): The file object to read from.
-#            index (int, optional): The index of the word to return from each valid line. Defaults to 0.
+#            index (int, optional): The index of the word to return from each valid line. Defaults
+#            to 0.
 #        """
 #        self._index = index
 #        self._lines = fileio.readlines()

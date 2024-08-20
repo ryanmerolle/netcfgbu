@@ -74,7 +74,8 @@ EnvSecretStr = Annotated[SecretStr, BeforeValidator(expand_env_str)]
 
 
 class Credential(NoExtraBaseModel):
-    """Represents a credential with a username and password, supporting environment variable expansion.
+    """Represents a credential with a username and password, supporting environment variable
+    expansion.
 
     Attributes:
         username: The username for the credential.

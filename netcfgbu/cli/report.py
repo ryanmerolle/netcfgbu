@@ -133,7 +133,9 @@ class Report:
             print(tabulate(summary_tabular_data, headers=summary_headers, tablefmt="pretty"))
 
     def save_login_report(self) -> None:
-        """Generates and saves the login report as a CSV file, including a summary of login attempts."""
+        """Generates and saves the login report as a CSV file, including a summary of login
+        attempts.
+        """
         headers = ["host", "os_name", "num_of_attempts", "login_used"]
         login_tabular_data: list[list[Any]] = []
         summary_data: dict[str, dict[str, int]] = defaultdict(lambda: defaultdict(int))
@@ -156,7 +158,9 @@ class Report:
         )
 
     def save_failure_report(self) -> None:
-        """Generates & saves the failure report as a CSV file, including a summary of failure reasons."""
+        """Generates & saves the failure report as a CSV file, including a summary of
+        failure reasons.
+        """
         headers = ["host", "os_name", "reason"]
         failure_tabular_data: list[list[Any]] = [
             [rec["host"], rec["os_name"], err_reason(exc)] for rec, exc in self.task_results[False]

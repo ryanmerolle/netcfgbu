@@ -54,7 +54,7 @@ def load(*, filepath: Optional[str] = None, fileio=None) -> AppConfig:
 
     if filepath:
         app_cfg_file = Path(filepath)
-        fileio = app_cfg_file.open(encoding="utf-8")
+        fileio = app_cfg_file.open(mode="r", encoding="utf-8")
 
     if fileio:
         app_cfg = toml.load(fileio)
