@@ -46,20 +46,32 @@ def test_cli_probe_pass(monkeypatch):
     assert len(inv_rec) == 6
 
 
+def cli_probe_exec(monkeypatch, log_vcr, fail: bool):
+    """Utility function for testing cli probe execution."""
+    mock_probe = CoroutineMock()
+    if fail:
+        mock_probe.side_effect = asyncio.TimeoutError
+
+    monkeypatch.setattr(probe, "probe", mock_probe)
+
+    runner = CliRunner()
+    res = runner.invoke(probe.cli_check, obj={"inventory_recs": [{} for _ in range(6)]})
+    assert res.exit_code == 0
+
+    logs = log_vcr.handlers[0].records[1:]
+    if fail:
+        assert all("TimeoutError" in log.msg for log in logs)
+    else:
+        assert all("PASS" in log.msg for log in logs)
+
+
 def test_cli_probe_pass_exec(monkeypatch, log_vcr):
     """Test the CLI probe command with a successful probe execution.
 
     This test verifies that the CLI probe command succeeds and logs "PASS"
     for each inventory record when the probe function executes successfully.
     """
-    mock_probe = CoroutineMock()
-    monkeypatch.setattr(probe, "probe", mock_probe)
-
-    runner = CliRunner()
-    res = runner.invoke(probe.cli_check, obj={"inventory_recs": [{} for _ in range(6)]})
-    assert res.exit_code == 0
-    logs = log_vcr.handlers[0].records[1:]
-    assert all("PASS" in log.msg for log in logs)
+    cli_probe_exec(monkeypatch, log_vcr, fail=False)
 
 
 def test_cli_probe_fail_exec(monkeypatch, log_vcr):
@@ -69,12 +81,4 @@ def test_cli_probe_fail_exec(monkeypatch, log_vcr):
     for each inventory record when the probe function raises an exception.
     """
     # Mock the probe function to raise an asyncio.TimeoutError
-    mock_probe = CoroutineMock()
-    mock_probe.side_effect = asyncio.TimeoutError
-    monkeypatch.setattr(probe, "probe", mock_probe)
-
-    runner = CliRunner()
-    res = runner.invoke(probe.cli_check, obj={"inventory_recs": [{} for _ in range(6)]})
-    assert res.exit_code == 0
-    logs = log_vcr.handlers[0].records[1:]
-    assert all("TimeoutError" in log.msg for log in logs)
+    cli_probe_exec(monkeypatch, log_vcr, fail=True)

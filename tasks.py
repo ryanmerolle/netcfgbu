@@ -24,7 +24,6 @@ DIRS_TO_CLEAN = [
     "netcfgbu/vcs/__pycache__",
     "tests/__pycache__",
     "tests/files/plugins/__pycache__",
-
 ]
 FILES_TO_CLEAN = [
     ".coverage",
@@ -41,12 +40,14 @@ def write_to_file(output: str, filename: str = "lint.tmp") -> None:
     with open(filename, "w", encoding="utf-8") as file:
         file.write(output)
 
+
 @task
 def update(ctx, help="Update project.") -> None:
     """Update project.
 
     Args:
         ctx (invoke.Context): The context instance (passed automatically by Invoke).
+        help (str): Description of the cli command.
     """
     # ctx.run("poetry run ruff check . --fix")
     # ctx.run("poetry run ruff format .")
@@ -60,6 +61,7 @@ def precheck(ctx, help="Run pre-checks on the project.") -> None:
 
     Args:
         ctx (invoke.Context): The context instance (passed automatically by Invoke).
+        help (str): Description of the cli command.
     """
     # ctx.run("poetry run ruff check . --fix")
     # ctx.run("poetry run ruff format .")
@@ -76,6 +78,7 @@ def clean(ctx, help="Clean up the project of cache & temp files.") -> None:
 
     Args:
         ctx (invoke.Context): The context instance (passed automatically by Invoke).
+        help (str): Description of the cli command.
     """
     for folder in DIRS_TO_CLEAN:
         try:
@@ -99,6 +102,7 @@ def install(ctx, help="Install the package locally.") -> None:
 
     Args:
         ctx (invoke.Context): The context instance (passed automatically by Invoke).
+        help (str): Description of the cli command.
     """
     try:
         ctx.run("pip install . --force")

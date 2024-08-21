@@ -1,10 +1,10 @@
 """This module provides common utility functions for the CLI."""
 
 import asyncio
+import errno
 import socket
 
 import asyncssh
-import errno
 
 from netcfgbu import jumphosts
 from netcfgbu.aiofut import as_completed
@@ -33,11 +33,9 @@ async def handle_exception(exc, rec, done_msg, report, cli_command) -> None:
         socket.gaierror: "NameResolutionError",
         asyncio.TimeoutError: "TimeoutError",
         asyncssh.TimeoutError: "TimeoutError",
-        OSError: "HostUnreachable" if getattr(
-            exc,
-            'errno',
-            None
-        ) == errno.EHOSTUNREACH else "OSError",
+        OSError: "HostUnreachable"
+        if getattr(exc, "errno", None) == errno.EHOSTUNREACH
+        else "OSError",
     }
 
     reason = exception_map.get(type(exc), type(exc).__name__)
