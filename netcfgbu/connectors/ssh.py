@@ -29,12 +29,12 @@ class LoginPromptUserPass(BasicSSHConnector):
         """
         await super().login()
 
-        await asyncio.wait_for(self.process.stdout.readuntil(b"User:"), timeout=60)
+        await asyncio.wait_for(self.process.stdout.readuntil(b"User:"), timeout=15)
 
         username = (self.conn_args["username"] + "\n").encode("utf-8")
         self.process.stdin.write(username)
 
-        await asyncio.wait_for(self.process.stdout.readuntil(b"Password:"), timeout=60)
+        await asyncio.wait_for(self.process.stdout.readuntil(b"Password:"), timeout=15)
 
         password = (self.conn_args["password"] + "\n").encode("utf-8")
         self.process.stdin.write(password)

@@ -17,7 +17,7 @@ def get_expected_commands(key_file: Optional[str] = None) -> list[str]:
     Otherwise, excludes it from the list.
 
     Args:
-        keyfile (Optional[str]): A string representing the keyfile. Defaults to None.
+        key_file (Optional[str]): A string representing the keyfile. Defaults to None.
 
     Returns:
         List[str]: A list of git commands.
@@ -31,7 +31,9 @@ def get_expected_commands(key_file: Optional[str] = None) -> list[str]:
     ]
 
     if key_file:
-        commands.append(f"git config --local core.sshCommand 'ssh -i {key_file} -o StrictHostKeyChecking=no'")
+        commands.append(
+            f"git config --local core.sshCommand 'ssh -i {key_file} -o StrictHostKeyChecking=no'"
+        )
 
     commands.append("git pull origin main")
 
@@ -87,7 +89,7 @@ def run_vcs_prepare_test(
     tmpdir: Path,
     monkeypatch: pytest.MonkeyPatch,
     deploy_key: Optional[str] = None,
-    deploy_passphrase: Optional[str] = None
+    deploy_passphrase: Optional[str] = None,
 ):
     """Helper function to run the vcs_prepare test with the given parameters.
 
@@ -134,7 +136,11 @@ def test_vcs_pass_prepare_deploykey(mock_pexpect, tmpdir, monkeypatch):
 def test_vcs_pass_prepare_deploykey_passphrase(mock_pexpect, tmpdir, monkeypatch):
     """Test the vcs_prepare function with a deploy key and passphrase-based Git configuration."""
     run_vcs_prepare_test(
-        mock_pexpect, tmpdir, monkeypatch, deploy_key="dummy-keyfile", deploy_passphrase="dummy-key-passphrase"
+        mock_pexpect,
+        tmpdir,
+        monkeypatch,
+        deploy_key="dummy-keyfile",
+        deploy_passphrase="dummy-key-passphrase",
     )
 
 

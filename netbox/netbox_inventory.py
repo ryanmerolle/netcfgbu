@@ -1,8 +1,9 @@
 #!/usr/bin/env python3.9
-"""This script is used to retrieve the device inventory from a Netbox system and
-email the CSV file to either stdout (default) or a filename provided.
+"""Retrieve device inventory from Netbox and email or save it as a CSV file.
 
-The following Environment variables are REQUIRED:
+This script fetches the device inventory from a Netbox system using API credentials
+and outputs the data as a CSV file. It supports filtering by site, region, and role,
+with configurable environment variables for Netbox settings.
 
   NETBOX_ADDR: the URL to the NetBox server
       "https://my-netbox-server"
@@ -20,8 +21,9 @@ import argparse
 import csv
 import os
 import sys
+from collections.abc import Iterator
 from functools import lru_cache
-from typing import Iterable, Iterator, Optional
+from typing import Optional
 
 import requests  # noqa
 from urllib3 import disable_warnings  # noqa
@@ -164,7 +166,12 @@ def fetch_inventory(cli_opts: argparse.Namespace) -> Iterator[dict]:
     # Perform a GET on the API URL to obtain the Netbox version
     res = NETBOX_SESSION.get("/api")
     api_ver = tuple(map(int, res.headers["API-Version"].split(".")))
-    params = {"limit": 0, "status": 1, "has_primary_ip": "true", "exclude": "config_context"}
+    params = {
+        "limit": 0,
+        "status": 1,
+        "has_primary_ip": "true",
+        "exclude": "config_context",
+    }
 
     if api_ver > (2, 6):
         params["status"] = "active"

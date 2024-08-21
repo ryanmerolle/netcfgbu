@@ -4,6 +4,7 @@ import asyncio
 import socket
 
 import asyncssh
+import errno
 
 from netcfgbu import jumphosts
 from netcfgbu.aiofut import as_completed
@@ -15,7 +16,7 @@ from netcfgbu.plugins import Plugin
 log = get_logger()
 
 
-async def handle_exception(exc, rec, done_msg, report) -> None:
+async def handle_exception(exc, rec, done_msg, report, cli_command) -> None:
     """Handles exceptions during task execution and logs the error.
 
     Args:
@@ -23,6 +24,7 @@ async def handle_exception(exc, rec, done_msg, report) -> None:
         rec: The inventory record associated with the task.
         done_msg: The message indicating task completion status.
         report: The Report object to store task results.
+        cli_command:  The cli command run by netcfgbu.
     """
     exception_map = {
         asyncssh.PermissionDenied: "All credentials failed",
@@ -31,13 +33,17 @@ async def handle_exception(exc, rec, done_msg, report) -> None:
         socket.gaierror: "NameResolutionError",
         asyncio.TimeoutError: "TimeoutError",
         asyncssh.TimeoutError: "TimeoutError",
-        OSError: "NoRouteToHost" if getattr(exc, 'errno', None) == 113 else "OSError",
+        OSError: "HostUnreachable" if getattr(
+            exc,
+            'errno',
+            None
+        ) == errno.EHOSTUNREACH else "OSError",
     }
 
     reason = exception_map.get(type(exc), type(exc).__name__)
 
     reason_detail = f"{reason} - {str(exc)}"
-    log.error(done_msg + " - " + reason_detail)
+    log.error("%s - %s", done_msg, reason_detail)
     report.task_results[False].append((rec, reason))
 
 
@@ -95,7 +101,7 @@ async def process_login_task(task, report, done_msg, rec, failure_callback):
             rec["login_user"] = login_user
             rec["attempts"] = rec.get("attempts", 1)
             report.task_results[True].append(rec)
-            log.info(done_msg + f" - {login_user=}")
+            log.info("%s - login_user=%s", done_msg, login_user)
         else:
             reason = "all credentials failed"
             rec["login_user"] = reason
@@ -103,7 +109,7 @@ async def process_login_task(task, report, done_msg, rec, failure_callback):
             report.task_results[False].append((rec, reason))
             log.error("%s%s", done_msg, reason)
     except Exception as exc:
-        await handle_exception(exc, rec, done_msg, report)
+        await handle_exception(exc, rec, done_msg, report, "login")  # TODO
         if failure_callback:
             failure_callback(rec, exc)
 
@@ -131,11 +137,11 @@ async def process_generic_task(
                 success_callback(rec, result)
         else:
             reason = f"{cli_command} failed"
-            await handle_exception(Exception(reason), rec, done_msg, report)
+            await handle_exception(Exception(reason), rec, done_msg, report, cli_command)
             if failure_callback:
                 failure_callback(rec, Exception(reason))
     except Exception as exc:
-        await handle_exception(exc, rec, done_msg, report)
+        await handle_exception(exc, rec, done_msg, report, cli_command)
         if failure_callback:
             failure_callback(rec, exc)
 

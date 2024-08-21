@@ -26,6 +26,7 @@ exclude = [
     "node_modules",
     "site-packages",
     "venv",
+    "tasks.py"
 ]
 
 # Same as Black.
@@ -81,7 +82,16 @@ select = [
     # Ruff-specific rules
     # "RUF",
 ]
-ignore = []
+ignore = [
+    "ASYNC109", # Async function definition with a `timeout` parameter
+    "DTZ005", # datetime.datetime.now()` called without a `tz` argument
+    "N805", # First argument of a method should be named `self`
+    "PLR0913", # Too many arguments in function definition
+    "PLR2004", # Magic value used in comparison
+    "PLW0603", # Using the global statement to update
+    "SIM115", # Use context handler for opening files
+    "UP008", # Use `super()` instead of `super(__class__, self)`
+]
 
 # Allow fix for all enabled rules (when `--fix`) is provided.
 fixable = ["ALL"]

@@ -1,7 +1,6 @@
-"""References:
-----------
-Logging in asyncio applications
-   https://bit.ly/36WWgrf
+"""Provides utility functions for logging.
+
+Logging in asyncio applications https://bit.ly/36WWgrf
 """
 
 import asyncio

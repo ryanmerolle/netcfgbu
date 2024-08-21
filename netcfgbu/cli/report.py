@@ -31,9 +31,7 @@ def err_reason(exc) -> str:
 
 
 class Report:
-    """A class to handle reporting of task results, including timing, saving reports to files,
-    and printing summaries.
-    """
+    """Handles reporting of task results, saving to files, & printing summaries."""
 
     TIME_FORMAT = "%Y-%b-%d %I:%M:%S %p"
 
@@ -133,9 +131,7 @@ class Report:
             print(tabulate(summary_tabular_data, headers=summary_headers, tablefmt="pretty"))
 
     def save_login_report(self) -> None:
-        """Generates and saves the login report as a CSV file, including a summary of login
-        attempts.
-        """
+        """Generates & saves a login report as a CSV file, including a summary of login attempts."""
         headers = ["host", "os_name", "num_of_attempts", "login_used"]
         login_tabular_data: list[list[Any]] = []
         summary_data: dict[str, dict[str, int]] = defaultdict(lambda: defaultdict(int))
@@ -158,9 +154,7 @@ class Report:
         )
 
     def save_failure_report(self) -> None:
-        """Generates & saves the failure report as a CSV file, including a summary of
-        failure reasons.
-        """
+        """Generates and saves a CSV file with a summary of failure reasons."""
         headers = ["host", "os_name", "reason"]
         failure_tabular_data: list[list[Any]] = [
             [rec["host"], rec["os_name"], err_reason(exc)] for rec, exc in self.task_results[False]
@@ -192,6 +186,7 @@ class Report:
         total_n = ok_n + fail_n
 
         print(LN_SEP)
+        print(f"NETCFGBU CLI_COMMAND: {reports_type.upper()}\n")
         print(
             f"SUMMARY: TOTAL={total_n}, OK={ok_n}, FAIL={fail_n}\n"
             f"         START={self.start_time}, STOP={self.stop_time}\n"

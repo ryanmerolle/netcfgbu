@@ -7,13 +7,7 @@ from netcfgbu.config_model import AppConfig
 from netcfgbu.consts import DEFAULT_PROBE_TIMEOUT
 from netcfgbu.probe import probe
 
-from .root import (
-    WithInventoryCommand,
-    cli,
-    opt_config_file,
-    opt_timeout,
-    opts_inventory,
-)
+from .root import WithInventoryCommand, cli, opt_config_file, opt_timeout, opts_inventory
 
 CLI_COMMAND = "probe"
 

@@ -12,12 +12,10 @@ class TestPlugin(Plugin):
         """Handles a successful backup.
 
         Args:
-        ----
             rec (Dict[Any, Any]): The record associated with the backup.
             res (bool): The result of the backup.
 
         Returns:
-        -------
             Any: The result of handling the successful backup.
 
         """
@@ -27,12 +25,10 @@ class TestPlugin(Plugin):
         """Handles a failed backup.
 
         Args:
-        ----
             rec (str): The identifier of the record that failed backup.
             exc (str): The exception message related to the failed backup.
 
         Returns:
-        -------
             Any: The result of handling the failed backup.
 
         """

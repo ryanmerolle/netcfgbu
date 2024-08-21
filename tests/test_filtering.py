@@ -1,3 +1,22 @@
+"""Module for testing filtering functionality in network configuration backups.
+
+This module contains various test cases for validating the behavior of the filtering
+mechanism in the `netcfgbu` package. It ensures that the filters are correctly
+applied to device data based on constraints, field names, and inclusion/exclusion rules.
+The tests cover a wide range of scenarios, including filtering by IP addresses,
+handling CSV files, and ensuring that invalid constraints raise appropriate errors.
+
+Test Cases:
+- Inclusion and exclusion filters based on OS names, hostnames, and IP addresses.
+- Validation of constraints with regular expressions.
+- Handling of CSV files for filtering, including error handling for missing fields
+  and incorrect file formats.
+- Ensuring that filters work correctly with both IPv4 and IPv6 addresses.
+
+This module also includes helper functions to streamline the creation of filters
+and the writing of CSV files for testing purposes.
+"""
+
 import csv
 
 import pytest  # noqa
@@ -5,17 +24,15 @@ import pytest  # noqa
 from netcfgbu.filtering import create_filter
 
 # Test data
-TEST1 = {"ipaddr": "10.10.0.2", "host": "switch1.nyc1"}
-TEST2 = {"ipaddr": "10.10.0.3", "host": "switch1.nyc1"}
-TEST3 = {"ipaddr": "10.10.0.4", "host": "switch1.dc1"}
-TEST4 = {"ipaddr": "3001:10:10::2", "host": "switch1.nyc1"}
-TEST5 = {"ipaddr": "3001:10:10::3", "host": "switch1.nyc1"}
-TEST6 = {"ipaddr": "3001:10:10::4", "host": "switch1.dc1"}
+TEST_DATA1 = {"ipaddr": "10.10.0.2", "host": "switch1.nyc1"}
+TEST_DATA2 = {"ipaddr": "10.10.0.3", "host": "switch1.nyc1"}
+TEST_DATA3 = {"ipaddr": "10.10.0.4", "host": "switch1.dc1"}
+TEST_DATA4 = {"ipaddr": "3001:10:10::2", "host": "switch1.nyc1"}
+TEST_DATA5 = {"ipaddr": "3001:10:10::3", "host": "switch1.nyc1"}
+TEST_DATA6 = {"ipaddr": "3001:10:10::4", "host": "switch1.dc1"}
 
 
-def create_and_test_filter(
-    constraints, field_names, include, test_data, expected_results
-):
+def create_and_test_filter(constraints, field_names, include, test_data, expected_results):
     """Helper function to create a filter and run assertions.
 
     Args:
@@ -45,6 +62,7 @@ def write_csv(tmpfile, fieldnames, rows):
 
 
 def test_filtering_pass_include():
+    """Tests the filtering function for inclusion with valid constraints."""
     create_and_test_filter(
         constraints=["os_name=eos", "host=.*nyc1"],
         field_names=["os_name", "host"],
@@ -59,6 +77,7 @@ def test_filtering_pass_include():
 
 
 def test_filtering_pass_exclude():
+    """Tests the filtering function for exclusion with valid constraints."""
     create_and_test_filter(
         constraints=["os_name=eos", "host=.*nyc1"],
         field_names=["os_name", "host"],
@@ -73,6 +92,7 @@ def test_filtering_pass_exclude():
 
 
 def test_filtering_fail_constraint_field():
+    """Tests the filtering function for failure due to an invalid constraint field."""
     constraints = ["os_name2=eos", "host=.*nyc1"]
     field_names = ["os_name", "host"]
 
@@ -83,6 +103,7 @@ def test_filtering_fail_constraint_field():
 
 
 def test_filtering_fail_constraint_regex():
+    """Tests the filtering function for failure due to an invalid regular expression."""
     with pytest.raises(ValueError) as excinfo:
         create_filter(constraints=["os_name=***"], field_names=["os_name"], include=False)
 
@@ -90,6 +111,7 @@ def test_filtering_fail_constraint_regex():
 
 
 def test_filtering_pass_filepath(tmpdir):
+    """Tests the filtering function with constraints loaded from a CSV file."""
     filename = "failures.csv"
     tmpfile = tmpdir.join(filename)
 
@@ -107,6 +129,7 @@ def test_filtering_pass_filepath(tmpdir):
 
 
 def test_filtering_fail_filepath(tmpdir):
+    """Tests the filtering function for failure when the specified file is not found."""
     filename = "failures.csv"
     tmpfile = tmpdir.join(filename)
     abs_filepath = str(tmpfile)
@@ -118,6 +141,7 @@ def test_filtering_fail_filepath(tmpdir):
 
 
 def test_filtering_pass_csv_filecontents(tmpdir):
+    """Tests the filtering function with valid CSV file contents."""
     filename = "failures.csv"
     tmpfile = tmpdir.join(filename)
 
@@ -144,6 +168,7 @@ def test_filtering_pass_csv_filecontents(tmpdir):
 
 
 def test_filtering_fail_csv_missinghostfield(tmpdir):
+    """Tests the filtering function for failure due to missing 'host' field in CSV."""
     filename = "failures.csv"
     tmpfile = tmpdir.join(filename)
 
@@ -165,6 +190,7 @@ def test_filtering_fail_csv_missinghostfield(tmpdir):
 
 
 def test_filtering_fail_csv_filecontentsnotcsv(tmpdir):
+    """Tests the filtering function for failure when the file contents are not valid CSV."""
     filepath = tmpdir.join("dummy.csv")
     filepath.mklinkto(__file__)
 
@@ -175,6 +201,7 @@ def test_filtering_fail_csv_filecontentsnotcsv(tmpdir):
 
 
 def test_filtering_fail_csv_notcsvfile():
+    """Tests the filtering function for failure when the specified file is not a CSV file."""
     with pytest.raises(ValueError) as excinfo:
         create_filter(constraints=[f"@{__file__}"], field_names=["host, os_name"])
 
@@ -182,103 +209,107 @@ def test_filtering_fail_csv_notcsvfile():
 
 
 def test_filtering_ipaddr_v4_include():
+    """Tests IPv4 address filtering for inclusion with valid constraints."""
     create_and_test_filter(
         constraints=["ipaddr=10.10.0.2"],
         field_names=["ipaddr"],
         include=True,
-        test_data=[TEST1, TEST2, TEST3],
+        test_data=[TEST_DATA1, TEST_DATA2, TEST_DATA3],
         expected_results=[True, False, False],
     )
     create_and_test_filter(
         constraints=["ipaddr=10.10.0.2/31"],
         field_names=["ipaddr"],
         include=True,
-        test_data=[TEST1, TEST2, TEST3],
+        test_data=[TEST_DATA1, TEST_DATA2, TEST_DATA3],
         expected_results=[True, True, False],
     )
     create_and_test_filter(
         constraints=["ipaddr=10.10.0.0/16"],
         field_names=["ipaddr"],
         include=True,
-        test_data=[TEST1, TEST2, TEST3],
+        test_data=[TEST_DATA1, TEST_DATA2, TEST_DATA3],
         expected_results=[True, True, True],
     )
 
 
 def test_filtering_ipaddr_v4_exclude():
+    """Tests IPv4 address filtering for exclusion with valid constraints."""
     create_and_test_filter(
         constraints=["ipaddr=10.10.0.2"],
         field_names=["ipaddr"],
         include=False,
-        test_data=[TEST1, TEST2, TEST3],
+        test_data=[TEST_DATA1, TEST_DATA2, TEST_DATA3],
         expected_results=[False, True, True],
     )
     create_and_test_filter(
         constraints=["ipaddr=10.10.0.2/31"],
         field_names=["ipaddr"],
         include=False,
-        test_data=[TEST1, TEST2, TEST3],
+        test_data=[TEST_DATA1, TEST_DATA2, TEST_DATA3],
         expected_results=[False, False, True],
     )
     create_and_test_filter(
         constraints=["ipaddr=10.10.0.0/16"],
         field_names=["ipaddr"],
         include=False,
-        test_data=[TEST1, TEST2, TEST3],
+        test_data=[TEST_DATA1, TEST_DATA2, TEST_DATA3],
         expected_results=[False, False, False],
     )
 
 
 def test_filtering_ipaddr_v6_include():
+    """Tests IPv6 address filtering for inclusion with valid constraints."""
     create_and_test_filter(
         constraints=["ipaddr=3001:10:10::2"],
         field_names=["ipaddr"],
         include=True,
-        test_data=[TEST4, TEST5, TEST6],
+        test_data=[TEST_DATA4, TEST_DATA5, TEST_DATA6],
         expected_results=[True, False, False],
     )
     create_and_test_filter(
         constraints=["ipaddr=3001:10:10::2/127"],
         field_names=["ipaddr"],
         include=True,
-        test_data=[TEST4, TEST5, TEST6],
+        test_data=[TEST_DATA4, TEST_DATA5, TEST_DATA6],
         expected_results=[True, True, False],
     )
     create_and_test_filter(
         constraints=["ipaddr=3001:10:10::0/64"],
         field_names=["ipaddr"],
         include=True,
-        test_data=[TEST4, TEST5, TEST6],
+        test_data=[TEST_DATA4, TEST_DATA5, TEST_DATA6],
         expected_results=[True, True, True],
     )
 
 
 def test_filtering_ipaddr_v6_exclude():
+    """Tests IPv6 address filtering for exclusion with valid constraints."""
     create_and_test_filter(
         constraints=["ipaddr=3001:10:10::2"],
         field_names=["ipaddr"],
         include=False,
-        test_data=[TEST4, TEST5, TEST6],
+        test_data=[TEST_DATA4, TEST_DATA5, TEST_DATA6],
         expected_results=[False, True, True],
     )
     create_and_test_filter(
         constraints=["ipaddr=3001:10:10::2/127"],
         field_names=["ipaddr"],
         include=False,
-        test_data=[TEST4, TEST5, TEST6],
+        test_data=[TEST_DATA4, TEST_DATA5, TEST_DATA6],
         expected_results=[False, False, True],
     )
     create_and_test_filter(
         constraints=["ipaddr=3001:10:10::0/64"],
         field_names=["ipaddr"],
         include=False,
-        test_data=[TEST4, TEST5, TEST6],
+        test_data=[TEST_DATA4, TEST_DATA5, TEST_DATA6],
         expected_results=[False, False, False],
     )
 
 
 def test_filtering_ipaddr_regex_fallback():
-    """Test the use-case of ipaddr filtering when a regex is used."""
+    """Tests IP address filtering using regex as a fallback."""
     create_and_test_filter(
         constraints=["ipaddr=3001:10:(10|20)::2"],
         field_names=["ipaddr"],

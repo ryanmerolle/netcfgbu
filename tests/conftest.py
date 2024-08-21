@@ -11,11 +11,9 @@ def fake_inventory_file(tmpdir: pytest.TempPathFactory):
     """Create a temporary fake inventory file for testing.
 
     Args:
-    ----
         tmpdir (pytest.TempPathFactory): Temporary directory factory provided by pytest.
 
     Yields:
-    ------
         str: The path to the fake inventory file.
 
     """
@@ -27,7 +25,6 @@ def netcfgbu_envars(monkeypatch: pytest.MonkeyPatch) -> None:
     """Set environment variables for netcfgbu configuration.
 
     Args:
-    ----
         monkeypatch (pytest.MonkeyPatch): pytest's monkeypatch fixture for modifying environment
         variables.
 
@@ -51,7 +48,6 @@ class RecordsCollector(logging.Handler):
         """Store a log record in the records list.
 
         Args:
-        ----
             record (logging.LogRecord): The log record to store.
 
         """
@@ -63,7 +59,6 @@ def log_vcr() -> logging.Logger:
     """Create and configure a logger for capturing log records.
 
     Returns:
-    -------
         logging.Logger: The configured logger with RecordsCollector as its handler.
 
     """
@@ -79,11 +74,9 @@ def files_dir(request: pytest.FixtureRequest) -> Path:
     """Provide the directory containing the test files.
 
     Args:
-    ----
         request (pytest.FixtureRequest): The pytest request object.
 
     Returns:
-    -------
         Path: The path to the 'files' directory in the test module.
 
     """

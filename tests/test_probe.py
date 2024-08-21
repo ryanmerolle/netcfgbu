@@ -62,6 +62,7 @@ async def test_probe_pass_timeout(monkeypatch):
     Args:
         monkeypatch: Pytest's monkeypatch fixture to modify behavior.
     """
+
     def raises_timeout(coro, timeout):  # noqa
         raise asyncio.TimeoutError
 
@@ -82,6 +83,7 @@ async def test_probe_pass_raises_timeout(monkeypatch):
     Args:
         monkeypatch: Pytest's monkeypatch fixture to modify behavior.
     """
+
     def raises_timeout(coro, timeout):  # noqa
         raise asyncio.TimeoutError
 

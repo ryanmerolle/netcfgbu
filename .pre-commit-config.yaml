@@ -19,11 +19,10 @@ repos:
     hooks:
       - id: ruff
         name: lint with ruff
-      - id: ruff
-        name: sort imports with ruff
-        args: [--select, I, --fix]
+        args: [--output-format, concise, --fix]
       - id: ruff-format
         name: format with ruff
+        #args: [--output-format, concise]
   - repo: https://github.com/igorshubovych/markdownlint-cli
     rev: v0.41.0
     hooks:

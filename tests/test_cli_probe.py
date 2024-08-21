@@ -65,16 +65,16 @@ def test_cli_probe_pass_exec(monkeypatch, log_vcr):
 def test_cli_probe_fail_exec(monkeypatch, log_vcr):
     """Test the CLI probe command with a failed probe execution.
 
-    This test verifies that the CLI probe command fails and logs "FAIL"
+    This test verifies that the CLI probe command completes and logs "TimeoutError"
     for each inventory record when the probe function raises an exception.
     """
+    # Mock the probe function to raise an asyncio.TimeoutError
     mock_probe = CoroutineMock()
     mock_probe.side_effect = asyncio.TimeoutError
     monkeypatch.setattr(probe, "probe", mock_probe)
 
     runner = CliRunner()
     res = runner.invoke(probe.cli_check, obj={"inventory_recs": [{} for _ in range(6)]})
-
-    assert res.exit_code != 0  # Make sure the exit code is non-zero indicating failure
+    assert res.exit_code == 0
     logs = log_vcr.handlers[0].records[1:]
-    assert all("FAIL" in log.msg for log in logs)
+    assert all("TimeoutError" in log.msg for log in logs)

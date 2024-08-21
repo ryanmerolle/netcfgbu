@@ -33,11 +33,11 @@ def lint_content(config_content, lint_spec: LinterSpec) -> str:
     ):
         start_offset = start_mo.end() + 1
 
-    if lint_spec.config_ends_at:
-        # if not found, rfind returns -1 to indciate; therefore need to make
-        # this check
-        if (found := config_content.rfind("\n" + lint_spec.config_ends_at)) > 0:
-            end_offset = found
+    if (
+        lint_spec.config_ends_at
+        and (found := config_content.rfind("\n" + lint_spec.config_ends_at)) > 0
+    ):
+        end_offset = found
 
     config_content = config_content[start_offset:end_offset]
 

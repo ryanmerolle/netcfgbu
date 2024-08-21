@@ -139,7 +139,7 @@ async def test_jumphosts_fail_connect(
     log_vcr: pytest.FixtureRequest,
     inventory: list,
     mock_asyncssh_connect: CoroutineMock,
-    monkeypatch: pytest.MonkeyPatch
+    monkeypatch: pytest.MonkeyPatch,
 ):
     """Test the failure of SSH connection attempts to a jump host.
 

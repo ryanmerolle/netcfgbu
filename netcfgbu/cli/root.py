@@ -43,8 +43,10 @@ class WithConfigCommand(click.Command):
 
 
 class WithInventoryCommand(click.Command):
-    """Custom Click command that loads the configuration and inventory before invoking the command.
-    Also handles SSH debugging and jumphost initialization if configured.
+    """Custom Click command that preloads configuration and inventory.
+
+    This function loads the necessary configuration & inventory before invoking the specified
+    command. It also initializes SSH debugging & jumphost setup if these options are configured.
     """
 
     def invoke(self, ctx):

@@ -13,8 +13,7 @@ log = get_logger()
 
 
 def load_plugins(plugins_dir: Path) -> None:
-    """Loads all Python files in the specified directory as plugins and registers
-    subclasses of the Plugin class.
+    """Loads all Python files in a directory as plugins & registers subclasses of the Plugin class.
 
     Args:
         plugins_dir (Path): The directory containing plugin Python files.

@@ -20,8 +20,7 @@ class CommentedCsvReader(csv.DictReader):
     """
 
     def __next__(self):
-        """Return the next row from the CSV file, skipping rows where the first column
-        starts with the comment character '#'.
+        """Return the next row from the CSV file, skipping rows that start with ‘#’.
 
         Returns:
             dict: The next valid row as a dictionary.

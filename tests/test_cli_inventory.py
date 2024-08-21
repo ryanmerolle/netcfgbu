@@ -57,7 +57,8 @@ def test_cli_inventory_pass(files_dir: Path, monkeypatch: pytest.MonkeyPatch) ->
 
     Args:
         files_dir (Path): The directory containing the test files.
-        monkeypatch (pytest.MonkeyPatch): Pytest's monkeypatch fixture to modify environment variables.
+        monkeypatch (pytest.MonkeyPatch): Pytest's monkeypatch fixture to modify environment
+        variables.
     """
     test_cfg = files_dir.joinpath("test-inventory-script-donothing.toml")
     test_inv = files_dir.joinpath("test-small-inventory.csv")
@@ -79,7 +80,8 @@ def test_cli_inventory_fail_limits_zero(files_dir: Path, monkeypatch: pytest.Mon
 
     Args:
         files_dir (Path): The directory containing the test files.
-        monkeypatch (pytest.MonkeyPatch): Pytest's monkeypatch fixture to modify environment variables.
+        monkeypatch (pytest.MonkeyPatch): Pytest's monkeypatch fixture to modify environment
+        variables.
     """
     test_inv = files_dir.joinpath("test-small-inventory.csv")
     monkeypatch.setenv("NETCFGBU_INVENTORY", str(test_inv))
@@ -91,7 +93,9 @@ def test_cli_inventory_fail_limits_zero(files_dir: Path, monkeypatch: pytest.Mon
     assert "No inventory matching limits" in res.output
 
 
-def test_cli_inventory_fail_limits_invalid(files_dir: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_cli_inventory_fail_limits_invalid(
+    files_dir: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     """Test CLI inventory command with an invalid filter expression.
 
     This test verifies that the CLI command fails with an appropriate error message
@@ -99,7 +103,8 @@ def test_cli_inventory_fail_limits_invalid(files_dir: Path, monkeypatch: pytest.
 
     Args:
         files_dir (Path): The directory containing the test files.
-        monkeypatch (pytest.MonkeyPatch): Pytest's monkeypatch fixture to modify environment variables.
+        monkeypatch (pytest.MonkeyPatch): Pytest's monkeypatch fixture to modify environment
+        variables.
     """
     test_inv = files_dir.joinpath("test-small-inventory.csv")
     monkeypatch.setenv("NETCFGBU_INVENTORY", str(test_inv))
@@ -123,7 +128,9 @@ def test_cli_inventory_fail_build() -> None:
     assert "Configuration file required for use with build subcommand" in res.output
 
 
-def test_cli_inventory_pass_build(files_dir: Path, mock_build: Mock, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_cli_inventory_pass_build(
+    files_dir: Path, mock_build: Mock, monkeypatch: pytest.MonkeyPatch
+) -> None:
     """Test CLI build command with a valid configuration file.
 
     This test verifies that the CLI build command succeeds when a valid configuration
@@ -132,7 +139,8 @@ def test_cli_inventory_pass_build(files_dir: Path, mock_build: Mock, monkeypatch
     Args:
         files_dir (Path): The directory containing the test files.
         mock_build (Mock): The mocked build function.
-        monkeypatch (pytest.MonkeyPatch): Pytest's monkeypatch fixture to modify environment variables.
+        monkeypatch (pytest.MonkeyPatch): Pytest's monkeypatch fixture to modify environment
+        variables.
     """
     test_cfg = files_dir.joinpath("test-inventory-script-donothing.toml")
 
@@ -148,9 +156,7 @@ def test_cli_inventory_pass_build(files_dir: Path, mock_build: Mock, monkeypatch
     assert inv_spec.script.endswith("do-nothing.sh")
 
 
-def run_cli_inventory_build_test(
-    files_dir: Path, monkeypatch: pytest.MonkeyPatch, args: list[str]
-):
+def run_cli_inventory_build_test(files_dir: Path, monkeypatch: pytest.MonkeyPatch, args: list[str]):
     """Helper function to run the CLI inventory build test with the given parameters.
 
     Args:
@@ -170,13 +176,16 @@ def run_cli_inventory_build_test(
     return runner.invoke(inventory.cli_inventory_build, obj={}, args=args)
 
 
-def test_cli_inventory_pass_build_name(files_dir: Path, mock_build: Mock, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_cli_inventory_pass_build_name(
+    files_dir: Path, mock_build: Mock, monkeypatch: pytest.MonkeyPatch
+) -> None:
     """Test CLI build command with a specific inventory name.
 
     Args:
         files_dir (Path): The directory containing test files.
         mock_build (Mock): The mocked build function.
-        monkeypatch (pytest.MonkeyPatch): Pytest's monkeypatch fixture to modify environment variables.
+        monkeypatch (pytest.MonkeyPatch): Pytest's monkeypatch fixture to modify environment
+        variables.
     """
     res = run_cli_inventory_build_test(files_dir, monkeypatch, args=["--name=dummy"])
     assert res.exit_code == 0
@@ -190,7 +199,8 @@ def test_cli_inventory_fail_build_badname(files_dir: Path, monkeypatch: pytest.M
 
     Args:
         files_dir (Path): The directory containing test files.
-        monkeypatch (pytest.MonkeyPatch): Pytest's monkeypatch fixture to modify environment variables.
+        monkeypatch (pytest.MonkeyPatch): Pytest's monkeypatch fixture to modify environment
+        variables.
     """
     res = run_cli_inventory_build_test(files_dir, monkeypatch, args=["--name=noexists"])
     assert res.exit_code != 0

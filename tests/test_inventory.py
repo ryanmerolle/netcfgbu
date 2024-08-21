@@ -5,9 +5,9 @@ from netcfgbu import config, inventory
 
 
 def test_inventory_pass(request, monkeypatch, netcfgbu_envars) -> None:
-    """Test the use-case where there is a small inventory file that is properlly
-    formatted.  Load the entire inventory as one subtest.  Load a filtered
-    set of records as another subtest.
+    """Tests loading a properly formatted small inventory file.
+
+    Validates both loading all records and loading a filtered subset.
     """
     inventory_fpath = f"{request.fspath.dirname}/files/test-small-inventory.csv"
     monkeypatch.setenv("NETCFGBU_INVENTORY", inventory_fpath)
@@ -24,9 +24,7 @@ def test_inventory_pass(request, monkeypatch, netcfgbu_envars) -> None:
 
 
 def test_inventory_fail_nofilegiven(tmpdir, netcfgbu_envars) -> None:
-    """Test the use-case where the inventory is given in configuration file,
-    but the inventory file does not actually exist.
-    """
+    """Tests failure when the configuration specifies an inventory file that does not exist."""
     app_cfg = config.load()
 
     with pytest.raises(FileNotFoundError) as excinfo:
@@ -37,9 +35,7 @@ def test_inventory_fail_nofilegiven(tmpdir, netcfgbu_envars) -> None:
 
 
 def test_inventory_pass_build(request, monkeypatch, netcfgbu_envars) -> None:
-    """Test the use-case where the configuraiton contains an inventory build
-    script.  The script exists, it runs without error.
-    """
+    """Tests a successful inventory build where the script exists and runs without error."""
     files_dir = request.fspath.dirname + "/files"
     monkeypatch.setenv("SCRIPT_DIR", files_dir)
     config_fpath = files_dir + "/test-inventory-script-donothing.toml"
@@ -50,9 +46,7 @@ def test_inventory_pass_build(request, monkeypatch, netcfgbu_envars) -> None:
 
 
 def test_inventory_fail_build_exitnozero(request, monkeypatch, netcfgbu_envars) -> None:
-    """Test the use-case where the configuraiton contains an inventory build
-    script.  The script exists, it runs but exists with non-zero return code.
-    """
+    """Tests failure when an inventory build script exists but exits with a non-zero return code."""
     files_dir = request.fspath.dirname + "/files"
     monkeypatch.setenv("SCRIPT_DIR", files_dir)
     config_fpath = files_dir + "/test-inventory-script-fails.toml"
@@ -65,8 +59,9 @@ def test_inventory_fail_build_exitnozero(request, monkeypatch, netcfgbu_envars) 
 
 
 def test_inventory_fail_build_noscript(request, netcfgbu_envars) -> None:
-    """Test the use-case where the configuraiton contains an inventory build
-    script.  The script exists, it runs without error.
+    """Tests failure when the configuration lacks a required inventory build script.
+
+    Ensures the script is missing and raises the appropriate error.
     """
     config_fpath = f"{request.fspath.dirname}/files/test-inventory-noscript.toml"
     with pytest.raises(RuntimeError) as excinfo:

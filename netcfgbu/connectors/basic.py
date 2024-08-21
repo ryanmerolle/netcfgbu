@@ -20,32 +20,25 @@ __all__ = ["BasicSSHConnector", "set_max_startups"]
 
 
 class BasicSSHConnector:
-    """The BasicSSHConnector class is used to define and process the
-    configuration file backup process over SSH.  The primary usage is to
-    initialize the class with the host configuration, the operating system
-    specification, and the application configuration.  Once initialized the
-    Caller should await on `backup_config()` to execute the backup process.
+    """Defines and manages SSH-based configuration file backups.
 
-    If the BasicSSHConnector defines `pre_get_config` will execute those
-    commands before executinig the `get_config` command.
+    This class is initialized with the host configuration, OS specification, and application
+    configuration. The primary function is to execute the configuration backup process via SSH.
+    Callers should await `backup_config()` to start the backup process.
 
-    If the BasicSSHConnector does not define the `pre_get_config` attribute,
-    then only the `get_config` command will be executed.
-
+    If `pre_get_config` is defined, it executes those commands before running `get_config`.
+    If not, only the `get_config` command is executed.
 
     Attributes:
     ----------
     cls.prompt_pattern: re.Pattern
-        compiled regular expression this used to find the CLI prompt
+        Compiled regex pattern to detect the CLI prompt.
 
     cls.get_config: str
-        The device CLI command that when executed will produce the output of
-        the running configuraiton
+        CLI command to retrieve the running configuration.
 
-    cls.pre_get_config: Optional[Union[str,list]]
-        The device CLI command(s) that when execute will disable paging so that
-        when the show-running command is executed the output will not be
-        blocked with a "--More--" user prompt.
+    cls.pre_get_config: Optional[Union[str, list]]
+        CLI command(s) to disable paging, preventing output blocking by the "--More--" prompt.
     """
 
     prompt_pattern = re.compile(
@@ -64,13 +57,12 @@ class BasicSSHConnector:
     _max_startups_sem4 = asyncio.Semaphore(consts.DEFAULT_MAX_STARTUPS)
 
     def __init__(self, host_cfg: dict, os_spec: OSNameSpec, app_cfg: AppConfig):
-        """Initialize the BasicSSHConnector with host configuration, OS specification
-        , and app configuration.
+        """Initializes the BasicSSHConnector with host, OS, and application configurations.
 
         Args:
-            host_cfg: Dictionary containing host configuration details.
-            os_spec: Instance of OSNameSpec containing OS-specific details.
-            app_cfg: Instance of AppConfig containing application configuration.
+            host_cfg (dict): Host configuration details.
+            os_spec (OSNameSpec): OS-specific configuration details.
+            app_cfg (AppConfig): Application configuration details.
         """
         self.host_cfg = host_cfg
         self.name = host_cfg.get("host") or host_cfg.get("ipaddr")
@@ -206,7 +198,7 @@ class BasicSSHConnector:
         paging_disabled = False
 
         try:
-            res = await asyncio.wait_for(self.read_until_prompt(), timeout=60)
+            res = await asyncio.wait_for(self.read_until_prompt(), timeout=15)
             at_prompt = True
             # TODO - Add hostname to debug of AT-PROMPT
             self.log.debug("AT-PROMPT: %s", res)
@@ -278,7 +270,8 @@ class BasicSSHConnector:
             asyncssh.PermissionDenied: If none of the credentials result in a successful login.
             asyncio.TimeoutError: If attempting to connect to a device exceeds the timeout value.
             Exception: If a specific exception is raised other than the above, it will raise it so
-            we can fail the ssh connection quicker. Examples: DNS resolution issues & no route to host.
+            we can fail the ssh connection quicker. Examples: DNS resolution issues & no route to
+            host.
         """
         timeout: int = self.os_spec.timeout
 

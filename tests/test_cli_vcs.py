@@ -5,7 +5,8 @@ system (VCS) functionality. It uses pytest for testing.
 
 Functions:
     test_cli_vcs_fail_missingconfig_file: Test the case where the VCS configuration file is missing.
-    test_cli_vcs_fail_missingconfig_section: Test the case where the VCS configuration section is missing.
+    test_cli_vcs_fail_missingconfig_section: Test the case where the VCS configuration section is
+    missing.
 """
 
 from operator import itemgetter

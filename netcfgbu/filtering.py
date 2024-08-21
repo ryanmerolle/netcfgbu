@@ -1,5 +1,4 @@
-"""This file contains the filtering functions that are used to process the
-'--include' and '--exclude' command line options.
+"""Provides filtering functions for processing the ‘–include’ & ‘–exclude’ command-line options.
 
 The code in this module is not specific to the netcfgbu inventory column names and can be
 re-used for other CSV-related tools and use cases.
@@ -125,7 +124,9 @@ class IPFilter(Filter):
 
 
 def parse_constraint(
-    constraint: str, field_value_reg: re.Pattern, field_names: Optional[list[AnyStr]] = None
+    constraint: str,
+    field_value_reg: re.Pattern,
+    field_names: Optional[list[AnyStr]] = None,
 ) -> Filter:
     """Parse a filter constraint expression and return the appropriate Filter instance.
 

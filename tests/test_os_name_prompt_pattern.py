@@ -2,11 +2,6 @@
 
 This module contains tests for various OS name prompt pattern functionalities in the
 netcfgbu package. It uses pytest for testing.
-
-Functions:
-    test_prompt_pattern_detection: Test the detection of prompt patterns.
-    test_prompt_pattern_matching: Test the matching of prompt patterns.
-    test_prompt_pattern_validation: Test the validation of prompt patterns.
 """
 
 import re
@@ -17,10 +12,7 @@ from netcfgbu.connectors import BasicSSHConnector
 
 
 def test_config_os_name_prompt_pattern(netcfgbu_envars, request):  # noqa
-    """This test validates that a User provided prompt_pattern in the [os_name.$name]
-    configuration section results in the User defined pattern used by the
-    SSH connector instance.
-    """
+    """Tests that a user-defined prompt pattern in [os_name.$name] is correctly applied."""
     rec = {"host": "dummy", "os_name": "cumulus"}
     abs_filepath = request.fspath.dirname + "/files/test-config-os-name-prompt-pattern.toml"
     app_cfg = load(filepath=abs_filepath)

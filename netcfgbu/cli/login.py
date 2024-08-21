@@ -27,17 +27,15 @@ CLI_COMMAND = "login"
 
 
 def exec_test_login(inventory_recs: list, app_cfg: AppConfig, cli_opts: dict) -> None:
-    """This function performs login tests on the provided inventory records using
-    the specified application configuration and command-line options.
+    """Performs login tests on inventory records using app configuration and CLI options.
 
     Args:
-        inventory_recs (list): List of inventory records to test.
+        inventory_recs (list): Inventory records to test.
         app_cfg (AppConfig): Application configuration object.
-        cli_opts (dict): Command-line options dictionary.
+        cli_opts (dict): Command-line options.
 
     Returns:
         None
-
     """
     timeout = cli_opts["timeout"] or DEFAULT_LOGIN_TIMEOUT
 

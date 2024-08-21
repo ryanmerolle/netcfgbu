@@ -10,9 +10,11 @@ from .root import cli
 
 
 def copy_example_files() -> None:
-    """Check if any example file already exists in the current working directory.
-    If so, print an error message and do not copy any files.
-    Otherwise, copy all files from the 'src/examples/' directory within the package.
+    """Copy example files from the package to the current directory.
+
+    Checks if any example file already exists in the current working directory.
+    If found, prints an error message and aborts the operation. Otherwise,
+    copies all files from the 'src/examples/' directory within the package to the current directory.
     """
     package_name = "netcfgbu"
     examples_dir_name = "examples"

@@ -1,5 +1,6 @@
-"""This file contains the Version Control System (VCS) integration
-using Git as the backend. The following functions are exported for use:
+"""This file contains the Version Control System (VCS) integration using Git as the backend.
+
+The following functions are exported for use:
 
    * vcs_prepare: Used to prepare the repo directory for VCS use.
 
@@ -42,8 +43,7 @@ GIT_BIN = "git"
 
 
 def generate_commit_message() -> str:
-    """Create a commit message using the current timestamp with
-    format <year><month#><day#>_<24hr><minute><sec>.
+    """Create a commit message using the current timestamp.
 
     Returns:
         str: The generated commit message based on the current timestamp.
@@ -156,8 +156,7 @@ VCS diffs git: %s
 
 
 class GitRunner:
-    """The GitRunner class is used to perform specific `git` command
-    operations for the VCS use cases.
+    """This class is used to perform specific `git` command operations for the VCS use cases.
 
     Args:
         config (GitSpec): The Git configuration.

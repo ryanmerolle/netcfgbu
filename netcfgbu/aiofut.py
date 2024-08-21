@@ -1,5 +1,8 @@
-"""This module provides an asynchronous generator that mimics the behavior of
-concurrent.futures.as_completed, allowing retrieval of originating coroutines.
+"""Asynchronous generator for retrieving originating coroutines with as_completed.
+
+This module provides an async generator that mimics the concurrent.futures.as_completed behavior
+but allows access to the originating coroutines. It overcomes the limitation of
+asyncio.as_completed, which does not retain a reference to the original coroutine.
 """
 
 import asyncio
@@ -13,10 +16,10 @@ __all__ = ["as_completed"]
 async def as_completed(
     aws: Iterable[Coroutine], timeout: Optional[int] = None
 ) -> AsyncIterable[Task]:
-    """This async generator is used to "mimic" the behavior of the
-    concurrent.futures.as_completed functionality. Usage of this as_completed
-    generator is slightly different from the builtin asyncio version; see
-    example below.
+    """This is used to "mimic" the behavior of the concurrent.futures.as_completed functionality.
+
+    Usage of this as_completed generator is slightly different from the builtin asyncio version;
+    see example below.
 
     The builtin asyncio.as_completed yields futures such that the originating
     coroutine can not be retrieved. In order to obtain the originating

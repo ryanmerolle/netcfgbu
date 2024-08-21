@@ -1,7 +1,4 @@
-"""This module contains the code providing jump host feature functionality
-so that any device in inventory that requires a proxy server can use
-the netcfgbu tool.
-"""
+"""Provides jumphost functionality for devices requiring a proxy server in inventory."""
 
 import asyncio
 
@@ -26,23 +23,19 @@ from .logger import get_logger
 
 
 class JumpHost:
-    """A JumpHost instance is used to provide a tunnel connection so that any
-    device in the inventory that requires one can use it.
-    """
+    """Represents a tunnel connection for devices in inventory that require one."""
 
     available = []
 
     def __init__(self, spec: JumphostSpec, field_names: list[AnyStr]):
-        """Prepare a jump host instance for potential use.  This method
-        does not connect to the proxy system.
-        Parameters.
-        ----------
-        spec:
-            The jumphost configuraiton
+        """Prepare a jump host instance for potential use.
 
-        field_names:
-            List of inventory field names that are used to prepare any
-            necessary filtering functionality
+        This method does not connect to the proxy system.
+
+        Args:
+            spec: The jumphost configuraiton
+            field_names: List of inventory field names that are used to prepare any necessary
+            filtering functionality
         """
         self._spec = spec
         self.filters = []
@@ -51,9 +44,10 @@ class JumpHost:
 
     @property
     def tunnel(self):
-        """Returns the SSH client connection of the jump-host for use as `tunnel` when
-        connecting to a target device.  If the SSH client does not exist, then raise
-        a RuntimeError.
+        """Returns the SSH client connection for the jumphost, used as a tunnel to target devices.
+
+        Raises:
+            RuntimeError: If the SSH client is not connected.
         """
         if not self.is_active:
             raise RuntimeError(f"Attempting to use JumpHost {self.name}, but not connected")
@@ -83,9 +77,7 @@ class JumpHost:
             )
 
     async def connect(self):
-        """Connects to the jumphost system so that it can be used later as the
-        tunnel to connect to other devices.
-        """
+        """Establishes a connection to the jumphost for later use as a tunnel to other devices."""
         proxy_parts = urlparse("ssh://" + self._spec.proxy)
 
         conn_args = {"host": proxy_parts.hostname, "known_hosts": None}
@@ -102,8 +94,13 @@ class JumpHost:
         await asyncio.wait_for(connect_to_jh(), timeout=self._spec.timeout)
 
     def filter(self, inv_rec):
-        """This function returns True if this jump host is required to support the given
-        inventory record.  Returns False otherwise.
+        """Determines if this jump host is needed for the given inventory record.
+
+        Args:
+            inv_rec: The inventory record to check.
+
+        Returns:
+            bool: True if the jump host is required, False otherwise.
         """
         return any(_f(inv_rec) for _f in self.filters)
 
@@ -116,19 +113,13 @@ class JumpHost:
 
 
 def init_jumphosts(jumphost_specs: list[JumphostSpec], inventory: list[dict]):
-    """Initialize the required set of Jump Host instances so that they can be used
-    when netcfgbu attempts to access devices that require the use of jump
-    hosts.
+    """Initializes Jump Host instances for accessing devices that require jump hosts.
 
-    Parameters
-    ----------
-    jumphost_specs:
-        List of jump host specs from the app config instance
-
-    inventory:
-        List of inventory records; these are used to determine which, if any,
-        of the configured jump hosts are actually required for use given any
-        provided inventory filtering.
+    Args:
+        jumphost_specs (list[JumphostSpec]): List of jump host specifications from the app
+        configuration.
+        inventory (list[dict]): List of inventory records to determine which jump hosts are required
+        based on inventory filtering.
     """
     field_names = inventory[0].keys()
 
@@ -145,14 +136,12 @@ def init_jumphosts(jumphost_specs: list[JumphostSpec], inventory: list[dict]):
 
 
 async def connect_jumphosts():
-    """This coroutine is used to connect to all of the required jump host servers.  This
-    should be called before attempting to run any of the SSH device tasks, such as
-    login or backup.
+    """Connects to all required jump host servers.
+
+    This coroutine should be called before executing any SSH tasks, such as login or backup.
 
     Returns:
-    -------
-    True if all required jump host servers are connected.
-    False otherwise; check log errors for details.
+        bool: True if all jump host servers are connected, False otherwise (check logs for errors).
     """
     log = get_logger()
     jump_host_connected = True
@@ -171,8 +160,12 @@ async def connect_jumphosts():
 
 
 def get_jumphost(inv_rec: dict) -> Optional[JumpHost]:
-    """Return the jumphost instance that is used to tunnel the connection
-    for the given inventory record.  If this record does not require the
-    use of a jumphost, then return None.
+    """Returns the jumphost instance for the given inventory record if tunneling is required.
+
+    Args:
+        inv_rec (dict): Inventory record for which to determine the jumphost.
+
+    Returns:
+        Optional[JumpHost]: The jumphost instance if required, otherwise None.
     """
     return first(jh for jh in JumpHost.available if jh.filter(inv_rec))

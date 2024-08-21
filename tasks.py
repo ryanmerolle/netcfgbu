@@ -1,13 +1,12 @@
 #!/usr/bin/env python
-#
-# For use with the invoke tool, see: http://www.pyinvoke.org/
-#
-# References
+"""Common tasks for developemnt of this project.
+
+For use with the invoke tool, see: http://www.pyinvoke.org/
+"""
 
 import io
 import os
 import shutil
-import sys
 
 from invoke import exceptions, task
 
@@ -16,6 +15,7 @@ DIRS_TO_CLEAN = [
     ".pytest_cache",
     ".pytest_tmpdir",
     ".ruff_cache",
+    ".tox",
     "htmlcov",
     "netcfgbu.egg-info",
     "netcfgbu/__pycache__",
@@ -24,6 +24,7 @@ DIRS_TO_CLEAN = [
     "netcfgbu/vcs/__pycache__",
     "tests/__pycache__",
     "tests/files/plugins/__pycache__",
+
 ]
 FILES_TO_CLEAN = [
     ".coverage",
@@ -40,6 +41,18 @@ def write_to_file(output: str, filename: str = "lint.tmp") -> None:
     with open(filename, "w", encoding="utf-8") as file:
         file.write(output)
 
+@task
+def update(ctx, help="Update project.") -> None:
+    """Update project.
+
+    Args:
+        ctx (invoke.Context): The context instance (passed automatically by Invoke).
+    """
+    # ctx.run("poetry run ruff check . --fix")
+    # ctx.run("poetry run ruff format .")
+    ctx.run("poetry run pre-commit autoupdate")
+    ctx.run("poetry update")
+
 
 @task
 def precheck(ctx, help="Run pre-checks on the project.") -> None:
@@ -48,8 +61,8 @@ def precheck(ctx, help="Run pre-checks on the project.") -> None:
     Args:
         ctx (invoke.Context): The context instance (passed automatically by Invoke).
     """
-    ctx.run("poetry run ruff check . --fix")
-    ctx.run("poetry run ruff format .")
+    # ctx.run("poetry run ruff check . --fix")
+    # ctx.run("poetry run ruff format .")
     ctx.run("poetry run pre-commit run -a")
     ctx.run(
         "poetry run interrogate -c pyproject.toml --exclude=build --exclude tests",
@@ -107,4 +120,3 @@ def write_result(output: io.StringIO, result: str) -> None:
         output.write("No issues found.\n\n")
 
     output.write("-" * 120 + "\n")
-
