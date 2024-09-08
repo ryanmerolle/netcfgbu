@@ -1,87 +1,83 @@
-import asyncio
+"""This module provides functionality for backing up network configurations.
+
+Functions:
+    backup_config: Backs up the configuration of a network device.
+"""
 
 import click
 
+from netcfgbu.cli.common import execute_command
+from netcfgbu.config_model import AppConfig
 from netcfgbu.os_specs import make_host_connector
-from netcfgbu.logger import get_logger, stop_aiologging
-from netcfgbu.aiofut import as_completed
-from netcfgbu import jumphosts
 from netcfgbu.plugins import Plugin, load_plugins
 
 from .root import (
-    cli,
     WithInventoryCommand,
-    opt_config_file,
-    opts_inventory,
+    cli,
     opt_batch,
+    opt_config_file,
     opt_debug_ssh,
+    opts_inventory,
 )
 
-from .report import Report
+CLI_COMMAND = "backup"
 
 
-def exec_backup(app_cfg, inventory_recs):
-    backup_tasks = dict()
+def exec_backup(inventory_recs: list, app_cfg: AppConfig) -> None:
+    """Executes the backup command on the provided inventory records.
 
-    log = get_logger()
+    Args:
+        inventory_recs: List of inventory records to back up.
+        app_cfg: Application configuration object.
+    """
 
-    backup_tasks = {
-        make_host_connector(rec, app_cfg).backup_config(): rec for rec in inventory_recs
-    }
+    def task_creator(rec: dict, app_cfg: AppConfig):
+        """Creates a backup task for the given inventory record.
 
-    total = len(backup_tasks)
-    report = Report()
-    done = 0
+        Args:
+            rec: A dictionary representing an inventory record.
+            app_cfg: Application configuration object.
 
-    async def process_batch():
-        nonlocal done
+        Returns:
+            A backup task configured with the host connector.
+        """
+        return make_host_connector(rec, app_cfg).backup_config()
 
-        if app_cfg.jumphost:
-            await jumphosts.connect_jumphosts()
+    def success_callback(rec, result):
+        """Callback function executed on a successful backup.
 
-        async for task in as_completed(backup_tasks):
-            done += 1
-            coro = task.get_coro()
-            rec = backup_tasks[coro]
-            msg = f"DONE ({done}/{total}): {rec['host']} "
+        Args:
+            rec: A dictionary representing an inventory record.
+            result: The result of the backup task.
+        """
+        Plugin.run_backup_success(rec, result)
 
-            try:
-                res = task.result()
-                ok = res is True
-                report.task_results[ok].append((rec, res))
-                Plugin.run_backup_success(rec, res)
+    def failure_callback(rec, exc):
+        """Callback function executed on a failed backup.
 
-            except (asyncio.TimeoutError, OSError) as exc:
-                ok = False
-                report.task_results[False].append((rec, exc))
-                Plugin.run_backup_failed(rec, exc)
+        Args:
+            rec: A dictionary representing an inventory record.
+            exc: The exception raised during the backup task.
+        """
+        Plugin.run_backup_failed(rec, exc)
 
-            except Exception as exc:
-                ok = False
-                log.error(msg + f"FAILURE: {str(exc)}")
-                report.task_results[False].append((rec, exc))
-                Plugin.run_backup_failed(rec, exc)
-
-            log.info(msg + ("PASS" if ok else "FALSE"))
-
-    loop = asyncio.get_event_loop()
-    report.start_timing()
-    loop.run_until_complete(process_batch())
-    report.stop_timing()
-    stop_aiologging()
-    report.print_report()
-    Plugin.run_report(report)
+    execute_command(
+        inventory_recs,
+        app_cfg,
+        CLI_COMMAND,
+        task_creator,
+        success_callback,
+        failure_callback,
+    )
 
 
-@cli.command(name="backup", cls=WithInventoryCommand)
+@cli.command(name=CLI_COMMAND, cls=WithInventoryCommand)
 @opt_config_file
 @opts_inventory
 @opt_debug_ssh
 @opt_batch
 @click.pass_context
-def cli_backup(ctx, **_cli_opts):
-    """
-    Backup network configurations.
-    """
+def cli_backup(ctx: click.Context, **_cli_opts) -> None:
+    """Backup network configurations."""
     load_plugins(ctx.obj["app_cfg"].defaults.plugins_dir)
-    exec_backup(app_cfg=ctx.obj["app_cfg"], inventory_recs=ctx.obj["inventory_recs"])
+    exec_backup(inventory_recs=ctx.obj["inventory_recs"], app_cfg=ctx.obj["app_cfg"])

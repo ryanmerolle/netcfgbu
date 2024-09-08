@@ -1,36 +1,45 @@
-#!/usr/bin/env python3.8
-#
-# This script is used to retrieve the device inventory from a Netbox system and
-# emil the CSV file to either stdout (default) or a filename provided
-#
-# The following Environment variables are REQUIRED:
-#
-#   NETBOX_ADDR: the URL to the NetBox server
-#       "https://my-netbox-server"
-#
-#   NETBOX_TOKEN: the NetBox login token
-#       "e0759aa0d6b4146-from-netbox-f744c4489adfec48f"
-#
-# The following Environment variables are OPTIONAL:
-#
-#   NETBOX_INVENTORY_OPTIONS
-#       Same as the options provided by "--help"
-#
+#!/usr/bin/env python3.9
+"""Retrieve device inventory from Netbox and email or save it as a CSV file.
 
-import sys
+This script fetches the device inventory from a Netbox system using API credentials
+and outputs the data as a CSV file. It supports filtering by site, region, and role,
+with configurable environment variables for Netbox settings.
+
+  NETBOX_ADDR: the URL to the NetBox server
+      "https://my-netbox-server"
+
+  NETBOX_TOKEN: the NetBox login token
+      "e0759aa0d6b4146-from-netbox-f744c4489adfec48f"
+
+The following Environment variables are OPTIONAL:
+
+  NETBOX_INVENTORY_OPTIONS
+      Same as the options provided by "--help"
+"""
+
 import argparse
-import os
 import csv
+import os
+import sys
+from collections.abc import Iterator
 from functools import lru_cache
+from typing import Optional
 
 import requests  # noqa
 from urllib3 import disable_warnings  # noqa
 
-
 CSV_FIELD_NAMES = ["host", "ipaddr", "os_name", "role", "site", "region"]
 
 
-def rec_to_csv(rec):
+def rec_to_csv(rec: dict) -> list:
+    """Convert a NetBox device record to a list suitable for CSV output.
+
+    Args:
+        rec: A dictionary representing a device record from NetBox.
+
+    Returns:
+        list: A list of device attributes in the order of CSV_FIELD_NAMES.
+    """
     hostname = rec["name"]
     ipaddr = rec["primary_ip"]["address"].split("/")[0]
     platform = rec["platform"]
@@ -42,16 +51,16 @@ def rec_to_csv(rec):
     return [hostname, ipaddr, os_name, role, site, region]
 
 
-def cli():
-    """ Create CLI option parser, parse User inputs and return results """
+def cli() -> argparse.Namespace:
+    """Create and parse command-line interface (CLI) options.
+
+    Returns:
+        argparse.Namespace: Parsed command-line options.
+    """
     options_parser = argparse.ArgumentParser()
     options_parser.add_argument("--site", action="store", help="limit devices to site")
-    options_parser.add_argument(
-        "--region", action="store", help="limit devices to region"
-    )
-    options_parser.add_argument(
-        "--role", action="append", help="limit devices with role(s)"
-    )
+    options_parser.add_argument("--region", action="store", help="limit devices to region")
+    options_parser.add_argument("--role", action="append", help="limit devices with role(s)")
     options_parser.add_argument(
         "--exclude-role", action="append", help="exclude devices with role(s)"
     )
@@ -71,28 +80,63 @@ def cli():
 
 
 class NetBoxSession(requests.Session):
-    def __init__(self, url, token):
+    """A session for interacting with the NetBox API.
+
+    Attributes:
+        url: The base URL of the NetBox instance.
+        token: The API token for authentication.
+    """
+
+    def __init__(self, url: str, token: str):
+        """Initialize the NetBoxSession.
+
+        Args:
+            url: The base URL of the NetBox instance.
+            token: The API token for authentication.
+        """
         super(NetBoxSession, self).__init__()
         self.url = url
-        self.headers["authorization"] = "Token %s" % token
+        self.headers["authorization"] = f"Token {token}"
         self.verify = False
 
-    def prepare_request(self, request):
+    def prepare_request(self, request: requests.Request) -> requests.PreparedRequest:
+        """Prepare the request by appending the base URL to the request URL.
+
+        Args:
+            request: The request object to prepare.
+
+        Returns:
+            requests.PreparedRequest: The prepared request object.
+        """
         request.url = self.url + request.url
         return super(NetBoxSession, self).prepare_request(request)
 
 
-netbox: NetBoxSession = None
+NETBOX_SESSION: Optional[NetBoxSession] = None
 
 
-@lru_cache()
-def get_site(site_slug):
-    res = netbox.get("/api/dcim/sites/", params={"slug": site_slug})
+@lru_cache
+def get_site(site_slug: str) -> dict:
+    """Retrieve details of a site from NetBox using its slug.
+
+    Args:
+        site_slug: The slug of the site.
+
+    Returns:
+        dict: The site details as a dictionary.
+    """
+    res = NETBOX_SESSION.get("/api/dcim/sites/", params={"slug": site_slug})
     res.raise_for_status()
     return res.json()["results"][0]
 
 
-def create_csv_file(inventory_records, cli_opts):
+def create_csv_file(inventory_records: Iterator[dict], cli_opts: argparse.Namespace) -> None:
+    """Create a CSV file from inventory records.
+
+    Args:
+        inventory_records: An iterator of device records.
+        cli_opts: Parsed command-line options, including the output file.
+    """
     csv_wr = csv.writer(cli_opts.output)
     csv_wr.writerow(CSV_FIELD_NAMES)
 
@@ -100,28 +144,34 @@ def create_csv_file(inventory_records, cli_opts):
         csv_wr.writerow(rec_to_csv(rec))
 
 
-def fetch_inventory(cli_opts):
-    global netbox
+def fetch_inventory(cli_opts: argparse.Namespace) -> Iterator[dict]:
+    """Fetch the inventory of devices from NetBox based on the provided CLI options.
+
+    Args:
+        cli_opts: Parsed command-line options.
+
+    Returns:
+        Iterator[dict]: An iterator of filtered device records.
+    """
+    global NETBOX_SESSION
 
     try:
         nb_url = os.environ["NETBOX_ADDR"]
         nb_token = os.environ["NETBOX_TOKEN"]
     except KeyError as exc:
-        sys.exit(f"ERROR: missing envirnoment variable: {exc.args[0]}")
+        sys.exit(f"ERROR: missing environment variable: {exc.args[0]}")
 
-    netbox = NetBoxSession(url=nb_url, token=nb_token)
+    NETBOX_SESSION = NetBoxSession(url=nb_url, token=nb_token)
 
-    # -------------------------------------------------------------------------
-    # perform a GET on the API URL to obtain the Netbox version; the value is
-    # stored in the response header.  convert to tuple(int) for comparison
-    # purposes.  If the Netbox version is after 2.6 the API status/choice
-    # changed from int -> str.
-    # -------------------------------------------------------------------------
-
-    res = netbox.get("/api")
+    # Perform a GET on the API URL to obtain the Netbox version
+    res = NETBOX_SESSION.get("/api")
     api_ver = tuple(map(int, res.headers["API-Version"].split(".")))
-    params = dict(limit=0, status=1, has_primary_ip="true")
-    params["exclude"] = "config_context"
+    params = {
+        "limit": 0,
+        "status": 1,
+        "has_primary_ip": "true",
+        "exclude": "config_context",
+    }
 
     if api_ver > (2, 6):
         params["status"] = "active"
@@ -132,32 +182,54 @@ def fetch_inventory(cli_opts):
     if cli_opts.region:
         params["region"] = cli_opts.region
 
-    res = netbox.get("/api/dcim/devices/", params=params)
+    res = NETBOX_SESSION.get("/api/dcim/devices/", params=params)
     if not res.ok:
         sys.exit("FAIL: get inventory: " + res.text)
 
     body = res.json()
     device_list = body["results"]
 
-    # -------------------------------------------------------------------------
-    # User Filters
-    # -------------------------------------------------------------------------
+    return apply_filters(device_list, cli_opts)
 
-    # If Caller provided an explicit list of device-roles, then filter the
-    # device list based on those roles before creating the inventory
 
+def apply_filters(device_list: list[dict], cli_opts: argparse.Namespace) -> Iterator[dict]:
+    """Apply user-provided filters to the device list.
+
+    Args:
+        device_list: The list of devices to filter.
+        cli_opts: Parsed command-line options.
+
+    Returns:
+        Iterator[dict]: The filtered list of devices.
+    """
     filter_functions = []
 
     if cli_opts.role:
 
-        def filter_role(dev_dict):
+        def filter_role(dev_dict: dict) -> bool:
+            """Filter to include devices that match the specified roles.
+
+            Args:
+                dev_dict (dict): The device record to filter.
+
+            Returns:
+                bool: True if the device's role matches the specified roles, False otherwise.
+            """
             return dev_dict["device_role"]["slug"] in cli_opts.role
 
         filter_functions.append(filter_role)
 
     if cli_opts.exclude_role:
 
-        def filter_ex_role(dev_dict):
+        def filter_ex_role(dev_dict: dict) -> bool:
+            """Filter to exclude devices that match the specified roles.
+
+            Args:
+                dev_dict (dict): The device record to filter.
+
+            Returns:
+                bool: True if the device's role does not match the excluded roles, False otherwise.
+            """
             return dev_dict["device_role"]["slug"] not in cli_opts.exclude_role
 
         filter_functions.append(filter_ex_role)
@@ -165,20 +237,29 @@ def fetch_inventory(cli_opts):
     if cli_opts.exclude_tag:
         ex_tag_set = set(cli_opts.exclude_tag)
 
-        def filter_ex_tag(dev_dict):
+        def filter_ex_tag(dev_dict: dict) -> bool:
+            """Filter to exclude devices that have the specified tags.
+
+            Args:
+                dev_dict (dict): The device record to filter.
+
+            Returns:
+                bool: True if the device does not have any of the excluded tags, False otherwise.
+            """
             return not set(dev_dict["tags"]) & ex_tag_set
 
         filter_functions.append(filter_ex_tag)
 
-    def apply_filters():
-        for dev_dict in device_list:
-            if all(fn(dev_dict) for fn in filter_functions):
-                yield dev_dict
-
-    return apply_filters() if filter_functions else iter(device_list)
+    for dev_dict in device_list:
+        if all(fn(dev_dict) for fn in filter_functions):
+            yield dev_dict
 
 
-def build_inventory():
+def build_inventory() -> None:
+    """Build the inventory by fetching device records and creating a CSV file.
+
+    This function handles CLI parsing, inventory fetching, and CSV file creation.
+    """
     cli_opts = cli()
     inventory = fetch_inventory(cli_opts)
     create_csv_file(inventory, cli_opts)

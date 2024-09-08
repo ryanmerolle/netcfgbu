@@ -1,4 +1,6 @@
-# def exec_lint(app_cfg, inventory):
+"""This module provides linting functionality for network configurations."""
+
+# def exec_lint(app_cfg, inventory) -> None:
 #
 #     lint_hosts = [
 #         (rec, os_spec["linter"])
@@ -52,7 +54,7 @@
 # @opt_config_file
 # @opts_inventory
 # @click.pass_context
-# def cli_lint(ctx, **_cli_opts):
+# def cli_lint(ctx: click.Context, **_cli_opts) -> None:
 #     """
 #     Remove unwanted content from network config files.
 #     """

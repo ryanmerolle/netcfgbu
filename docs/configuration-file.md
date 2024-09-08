@@ -2,10 +2,10 @@
 
 `netcfgbu` requires you to setup a TOML configuration file.  The default
 file name is `netcfgbu.toml` and is searched for in the current working directory.
-You can override this location using the -C <filepath> option or setting your
+You can override this location using the `-C <filepath>` option or setting your
 environment variable `NETCFGBU_CONFIG`.
 
-(See [example config file](../netcfgbu.toml))
+(See [example config file](../examples/netcfgbu.toml))
 
 By default, without any OS specific configurations, when you run `netcfgbu
 backup` the tool will attempt to login to the devices provided in the inventory
@@ -27,17 +27,21 @@ All of the default values support the use of environment variables as shown
 in the example below.  All of these defaults also support the use
 of `NETCFGBU_` environment variables as described [here](environment_variables.md).
 
-**`inventory`**<br/>
+### `inventory`
+
 File path to the inventory CSV.
 
-**`credentials.username`**<br/>
+### `credentials.username`
+
 The default login user-name
 
-**`credentials.password`**<br/>
+### `credentials.password`
+
 The default login password.  You should always use environment variables here,
 but you are not required to do so.
 
 Example:
+
 ```toml
 [defaults]
     inventory = "$PROJ_DIR/inventory.csv"
@@ -46,6 +50,7 @@ Example:
 ```
 
 ## Changing Storage Directory
+
 To change where the configuration files are stored you add the `config_dir`
 variable to the defaults section, for example:
 
@@ -55,6 +60,7 @@ configs_dir = "$PROJ_DIR/configs"
 ```
 
 ## Plugins Directory
+
 To change where the plugin files are stores you add the `plugins_dir` variable to the defaults section, for example:
 
 ```toml
@@ -63,9 +69,10 @@ plugins_dir = "$PROJ_DIR/plugins"
 ```
 
 ## Logging
+
 To enable logging you can defined the `[logging]` section in the configuration
 file. The format of this section is the standard Python logging module, as
-documented [here]( https://docs.python.org/3/library/logging.config.html).
+documented [here](https://docs.python.org/3/library/logging.config.html).
 
 The logger name for `netcfgbu` is "netcfgbu".
-See the [sample netcfgbu.toml](../netcfgbu.toml) for further details.
+See the [sample netcfgbu.toml](../examples/netcfgbu.toml) for further details.

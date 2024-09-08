@@ -1,7 +1,4 @@
-"""
-This module contains the probe coroutine used to validate that a target device
-has a given port open.
-"""
+"""Probe coroutine to check if a target device has a specified port open."""
 
 # -----------------------------------------------------------------------------
 # System Imports
@@ -20,8 +17,7 @@ __all__ = ["probe"]
 
 
 async def probe(host, timeout: int, port=22, raise_exc=False) -> bool:
-    """
-    Coroutine used to determine if a host port is online and available.
+    """Coroutine used to determine if a host port is online and available.
 
     Parameters
     ----------
@@ -40,7 +36,6 @@ async def probe(host, timeout: int, port=22, raise_exc=False) -> bool:
             When True the asyncio.TimeoutError will be raised
             When False, return False
     """
-
     loop = asyncio.get_running_loop()
     coro = loop.create_connection(asyncio.BaseProtocol, host=host, port=port)
 

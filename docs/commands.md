@@ -9,43 +9,62 @@ using the `--limit @failures.csv`.  Or you can use this file to exclude these
 devices using `--exlcude @failures.csv`.  For more details see
 [filtering](usage-filtering.md)
 
-**inventory**<br/>
+## example
+
+The `example` command is used to generate an example configuration and inventory file.  This is useful
+for getting started with the `netcfgbu` tool.
+
+Example:
+
+```shell script
+netcfgbu example
+```
+
+The files `example_inventory.csv` & `example_netcfgbu.toml` will be placed to the directory this is run from.
+
+## inventory
+
 The `inventory ls` command is used to list the contents of the current inventory file.  This
 is useful for when you want to test your filtering expressions before you try to run a backup.
 
 Example:
+
 ```shell script
-$ netcfgbu inventory ls --limit os_name=eos --brief
+netcfgbu inventory ls --limit os_name=eos --brief
 ```
 
 The `inventory build` command is used to invoke your inventory script that will create the inventory
 file.
 
 Example:
+
 ```shell script
-$ netcfgbu inventory build --name netbox
+netcfgbu inventory build --name netbox
 ```
 
-**probe**<br/>
+## probe
+
 The `probe` command is used to determine if the SSH port is available on the target device.  This
 is a useful first step before attempting to run a backup.  This probe does **not** attempt to
 login / authenticate with SSH.
 
 ```shell script
-$ netcfgbu probe
+netcfgbu probe
 ```
 
-**login**<br/>
+## login
+
 The `login` command is used to determine if the `netcfgbu` is able to authenticate with the
 device SSH, and reports the credential username value that was used.  This is useful to
 ensure that not only is the device reachable with SSH open, but the that `netcfgbu` is configured
 with the correct credentials to allow a connection.
 
 ```shell script
-$ netcfgbu probe
+netcfgbu probe
 ```
 
-**backup**<br/>
+## backup
+
 This `backup` command is used to login to the device via SSH, extract the
 running configuration, and save it to a file called $host.cfg, where $host is
 the value defined in the inventory item.  For example if an inventory item has
@@ -55,6 +74,7 @@ directory, or the directory designated by the `config_dir` value in the
 [configuration file](configuration-file.md#Changing-Storage-Directory)
 
 Example:
+
 ```shell script
-$ netcfgbu backup --exclude @failures.csv
+netcfgbu backup --exclude @failures.csv
 ```

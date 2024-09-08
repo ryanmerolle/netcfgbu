@@ -3,5 +3,14 @@
 #   - the first row MUST be the header for the csv file. Do not add a # in front of it, that will cause it to be ignored
 #   - username and password are optional. you can specify them in the TOML configuration file if it is the same for all devices of a specific OS type
 #
-ipaddr,host,os_name,username,password
-# 1.1.1.1,test,ios,cisco,cisco
+#ipaddr,host,os_name,username,password
+#
+ipaddr,host,os_name
+172.29.151.1,spine1,nxos
+172.29.151.2,spine2,nxos
+172.29.151.3,leaf1,ios
+172.29.151.4,leaf2,ios
+172.29.151.5,leaf3,junos
+172.29.151.6,leaf4,junos
+172.29.151.7,leaf5,eos
+172.29.151.8,leaf6,eos

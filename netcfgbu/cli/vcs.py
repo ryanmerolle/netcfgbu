@@ -1,25 +1,51 @@
+"""This module provides version control system (VCS) integration for network configurations."""
+
 import click
 
 from netcfgbu import config as _config
-from netcfgbu.vcs import git
 from netcfgbu.logger import stop_aiologging
 from netcfgbu.plugins import load_plugins
+from netcfgbu.vcs import git
 
 from .root import cli, get_spec_nameorfirst, opt_config_file
 
-opt_vcs_name = click.option("--name", help="vcs name as defined in config file")
+opt_vcs_name = click.option("--name", help="VCS name as defined in config file")
 
 
 @cli.group(name="vcs")
-def cli_vcs():
-    """
-    Version Control System subcommands.
-    """
+def cli_vcs() -> None:
+    """Version Control System subcommands."""
     pass  # pragma: no cover
 
 
 class VCSCommand(click.Command):
-    def invoke(self, ctx):
+    """A custom Click command that handles version control system (VCS) operations.
+
+    This class extends `click.Command` and is used to invoke VCS-related commands
+    within a CLI application. It loads the application configuration, selects the
+    appropriate VCS specification, and then invokes the command. If any errors occur
+    during the process, they are handled and displayed to the user.
+
+    Example usage:
+        @click.command(cls=VCSCommand)
+        def my_command():
+            # Command implementation
+
+    Methods:
+        invoke: Executes the VCS command with the given context, loading the appropriate
+                configuration and handling errors.
+    """
+
+    def invoke(self, ctx) -> None:
+        """Execute the VCS command with the given context.
+
+        Args:
+            ctx: The Click context object containing command parameters and options.
+
+        Raises:
+            RuntimeError: If no configuration file is provided or if no VCS configuration
+                          section is found in the configuration file.
+        """
         cfg_fileopt = ctx.params["config"]
 
         try:
@@ -44,32 +70,28 @@ class VCSCommand(click.Command):
 @opt_config_file
 @opt_vcs_name
 @click.pass_context
-def cli_vcs_prepare(ctx, **_cli_opts):
-    """
-    Prepare your system with the VCS repo.
+def cli_vcs_prepare(ctx: click.Context, **_cli_opts) -> None:
+    """Prepare your system with the VCS repo.
 
     This command is used to setup your `configs_dir` as the VCS repository
     so that when you execute the backup process the resulting backup files
     can be stored in the VCS system.
     """
-
-    git.vcs_prepare(
-        spec=ctx.obj["vcs_spec"], repo_dir=ctx.obj["app_cfg"].defaults.configs_dir
-    )
+    git.vcs_prepare(spec=ctx.obj["vcs_spec"], repo_dir=ctx.obj["app_cfg"].defaults.configs_dir)
 
 
 @cli_vcs.command(name="save", cls=VCSCommand)
 @opt_config_file
 @opt_vcs_name
-@click.option("--tag-name", help="tag-release name")
+@click.option("--add-tag", is_flag=True, default=False, help="If set, create a git tag")
+@click.option("--message", help="Set commit message / tag name")
 @click.pass_context
-def cli_vcs_save(ctx, **cli_opts):
-    """
-    Save changes into VCS repository.
+def cli_vcs_save(ctx: click.Context, **cli_opts) -> None:
+    """Save changes into VCS repository.
 
     After you have run the config backup process you will need to push those
     changes into the VCS repository.  This command performs the necesssary
-    steps to add changes to the repository and set a release tag.  The release
+    steps to add changes to the repository and set a git tag.  The release
     tag by default is the timestamp in the form of
     "<year><month><day>_<hour><minute><second>"
     """
@@ -77,7 +99,8 @@ def cli_vcs_save(ctx, **cli_opts):
     git.vcs_save(
         ctx.obj["vcs_spec"],
         repo_dir=ctx.obj["app_cfg"].defaults.configs_dir,
-        tag_name=cli_opts["tag_name"],
+        add_tag=cli_opts["add_tag"],
+        message=cli_opts["message"],
     )
 
 
@@ -85,9 +108,8 @@ def cli_vcs_save(ctx, **cli_opts):
 @opt_config_file
 @opt_vcs_name
 @click.pass_context
-def cli_vcs_status(ctx, **_cli_opts):
-    """
-    Show VCS repository status.
+def cli_vcs_status(ctx: click.Context, **_cli_opts) -> None:
+    """Show VCS repository status.
 
     This command will show the status of the `configs_dir` contents so that you
     will know what will be changed before you run the `vcs save` command.

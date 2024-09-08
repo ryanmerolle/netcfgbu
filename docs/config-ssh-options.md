@@ -1,10 +1,12 @@
 # SSH Config Options
+
 You may need to provide SSH configuration options such as Key Exchange or
 Cipher options.  The `netcfgbu` tool uses [AsyncSSH](https://github.com/ronf/asyncssh) as an underlying transport.
 You can provide any SSH Configuration option supported by AsyncSSH either at
 the global level or at the OS-spec level.
 
 For example at the global level:
+
 ```toml
 [ssh_configs]
    kex_algs = ["ecdh-sha2-nistp256", "diffie-hellman-group14-sha1"]
@@ -16,6 +18,7 @@ For example at the global level:
 ```
 
 Or at an OS-spec level:
+
 ```toml
 [os_name.aireos]
    ssh_configs.kex_algs =  ["ecdh-sha2-nistp256", "diffie-hellman-group14-sha1"]
@@ -29,4 +32,4 @@ in the global options.
 For details on the specific SSH options, refer to the AsyncSSH option names, [here](https://asyncssh.readthedocs.io/en/stable/api.html#asyncssh.SSHClientConnectionOptions)
 and supported option values, [here](https://asyncssh.readthedocs.io/en/stable/api.html#supported-algorithms).
 
-*NOTE: A future version of AsyncSSH will support the use of ssh_config file(s)*
+*NOTE:* A future version of AsyncSSH will support the use of ssh_config file(s)

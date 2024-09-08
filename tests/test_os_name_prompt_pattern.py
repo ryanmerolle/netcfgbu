@@ -1,19 +1,20 @@
+"""Tests for the OS name prompt pattern module in the netcfgbu package.
+
+This module contains tests for various OS name prompt pattern functionalities in the
+netcfgbu package. It uses pytest for testing.
+"""
+
 import re
+
 from netcfgbu import os_specs
-from netcfgbu.connectors import BasicSSHConnector
 from netcfgbu.config import load
+from netcfgbu.connectors import BasicSSHConnector
 
 
 def test_config_os_name_prompt_pattern(netcfgbu_envars, request):  # noqa
-    """
-    This test validates that a User provided prompt_pattern in the [os_name.$name]
-    configuration section results in the User defined pattern used by the
-    SSH connector instance.
-    """
+    """Tests that a user-defined prompt pattern in [os_name.$name] is correctly applied."""
     rec = {"host": "dummy", "os_name": "cumulus"}
-    abs_filepath = (
-        request.fspath.dirname + "/files/test-config-os-name-prompt-pattern.toml"
-    )
+    abs_filepath = request.fspath.dirname + "/files/test-config-os-name-prompt-pattern.toml"
     app_cfg = load(filepath=abs_filepath)
     conn = os_specs.make_host_connector(rec, app_cfg)
 
@@ -29,5 +30,5 @@ def test_config_os_name_prompt_pattern(netcfgbu_envars, request):  # noqa
     test_prompt_value = "cumulus@leaf01:mgmt-vrf:~$"
 
     assert isinstance(conn, BasicSSHConnector)
-    assert expected_re.pattern == conn.PROMPT_PATTERN.pattern
+    assert expected_re.pattern == conn.prompt_pattern.pattern
     assert expected_re.match(test_prompt_value.encode("utf-8"))

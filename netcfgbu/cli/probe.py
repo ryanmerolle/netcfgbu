@@ -1,82 +1,46 @@
-import asyncio
+"""This module provides probing functionality to check the status of network devices."""
 
 import click
 
-from netcfgbu.logger import get_logger, stop_aiologging
-from netcfgbu.aiofut import as_completed
+from netcfgbu.cli.common import execute_command
+from netcfgbu.config_model import AppConfig
+from netcfgbu.consts import DEFAULT_PROBE_TIMEOUT
 from netcfgbu.probe import probe
 
-from .root import (
-    cli,
-    WithInventoryCommand,
-    opt_config_file,
-    opts_inventory,
-    opt_timeout,
-)
+from .root import WithInventoryCommand, cli, opt_config_file, opt_timeout, opts_inventory
 
-from .report import Report
-from netcfgbu.consts import DEFAULT_PROBE_TIMEOUT
+CLI_COMMAND = "probe"
 
 
-def exec_probe(inventory, timeout=None):
-    inv_n = len(inventory)
-    log = get_logger()
-    log.info(f"Checking SSH reachability on {inv_n} devices ...")
+def exec_probe(inventory_recs: list, timeout=None) -> None:
+    """Executes the probe command on the provided inventory records.
+
+    Args:
+        inventory_recs: List of inventory records to probe.
+        timeout: Optional timeout value for the probe command. Defaults to DEFAULT_PROBE_TIMEOUT.
+    """
     timeout = timeout or DEFAULT_PROBE_TIMEOUT
 
-    loop = asyncio.get_event_loop()
+    def task_creator(rec: dict, app_cfg: AppConfig):
+        """Creates a probe task for the given inventory record.
 
-    tasks = {
-        probe(
-            rec.get("ipaddr") or rec.get("host"), timeout=timeout, raise_exc=True
-        ): rec
-        for rec in inventory
-    }
+        Args:
+            rec: A dictionary representing an inventory record.
+            app_cfg: Application configuration object.
 
-    total = len(tasks)
-    done = 0
-    report = Report()
+        Returns:
+            A probe task configured with the IP address or hostname from the inventory record.
+        """
+        return probe(rec.get("ipaddr") or rec.get("host"), timeout=timeout, raise_exc=True)
 
-    async def proces_check():
-        nonlocal done
-
-        async for probe_task in as_completed(tasks):
-            done += 1
-            task_coro = probe_task.get_coro()
-            rec = tasks[task_coro]
-            msg = f"DONE ({done}/{total}): {rec['host']} "
-
-            try:
-                probe_ok = probe_task.result()
-                report.task_results[probe_ok].append((rec, probe_ok))
-
-            except (asyncio.TimeoutError, OSError) as exc:
-                probe_ok = False
-                report.task_results[False].append((rec, exc))
-
-            except Exception as exc:
-                probe_ok = False
-                log.error(msg + f"FAILURE: {str(exc)}")
-
-            log.info(msg + ("PASS" if probe_ok else "FAIL"))
-
-    report.start_timing()
-    loop.run_until_complete(proces_check())
-    report.stop_timing()
-    stop_aiologging()
-    report.print_report()
+    execute_command(inventory_recs, None, CLI_COMMAND, task_creator)
 
 
-@cli.command(name="probe", cls=WithInventoryCommand)
+@cli.command(name=CLI_COMMAND, cls=WithInventoryCommand)
 @opt_config_file
 @opts_inventory
 @opt_timeout
 @click.pass_context
-def cli_check(ctx, **cli_opts):
-    """
-    Probe device for SSH reachablility.
-
-    The probe check determines if the device is reachable and the SSH port
-    is available to receive connections.
-    """
+def cli_check(ctx: click.Context, **cli_opts) -> None:
+    """Probe device for SSH reachablility."""
     exec_probe(ctx.obj["inventory_recs"], timeout=cli_opts["timeout"])

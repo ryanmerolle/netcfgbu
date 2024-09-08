@@ -1,15 +1,16 @@
+"""This module serves as the root command handler for the CLI."""
+
+from functools import reduce
 from importlib import metadata
 from pathlib import Path
 
 import click
-from functools import reduce
 from first import first
 
 import netcfgbu
 from netcfgbu import config as _config
 from netcfgbu import inventory as _inventory
 from netcfgbu import jumphosts
-
 
 VERSION = metadata.version(netcfgbu.__package__)
 
@@ -22,7 +23,17 @@ VERSION = metadata.version(netcfgbu.__package__)
 
 
 class WithConfigCommand(click.Command):
+    """Custom Click command that loads the configuration file before invoking the command."""
+
     def invoke(self, ctx):
+        """Invokes the command after loading the configuration file.
+
+        Args:
+            ctx: Click context object.
+
+        Raises:
+            Exception: If there is an error loading the configuration.
+        """
         try:
             ctx.obj["app_cfg"] = _config.load(fileio=ctx.params["config"])
             super().invoke(ctx)
@@ -32,14 +43,29 @@ class WithConfigCommand(click.Command):
 
 
 class WithInventoryCommand(click.Command):
-    def invoke(self, ctx):
+    """Custom Click command that preloads configuration and inventory.
 
+    This function loads the necessary configuration & inventory before invoking the specified
+    command. It also initializes SSH debugging & jumphost setup if these options are configured.
+    """
+
+    def invoke(self, ctx):
+        """Invokes the command after loading the configuration and inventory.
+
+        Args:
+            ctx: Click context object.
+
+        Raises:
+            Exception: If there is an error loading the configuration, inventory,
+            or initializing jumphosts.
+        """
         try:
             app_cfg = ctx.obj["app_cfg"] = _config.load(fileio=ctx.params["config"])
 
             if debug_ssh_lvl := ctx.params.get("debug_ssh"):  # pragma: no cover
-                from asyncssh import logging as assh_lgr
                 import logging
+
+                from asyncssh import logging as assh_lgr
 
                 assh_lgr.set_log_level(logging.DEBUG)
                 assh_lgr.set_debug_level(debug_ssh_lvl)
@@ -54,9 +80,7 @@ class WithInventoryCommand(click.Command):
             )
 
             if not inv:
-                raise RuntimeError(
-                    f"No inventory matching limits in: {app_cfg.defaults.inventory}"
-                )
+                raise RuntimeError(f"No inventory matching limits in: {app_cfg.defaults.inventory}")
 
             # if there is jump host configuraiton then prepare for later use.
             if app_cfg.jumphost:
@@ -76,6 +100,15 @@ class WithInventoryCommand(click.Command):
 
 
 def get_spec_nameorfirst(spec_list, spec_name=None):
+    """Returns the first matching spec by name or the first spec in the list.
+
+    Args:
+        spec_list: List of specs to search.
+        spec_name: Name of the spec to find (optional).
+
+    Returns:
+        The matching spec or the first spec if no name is specified.
+    """
     if not spec_list:
         return None
 
@@ -85,7 +118,17 @@ def get_spec_nameorfirst(spec_list, spec_name=None):
     return first(spec for spec in spec_list if getattr(spec, "name", "") == spec_name)
 
 
-def check_for_default(ctx, opt, value):
+def check_for_default(ctx: click.Context, opt, value):
+    """Checks if the value is provided or if a default configuration file exists.
+
+    Args:
+        ctx: Click context object.
+        opt: Option being checked.
+        value: Value of the option.
+
+    Returns:
+        The provided value or None if no value is provided and no default file exists.
+    """
     if value or Path("netcfgbu.toml").exists():
         return value
 
@@ -97,7 +140,7 @@ opt_config_file = click.option(
     "--config",
     envvar="NETCFGBU_CONFIG",
     type=click.File(),
-    callback=check_for_default
+    callback=check_for_default,
     # required=True,
     # default="netcfgbu.toml",
 )
@@ -127,28 +170,31 @@ opt_excludes = click.option(
 
 
 def opts_inventory(in_fn_deco):
-    return reduce(
-        lambda _d, fn: fn(_d), [opt_inventory, opt_limits, opt_excludes], in_fn_deco
-    )
+    """Decorator that applies inventory-related options to a command.
+
+    Args:
+        in_fn_deco: The command function to decorate.
+
+    Returns:
+        The decorated command function with inventory options applied.
+    """
+    return reduce(lambda _d, fn: fn(_d), [opt_inventory, opt_limits, opt_excludes], in_fn_deco)
 
 
 opt_batch = click.option(
     "--batch",
     "-b",
     type=click.IntRange(1, 500),
-    help="inevntory record processing batch size",
+    help="inventory record processing batch size",
 )
 
-opt_timeout = click.option(
-    "--timeout", "-t", help="timeout(s)", type=click.IntRange(0, 5 * 60)
-)
+opt_timeout = click.option("--timeout", "-t", help="timeout(s)", type=click.IntRange(0, 5 * 60))
 
-opt_debug_ssh = click.option(
-    "--debug-ssh", help="enable SSH debugging", type=click.IntRange(1, 3)
-)
+opt_debug_ssh = click.option("--debug-ssh", help="enable SSH debugging", type=click.IntRange(1, 3))
 
 
 @click.group()
 @click.version_option(version=VERSION)
-def cli():
+def cli() -> None:
+    """The main entry point for the CLI application."""
     pass  # pragma: no cover

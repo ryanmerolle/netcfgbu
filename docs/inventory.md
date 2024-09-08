@@ -4,6 +4,7 @@ The inventory file is a CSV file that MUST contain at a minimum two columns:
 `host` and `os_name`, for example:
 
 Example:
+
 ```csv
 host,os_name
 switch1,ios
@@ -18,6 +19,7 @@ fw1,asa
 If your host names cannot be resolved via DNS, then you MUST include the `ipaddr` column, for example:
 
 Example:
+
 ```csv
 host,os_name,ipaddr
 switch1,ios,10.1.123.1
@@ -29,6 +31,7 @@ If you need to provide host specific credentials, then you can add the columns `
 Both of these columns support the use of environment variables.
 
 Example:
+
 ```csv
 host,os_name,ipaddr,username,password
 switch1,ios,10.1.123.1
@@ -38,4 +41,3 @@ fw1,asa,10.1.123.254,SecOpsAdmin,$SECOPS_PASSWORD
 
 You can add any additional columns, and use those column names for filtering purposes.
 See [Filtering Usage](usage-filtering.md) for additional information.
-

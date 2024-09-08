@@ -1,5 +1,71 @@
+[tool.poetry]
+name = "netcfgbu"
+version = "1.0.0"
+description = "Network Configuration Backup"
+authors = ["Jeremy Schulman", "Ryan Merolle"]
+license = "Apache Software License"
+readme = "README.md"
+repository = "https://github.com/ryanmerolle/netcfgbu"
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3.9",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: System :: Networking"
+]
+
+[tool.poetry.scripts]
+netcfgbu = "netcfgbu.main:main"
+
+[virtualenvs]
+virtualenvs.create = true
+virtualenvs.in-project = true
+virtualenvs.path = ".venv"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+aiofiles = "*"
+asyncssh = "*"
+toml = "*"
+pydantic-settings = "*"
+tabulate = "*"
+click = "*"
+first = "*"
+pexpect = "*"
+types-tabulate = "*"
+types-first = "*"
+types-aiofiles = "*"
+types-toml = "*"
+types-pexpect = "*"
+pydantic = "2.7.*"
+cryptography = "< 43.0.0"
+
+[tool.poetry.group.dev.dependencies]
+asynctest = "*"
+#black = "*"
+#flake8 = "*"
+#flake8-breakpoint = "*"
+pylint = "*"
+mypy = "*"
+interrogate = "*"
+invoke = "*"
+isort = "*"
+pre-commit = "*"
+pytest = "*"
+pytest-asyncio = "*"
+pytest-cov = "*"
+requests = "*"
+ruff = "*"
+sourcery-analytics = "*"
+tox = "*"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
 [tool.black]
-target-version = ['py38']
+target-version = ['py39']
 
 [tool.interrogate]
     fail-under = 0
@@ -7,3 +73,12 @@ target-version = ['py38']
     color = true
     ignore-module = true
     exclude = ["setup.py", "tasks.py", "bin"]
+
+[tool.bandit]
+exclude_dirs = ["tests"]
+
+[tool.mypy]
+python_version = "3.9"
+exclude = [
+    ".vnenv"
+]
