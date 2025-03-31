@@ -240,10 +240,10 @@ class GitSpec(NoExtraBaseModel):
         auth_vals = list(filter(None, (values.get(auth) for auth in req)))
         auth_count = len(auth_vals)
         if auth_count == 0:
-            raise ValueError(f'Missing one of required auth method fields: {"|".join(req)}')
+            raise ValueError(f"Missing one of required auth method fields: {'|'.join(req)}")
 
         if auth_count > 1:
-            raise ValueError(f'Only one of {"|".join(req)} allowed')
+            raise ValueError(f"Only one of {'|'.join(req)} allowed")
 
         if values.get("deploy_passphrase") and not values.get("deploy_key"):
             raise ValueError("deploy_key required when using deploy_passphrase")
