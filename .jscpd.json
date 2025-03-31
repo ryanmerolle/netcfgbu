@@ -2,7 +2,7 @@
     "maxLines": 0,
     "maxSize": 0,
     "threshold": 0,
-    "ignore": ["**/.git", "**/.venv"],
+    "ignore": ["**/.git", "**/.venv", ".devcontainer/devcontainer.json"],
     "gitignore": true,
     "blame": true,
     "ignoreCase": true

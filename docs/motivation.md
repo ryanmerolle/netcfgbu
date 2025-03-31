@@ -211,6 +211,6 @@ Cheers
 
 -- Jeremy Schulman
 
-Twitter: [@nwkautomaniac](https://twitter.com/nwkautomaniac)
+Twitter: [@nwkautomaniac](https://x.com/nwkautomaniac)
 
 Slack: @nwkautomaniac on [networktocode.slack.com](https://slack.networktocode.com/)
