@@ -6,27 +6,27 @@ permissions: read-all
 
 on:
   # Trigger mega-linter at every push. Action will also be visible from Pull Requests to main
-  #push: # Comment this line to trigger action only on pull-requests (not recommended if you don't pay for GH Actions)
+  #push:  #  Comment this line to trigger action only on pull-requests (not recommended if you don't pay for GH Actions)
   pull_request:
     branches: [master, main, develop]
 
-env: # Comment env block if you don't want to apply fixes
+env:  # Comment env block if you don't want to apply fixes
   # Apply linter fixes configuration
-  APPLY_FIXES: none # When active, APPLY_FIXES must also be defined as environment variable (in github/workflows/mega-linter.yml or other CI tool)
-  APPLY_FIXES_EVENT: pull_request # Decide which event triggers application of fixes in a commit or a PR (pull_request, push, all)
-  APPLY_FIXES_MODE: commit # If APPLY_FIXES is used, defines if the fixes are directly committed (commit) or posted in a PR (pull_request)
-  SPELL_CSPELL_DISABLE_ERRORS: true # Only warn for cspell
-  SPELL_LYCHEE_DISABLE_ERRORS: true # Only warn for lychee
-  REPOSITORY_KICS_DISABLE_ERRORS: true # Only warn for kics
-  REPOSITORY_DEVSKIM_DISABLE_ERRORS: true # Only warn for devskim
-  PYTHON_MYPY_DISABLE_ERRORS: true # Only warn for mypy
-  PYTHON_PYLINT_DISABLE_ERRORS: true # Only warn for pylint
-  PYTHON_PYRIGHT_DISABLE_ERRORS: true # Only warn for pyright
+  APPLY_FIXES: none  # When active, APPLY_FIXES must also be defined as environment variable (in github/workflows/mega-linter.yml or other CI tool)
+  APPLY_FIXES_EVENT: pull_request  # Decide which event triggers application of fixes in a commit or a PR (pull_request, push, all)
+  APPLY_FIXES_MODE: commit  # If APPLY_FIXES is used, defines if the fixes are directly committed (commit) or posted in a PR (pull_request)
+  SPELL_CSPELL_DISABLE_ERRORS: true  # Only warn for cspell
+  SPELL_LYCHEE_DISABLE_ERRORS: true  # Only warn for lychee
+  REPOSITORY_KICS_DISABLE_ERRORS: true  # Only warn for kics
+  REPOSITORY_DEVSKIM_DISABLE_ERRORS: true  # Only warn for devskim
+  PYTHON_MYPY_DISABLE_ERRORS: true  # Only warn for mypy
+  PYTHON_PYLINT_DISABLE_ERRORS: true  # Only warn for pylint
+  PYTHON_PYRIGHT_DISABLE_ERRORS: true  # Only warn for pyright
   PYTHON_FLAKE8_CONFIG_FILE: tox.ini
   PYTHON_BANDIT_CONFIG_FILE: pyproject.toml
   JSON_JSONLINT_FILTER_REGEX_EXCLUDE: .devcontainer/devcontainer.json
-  MARKDOWN_MARKDOWN_LINK_CHECK_DISABLE_ERRORS: true # Only warn for markdown-link-check
-  REPOSITORY_GITLEAKS_DISABLE_ERRORS_IF_LESS_THAN: 5 # Only warn for gitleaks if less than 5 issues
+  MARKDOWN_MARKDOWN_LINK_CHECK_DISABLE_ERRORS: true  # Only warn for markdown-link-check
+  REPOSITORY_GITLEAKS_DISABLE_ERRORS_IF_LESS_THAN: 5  # Only warn for gitleaks if less than 5 issues
   #PYTHON_PYLINT_FILTER_REGEX_EXCLUDE: tests\
   #PYTHON_BANDIT_FILTER_REGEX_EXCLUDE: tests\
   #PYTHON_MYPY_FILTER_REGEX_EXCLUDE: tests\
@@ -53,7 +53,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.PAT || secrets.GITHUB_TOKEN }}
-          fetch-depth: 0 # If you use VALIDATE_ALL_CODEBASE = true, you can remove this line to improve performances
+          fetch-depth: 0  # If you use VALIDATE_ALL_CODEBASE = true, you can remove this line to improve performances
 
       # MegaLinter
       - name: MegaLinter
@@ -67,7 +67,7 @@ jobs:
           VALIDATE_ALL_CODEBASE: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }} # Validates all source when push on main, else just the git diff with main. Override with true if you always want to lint all sources
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           # ADD YOUR CUSTOM ENV VARIABLES HERE OR DEFINE THEM IN A FILE .mega-linter.yml AT THE ROOT OF YOUR REPOSITORY
-          # DISABLE: COPYPASTE,SPELL # Uncomment to disable copy-paste and spell checks
+          # DISABLE: COPYPASTE,SPELL  # Uncomment to disable copy-paste and spell checks
 
       # Upload MegaLinter artifacts
       - name: Archive production artifacts
