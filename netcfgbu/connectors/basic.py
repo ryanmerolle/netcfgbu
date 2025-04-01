@@ -128,11 +128,13 @@ class BasicSSHConnector:
         Returns:
             True if the backup process succeeds, otherwise returns an exception.
         """
+        self.log.debug("Starting backup process for device: %s", self.name)
         async with await self.login():
             try:
                 await self.get_running_config()
                 retval = True
             except Exception as exc:
+                self.log.error("Error during backup process for device: %s, error: %s", self.name, str(exc))
                 retval = exc
 
             finally:
@@ -141,6 +143,7 @@ class BasicSSHConnector:
         if self.config:
             await self.save_config()
 
+        self.log.debug("Backup process completed for device: %s", self.name)
         return retval
 
     # -------------------------------------------------------------------------

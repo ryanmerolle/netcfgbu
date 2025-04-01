@@ -10,6 +10,7 @@ from netcfgbu.cli.common import execute_command
 from netcfgbu.config_model import AppConfig
 from netcfgbu.os_specs import make_host_connector
 from netcfgbu.plugins import Plugin, load_plugins
+from netcfgbu.logger import get_logger
 
 from .root import (
     WithInventoryCommand,
@@ -22,6 +23,7 @@ from .root import (
 
 CLI_COMMAND = "backup"
 
+log = get_logger()
 
 def exec_backup(inventory_recs: list, app_cfg: AppConfig) -> None:
     """Executes the backup command on the provided inventory records.
@@ -30,6 +32,7 @@ def exec_backup(inventory_recs: list, app_cfg: AppConfig) -> None:
         inventory_recs: List of inventory records to back up.
         app_cfg: Application configuration object.
     """
+    log.debug("Starting backup process for %d devices", len(inventory_recs))
 
     def task_creator(rec: dict, app_cfg: AppConfig):
         """Creates a backup task for the given inventory record.
@@ -41,6 +44,7 @@ def exec_backup(inventory_recs: list, app_cfg: AppConfig) -> None:
         Returns:
             A backup task configured with the host connector.
         """
+        log.debug("Creating backup task for device: %s", rec.get("host") or rec.get("ipaddr"))
         return make_host_connector(rec, app_cfg).backup_config()
 
     def success_callback(rec, result):
@@ -50,6 +54,7 @@ def exec_backup(inventory_recs: list, app_cfg: AppConfig) -> None:
             rec: A dictionary representing an inventory record.
             result: The result of the backup task.
         """
+        log.info("Backup successful for device: %s", rec.get("host") or rec.get("ipaddr"))
         Plugin.run_backup_success(rec, result)
 
     def failure_callback(rec, exc):
@@ -59,6 +64,7 @@ def exec_backup(inventory_recs: list, app_cfg: AppConfig) -> None:
             rec: A dictionary representing an inventory record.
             exc: The exception raised during the backup task.
         """
+        log.error("Backup failed for device: %s, error: %s", rec.get("host") or rec.get("ipaddr"), str(exc))
         Plugin.run_backup_failed(rec, exc)
 
     execute_command(
@@ -69,6 +75,8 @@ def exec_backup(inventory_recs: list, app_cfg: AppConfig) -> None:
         success_callback,
         failure_callback,
     )
+
+    log.debug("Backup process completed for all devices")
 
 
 @cli.command(name=CLI_COMMAND, cls=WithInventoryCommand)

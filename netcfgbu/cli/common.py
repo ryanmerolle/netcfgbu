@@ -44,6 +44,9 @@ async def handle_exception(exc, rec, done_msg, report, cli_command) -> None:
     log.error("%s - %s", done_msg, reason_detail)
     report.task_results[False].append((rec, reason))
 
+    if cli_command == "backup":
+        Plugin.run_backup_failed(rec, exc)
+
 
 async def process_tasks(
     tasks, app_cfg, report, cli_command, success_callback=None, failure_callback=None
@@ -133,6 +136,8 @@ async def process_generic_task(
             log.info("%s - PASS", done_msg)
             if success_callback:
                 success_callback(rec, result)
+            if cli_command == "backup":
+                Plugin.run_backup_success(rec, result)
         else:
             reason = f"{cli_command} failed"
             await handle_exception(Exception(reason), rec, done_msg, report, cli_command)
