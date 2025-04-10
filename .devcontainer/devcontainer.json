@@ -9,7 +9,8 @@
 	},
 	"containerEnv": {
 		"POETRY_VIRTUALENVS_IN_PROJECT": "true",
-		"HISTFILE": "/home/vscode/.bash_history"
+		"HISTFILE": "/home/vscode/.bash_history",
+		"UV_LINK_MODE": "copy"
 	},
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
