@@ -135,7 +135,7 @@ class BasicSSHConnector:
             except asyncssh.ConnectionLost as exc:
                 retval = exc
                 msg = "Connection to the device was lost"
-                raise asyncssh.ConnectionLost(msg)
+                raise asyncssh.ConnectionLost(msg) from exc
             except Exception as exc:
                 retval = exc
 
