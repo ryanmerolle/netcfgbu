@@ -132,6 +132,10 @@ class BasicSSHConnector:
             try:
                 await self.get_running_config()
                 retval = True
+            except asyncssh.ConnectionLost as exc:
+                retval = exc
+                msg = "Connection to the device was lost"
+                raise asyncssh.ConnectionLost(msg)
             except Exception as exc:
                 retval = exc
 
@@ -220,6 +224,10 @@ class BasicSSHConnector:
                 msg = "Timeout getting running configuration"
 
             raise asyncio.TimeoutError(msg) from exc
+
+        except asyncssh.ConnectionLost as exc:
+            msg = "Connection to the device was lost"
+            raise asyncssh.ConnectionLost(msg) from exc
 
     # -------------------------------------------------------------------------
     #
@@ -341,13 +349,25 @@ class BasicSSHConnector:
 
         Returns:
             The output read until the prompt is found as a byte string.
+
+        Raises:
+            asyncssh.ConnectionLost: If the connection is closed while waiting for the prompt.
         """
         output = b""
         while True:
             self.log.debug("%s - %s", self.name, output)
-            output += await self.process.stdout.read(io.DEFAULT_BUFFER_SIZE)
+            chunk = await self.process.stdout.read(io.DEFAULT_BUFFER_SIZE)
+
+            # If we get an empty chunk, it means the connection was closed
+            if not chunk:
+                self.log.error(
+                    "CONNECTION-LOST: %s - connection lost waiting for prompt", self.name
+                )
+                raise asyncssh.ConnectionLost("ConnectionLost")
+
+            output += chunk
             nl_at = output.rfind(b"\n")
-            if mobj := self.prompt_pattern.match(output[nl_at + 1 :]):
+            if nl_at >= 0 and (mobj := self.prompt_pattern.match(output[nl_at + 1 :])):
                 self._cur_prompt = mobj.group(1)
                 return output[0:nl_at]
 
