@@ -1,3 +1,10 @@
+"""Main module for the netcfgbu CLI application.
+
+This module serves as the entry point for the netcfgbu command-line interface.
+It imports all CLI command modules and provides the main run function to
+start the application.
+"""
+
 from .backup import cli_backup  # noqa # pylint: disable=W0611
 from .example import cli_example  # noqa # pylint: disable=W0611
 from .inventory import cli_inventory  # noqa # pylint: disable=W0611
@@ -12,5 +19,8 @@ def run() -> None:
 
     This function initializes and runs the command-line interface (CLI)
     with an empty context object.
+
+    Returns:
+        None: This function doesn't return anything.
     """
     cli(obj={})

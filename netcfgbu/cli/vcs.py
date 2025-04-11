@@ -1,4 +1,9 @@
-"""This module provides version control system (VCS) integration for network configurations."""
+"""This module provides version control system (VCS) integration for network configurations.
+
+The module implements CLI commands for managing network device configurations in a
+version control system, specifically Git. It allows users to prepare, save, and check
+the status of configuration backups in a Git repository.
+"""
 
 import click
 
@@ -14,7 +19,10 @@ opt_vcs_name = click.option("--name", help="VCS name as defined in config file")
 
 @cli.group(name="vcs")
 def cli_vcs() -> None:
-    """Version Control System subcommands."""
+    """Version Control System subcommands.
+
+    This function creates a command group for all VCS-related operations.
+    """
     pass  # pragma: no cover
 
 
@@ -23,17 +31,12 @@ class VCSCommand(click.Command):
 
     This class extends `click.Command` and is used to invoke VCS-related commands
     within a CLI application. It loads the application configuration, selects the
-    appropriate VCS specification, and then invokes the command. If any errors occur
-    during the process, they are handled and displayed to the user.
+    appropriate VCS specification, and then invokes the command.
 
     Example usage:
         @click.command(cls=VCSCommand)
         def my_command():
             # Command implementation
-
-    Methods:
-        invoke: Executes the VCS command with the given context, loading the appropriate
-                configuration and handling errors.
     """
 
     def invoke(self, ctx) -> None:
@@ -44,7 +47,7 @@ class VCSCommand(click.Command):
 
         Raises:
             RuntimeError: If no configuration file is provided or if no VCS configuration
-                          section is found in the configuration file.
+                section is found in the configuration file.
         """
         cfg_fileopt = ctx.params["config"]
 
@@ -73,9 +76,13 @@ class VCSCommand(click.Command):
 def cli_vcs_prepare(ctx: click.Context, **_cli_opts) -> None:
     """Prepare your system with the VCS repo.
 
-    This command is used to setup your `configs_dir` as the VCS repository
+    This command sets up your `configs_dir` as the VCS repository
     so that when you execute the backup process the resulting backup files
     can be stored in the VCS system.
+
+    Args:
+        ctx: The Click context object containing command parameters and options.
+        **_cli_opts: Additional command line options.
     """
     git.vcs_prepare(spec=ctx.obj["vcs_spec"], repo_dir=ctx.obj["app_cfg"].defaults.configs_dir)
 
@@ -90,10 +97,16 @@ def cli_vcs_save(ctx: click.Context, **cli_opts) -> None:
     """Save changes into VCS repository.
 
     After you have run the config backup process you will need to push those
-    changes into the VCS repository.  This command performs the necesssary
-    steps to add changes to the repository and set a git tag.  The release
+    changes into the VCS repository. This command performs the necessary
+    steps to add changes to the repository and set a git tag. The release
     tag by default is the timestamp in the form of
-    "<year><month><day>_<hour><minute><second>"
+    "<year><month><day>_<hour><minute><second>".
+
+    Args:
+        ctx: The Click context object containing command parameters and options.
+        **cli_opts: Additional command line options including:
+            add_tag: Boolean flag to create a git tag.
+            message: String to set as commit message or tag name.
     """
     load_plugins(ctx.obj["app_cfg"].defaults.plugins_dir)
     git.vcs_save(
@@ -113,6 +126,13 @@ def cli_vcs_status(ctx: click.Context, **_cli_opts) -> None:
 
     This command will show the status of the `configs_dir` contents so that you
     will know what will be changed before you run the `vcs save` command.
+
+    Args:
+        ctx: The Click context object containing command parameters and options.
+        **_cli_opts: Additional command line options.
+
+    Returns:
+        None. Prints the repository status to standard output.
     """
     output = git.vcs_status(
         spec=ctx.obj["vcs_spec"], repo_dir=ctx.obj["app_cfg"].defaults.configs_dir

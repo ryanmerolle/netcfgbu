@@ -1,7 +1,11 @@
 """This module provides functionality for backing up network configurations.
 
-Functions:
-    backup_config: Backs up the configuration of a network device.
+This module contains functions & CLI commands for executing backup operations on
+network devices. It handles the coordination of backup tasks, success/failure
+handling, and integration with plugins.
+
+Note:
+    This module serves as the implementation for the 'backup' CLI command.
 """
 
 import click
@@ -26,20 +30,26 @@ CLI_COMMAND = "backup"
 def exec_backup(inventory_recs: list, app_cfg: AppConfig) -> None:
     """Executes the backup command on the provided inventory records.
 
+    This function orchestrates the backup process by creating tasks for each
+    inventory record and handling the results through callbacks.
+
     Args:
-        inventory_recs: List of inventory records to back up.
-        app_cfg: Application configuration object.
+        inventory_recs (list): List of inventory records to back up.
+        app_cfg (AppConfig): Application configuration object.
+
+    Returns:
+        None
     """
 
     def task_creator(rec: dict, app_cfg: AppConfig):
         """Creates a backup task for the given inventory record.
 
         Args:
-            rec: A dictionary representing an inventory record.
-            app_cfg: Application configuration object.
+            rec (dict): A dictionary representing an inventory record.
+            app_cfg (AppConfig): Application configuration object.
 
         Returns:
-            A backup task configured with the host connector.
+            object: A backup task configured with the host connector.
         """
         return make_host_connector(rec, app_cfg).backup_config()
 
@@ -47,8 +57,11 @@ def exec_backup(inventory_recs: list, app_cfg: AppConfig) -> None:
         """Callback function executed on a successful backup.
 
         Args:
-            rec: A dictionary representing an inventory record.
-            result: The result of the backup task.
+            rec (dict): A dictionary representing an inventory record.
+            result (object): The result of the backup task.
+
+        Returns:
+            None
         """
         Plugin.run_backup_success(rec, result)
 
@@ -56,8 +69,11 @@ def exec_backup(inventory_recs: list, app_cfg: AppConfig) -> None:
         """Callback function executed on a failed backup.
 
         Args:
-            rec: A dictionary representing an inventory record.
-            exc: The exception raised during the backup task.
+            rec (dict): A dictionary representing an inventory record.
+            exc (Exception): The exception raised during the backup task.
+
+        Returns:
+            None
         """
         Plugin.run_backup_failed(rec, exc)
 
@@ -78,6 +94,17 @@ def exec_backup(inventory_recs: list, app_cfg: AppConfig) -> None:
 @opt_batch
 @click.pass_context
 def cli_backup(ctx: click.Context, **_cli_opts) -> None:
-    """Backup network configurations."""
+    """Backup network configurations.
+
+    This command initiates the backup process for network device configurations
+    based on the provided inventory and configuration.
+
+    Args:
+        ctx (click.Context): The Click context object containing application state.
+        **_cli_opts: Additional CLI options passed to the command.
+
+    Returns:
+        None
+    """
     load_plugins(ctx.obj["app_cfg"].defaults.plugins_dir)
     exec_backup(inventory_recs=ctx.obj["inventory_recs"], app_cfg=ctx.obj["app_cfg"])

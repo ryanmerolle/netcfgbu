@@ -1,4 +1,9 @@
-"""This module handles inventory management for network devices."""
+"""This module handles inventory management for network devices.
+
+This provides CLI commands for listing & building network device inventories.
+It interacts with the inventory system to document info about available devices
+& their operating systems, as well as to build inventory files from config.
+"""
 
 from textwrap import indent
 
@@ -25,7 +30,11 @@ from .root import (
 
 @cli.group(name="inventory")
 def cli_inventory() -> None:
-    """Inventory subcommands."""
+    """Group of commands for managing device inventory.
+
+    This command group provides various subcommands that allow users to view,
+    build, and manage the network device inventory.
+    """
     pass  # pragma: no cover
 
 
@@ -35,7 +44,16 @@ def cli_inventory() -> None:
 @click.option("--brief", "-b", is_flag=True)
 @click.pass_context
 def cli_inventory_list(ctx: click.Context, **cli_opts):
-    """List inventory."""
+    """List network devices in the inventory.
+
+    This command displays a summary of devices in the inventory, grouped by
+    operating system, & optionally shows detailed information for each device.
+
+    Args:
+        ctx: Click context object containing inventory records and other shared data.
+        **cli_opts: Command line options including:
+            brief: If True, only shows the summary & not detailed device information.
+    """
     inventory_recs = ctx.obj["inventory_recs"]
     inventory_tabular_data = []
     os_name_counter = {}
@@ -83,10 +101,21 @@ def cli_inventory_list(ctx: click.Context, **cli_opts):
 @click.option("--brief", is_flag=True)
 @click.pass_context
 def cli_inventory_build(ctx: click.Context, **cli_opts) -> None:
-    """Build the inventory file.
+    """Build the inventory file from configuration.
 
-    If the netcfgbu configuraiton file contains inventory definitions then you
-    can use this command to the script to build the inventory.
+    Creates an inventory file based on definitions in the netcfgbu configuration file.
+    If multiple inventory definitions exist, a specific inventory can be selected using
+    the --name option.
+
+    Args:
+        ctx: Click context object containing application configuration.
+        **cli_opts: Command line options including:
+            name: Name of the inventory section defined in the config file.
+            brief: Flag for brief output format.
+
+    Raises:
+        RuntimeError: If the specified inventory is not defined in the configuration file
+                     or if no configuration file is provided.
     """
     app_cfg: AppConfig = ctx.obj["app_cfg"]
 

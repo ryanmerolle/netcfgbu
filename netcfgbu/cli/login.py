@@ -1,9 +1,11 @@
-"""This module contains the CLI command for testing SSH logins to devices.
+"""CLI command module for testing SSH logins to devices.
 
-The following functionality is provided:
+This module provides functionality to verify SSH login capabilities to network
+devices defined in the inventory.
 
-* exec_test_login: Executes SSH login tests on provided inventory records.
-* cli_login: CLI command for verifying SSH login to devices.
+Functionality:
+    exec_test_login: Executes SSH login tests on provided inventory records.
+    cli_login: CLI command for verifying SSH login to devices.
 """
 
 import click
@@ -27,12 +29,15 @@ CLI_COMMAND = "login"
 
 
 def exec_test_login(inventory_recs: list, app_cfg: AppConfig, cli_opts: dict) -> None:
-    """Performs login tests on inventory records using app configuration and CLI options.
+    """Perform login tests on inventory records using application configuration & CLI options.
+
+    This function executes SSH login tests for each provided inventory record using
+    the configuration and options specified.
 
     Args:
-        inventory_recs (list): Inventory records to test.
-        app_cfg (AppConfig): Application configuration object.
-        cli_opts (dict): Command-line options.
+        inventory_recs: List of inventory records to test.
+        app_cfg: Application configuration object.
+        cli_opts: Dictionary containing command-line options.
 
     Returns:
         None
@@ -42,12 +47,15 @@ def exec_test_login(inventory_recs: list, app_cfg: AppConfig, cli_opts: dict) ->
     def task_creator(rec: dict, app_cfg: AppConfig):
         """Create a task to test SSH login for a given inventory record.
 
+        This function creates and returns a task that tests SSH login capabilities
+        for the specified inventory record.
+
         Args:
-            rec (dict): A dictionary representing an inventory record.
-            app_cfg (AppConfig): The application configuration object.
+            rec: A dictionary representing an inventory record.
+            app_cfg: The application configuration object.
 
         Returns:
-            bool: The result of the login test.
+            bool: The result of the login test (True for success, False for failure).
         """
         return make_host_connector(rec, app_cfg).test_login(timeout=timeout)
 
@@ -62,5 +70,16 @@ def exec_test_login(inventory_recs: list, app_cfg: AppConfig, cli_opts: dict) ->
 @opt_timeout
 @click.pass_context
 def cli_login(ctx: click.Context, **cli_opts) -> None:
-    """Verify SSH login to devices."""
+    """Verify SSH login to devices.
+
+    This command tests SSH connectivity to network devices defined in the inventory.
+    It verifies that login credentials are correct and the devices are reachable.
+
+    Args:
+        ctx: Click context object containing inventory records and application config.
+        **cli_opts: Additional command-line options passed to the command.
+
+    Returns:
+        None
+    """
     exec_test_login(ctx.obj["inventory_recs"], ctx.obj["app_cfg"], cli_opts)

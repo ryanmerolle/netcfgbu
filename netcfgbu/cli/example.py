@@ -1,4 +1,8 @@
-"""This module provides example commands for the CLI."""
+"""Commands for the netcfgbu CLI to generate example files.
+
+This module contains commands for generating example files that help users
+get started with netcfgbu.
+"""
 
 import importlib.resources
 import shutil
@@ -12,9 +16,16 @@ from .root import cli
 def copy_example_files() -> None:
     """Copy example files from the package to the current directory.
 
-    Checks if any example file already exists in the current working directory.
-    If found, prints an error message and aborts the operation. Otherwise,
-    copies all files from the 'src/examples/' directory within the package to the current directory.
+    This function copies all example files from the package's examples directory
+    to the user's current working directory. If any of the example files already
+    exist in the current directory, no files will be copied and the function
+    will exit with an error.
+
+    Returns:
+        None
+
+    Raises:
+        SystemExit: If any example files already exist in the current directory.
     """
     package_name = "netcfgbu"
     examples_dir_name = "examples"
@@ -50,6 +61,13 @@ def copy_example_files() -> None:
 def cli_example(ctx: click.Context) -> None:
     """Generate example inventory & configuration files.
 
-    These files can be edited and used for setting up netcfgbu.
+    Creates sample inventory and configuration files in the current directory
+    that can be edited and used for setting up netcfgbu.
+
+    Args:
+        ctx: Click context object that holds state for the command.
+
+    Returns:
+        None
     """
     copy_example_files()

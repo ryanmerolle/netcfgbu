@@ -1,4 +1,11 @@
-"""This module generates reports based on network configuration data."""
+"""Report module for network configuration backup operations.
+
+This module provides functionality for generating reports about network
+configuration operations. It tracks task execution times, formats results,
+and outputs summaries in various formats including CSV files and tabular
+console output. The module supports reporting on successful operations,
+login attempts, and failures with detailed error categorization.
+"""
 
 import asyncio
 import csv
@@ -21,7 +28,7 @@ def err_reason(exc) -> str:
         exc: The exception to handle.
 
     Returns:
-        A string describing the error.
+        str: A string describing the error reason.
     """
     return {
         str: lambda: exc,
@@ -31,12 +38,19 @@ def err_reason(exc) -> str:
 
 
 class Report:
-    """Handles reporting of task results, saving to files, & printing summaries."""
+    """Handles reporting of task results, saving to files, and printing summaries.
+
+    This class provides functionality to track task execution times, store results,
+    and generate formatted reports about network configuration operations.
+    """
 
     TIME_FORMAT = "%Y-%b-%d %I:%M:%S %p"
 
     def __init__(self) -> None:
-        """Initializes a new instance of the Report class."""
+        """Initializes a new instance of the Report class.
+
+        Sets up tracking for task timing and results storage.
+        """
         self.start_ts: Union[None, datetime] = None
         self.start_tm: float = 0.0
         self.stop_ts: Union[None, datetime] = None
@@ -44,12 +58,18 @@ class Report:
         self.task_results: dict[bool, list[dict[str, Any]]] = defaultdict(list)
 
     def start_timing(self) -> None:
-        """Starts the timing for the report."""
+        """Starts the timing for the report.
+
+        Records the current datetime and monotonic time as the starting point.
+        """
         self.start_ts = datetime.now()
         self.start_tm = monotonic()
 
     def stop_timing(self) -> None:
-        """Stops the timing for the report."""
+        """Stops the timing for the report.
+
+        Records the current datetime and monotonic time as the ending point.
+        """
         self.stop_ts = datetime.now()
         self.stop_tm = monotonic()
 
@@ -131,7 +151,11 @@ class Report:
             print(tabulate(summary_tabular_data, headers=summary_headers, tablefmt="pretty"))
 
     def save_login_report(self) -> None:
-        """Generates & saves a login report as a CSV file, including a summary of login attempts."""
+        """Generates and saves a login report as a CSV file.
+
+        Creates a CSV file containing login attempt information and prints a summary
+        table showing the count of login attempts by OS name and login user.
+        """
         headers = ["host", "os_name", "num_of_attempts", "login_used"]
         login_tabular_data: list[list[Any]] = []
         summary_data: dict[str, dict[str, int]] = defaultdict(lambda: defaultdict(int))
@@ -154,7 +178,11 @@ class Report:
         )
 
     def save_failure_report(self) -> None:
-        """Generates and saves a CSV file with a summary of failure reasons."""
+        """Generates and saves a CSV file with a summary of failure reasons.
+
+        Creates a CSV file containing information about failed operations and
+        prints a summary table grouping failures by OS name and reason.
+        """
         headers = ["host", "os_name", "reason"]
         failure_tabular_data: list[list[Any]] = [
             [rec["host"], rec["os_name"], err_reason(exc)] for rec, exc in self.task_results[False]

@@ -1,4 +1,8 @@
-"""This module serves as the root command handler for the CLI."""
+"""Root command handler for the CLI.
+
+This module provides the foundation for the command-line interface,
+including custom Click commands, CLI options and common utilities.
+"""
 
 from functools import reduce
 from importlib import metadata
@@ -23,16 +27,20 @@ VERSION = metadata.version(netcfgbu.__package__)
 
 
 class WithConfigCommand(click.Command):
-    """Custom Click command that loads the configuration file before invoking the command."""
+    """Custom Click command that loads the configuration file before invoking the command.
+
+    This class extends the Click Command class to automatically load the application
+    configuration file before executing the command function.
+    """
 
     def invoke(self, ctx):
         """Invokes the command after loading the configuration file.
 
         Args:
-            ctx: Click context object.
+            ctx: Click context object containing command parameters and state.
 
         Raises:
-            Exception: If there is an error loading the configuration.
+            Exception: If there is an error loading the configuration file.
         """
         try:
             ctx.obj["app_cfg"] = _config.load(fileio=ctx.params["config"])
@@ -45,19 +53,24 @@ class WithConfigCommand(click.Command):
 class WithInventoryCommand(click.Command):
     """Custom Click command that preloads configuration and inventory.
 
-    This function loads the necessary configuration & inventory before invoking the specified
-    command. It also initializes SSH debugging & jumphost setup if these options are configured.
+    This class extends Click Command to automatically load both configuration and inventory
+    data before executing the command. It also handles SSH debugging setup and jumphost
+    configuration when specified.
     """
 
     def invoke(self, ctx):
         """Invokes the command after loading the configuration and inventory.
 
+        This method loads the application configuration and inventory data before invoking
+        the command function. It also sets up SSH debugging if enabled and initializes
+        any configured jumphosts.
+
         Args:
-            ctx: Click context object.
+            ctx: Click context object containing command parameters and state.
 
         Raises:
-            Exception: If there is an error loading the configuration, inventory,
-            or initializing jumphosts.
+            RuntimeError: If no inventory matches the specified limits.
+            Exception: If there is an error during configuration or inventory loading.
         """
         try:
             app_cfg = ctx.obj["app_cfg"] = _config.load(fileio=ctx.params["config"])
@@ -102,12 +115,15 @@ class WithInventoryCommand(click.Command):
 def get_spec_nameorfirst(spec_list, spec_name=None):
     """Returns the first matching spec by name or the first spec in the list.
 
+    This function searches through a list of specification objects to find one that matches
+    the provided name. If no name is specified, it returns the first item in the list.
+
     Args:
-        spec_list: List of specs to search.
-        spec_name: Name of the spec to find (optional).
+        spec_list: List of specification objects to search through.
+        spec_name: Optional name of the specification to find.
 
     Returns:
-        The matching spec or the first spec if no name is specified.
+        The first matching specification object or None if the list is empty.
     """
     if not spec_list:
         return None
@@ -121,10 +137,13 @@ def get_spec_nameorfirst(spec_list, spec_name=None):
 def check_for_default(ctx: click.Context, opt, value):
     """Checks if the value is provided or if a default configuration file exists.
 
+    This function is used as a callback for Click options to determine if a default
+    configuration file should be used when no explicit value is provided.
+
     Args:
-        ctx: Click context object.
-        opt: Option being checked.
-        value: Value of the option.
+        ctx: Click context object containing command state.
+        opt: The Click option that triggered this callback.
+        value: The value provided for the option, if any.
 
     Returns:
         The provided value or None if no value is provided and no default file exists.
@@ -172,6 +191,9 @@ opt_excludes = click.option(
 def opts_inventory(in_fn_deco):
     """Decorator that applies inventory-related options to a command.
 
+    This decorator function combines multiple inventory-related Click options
+    (inventory, limits, and excludes) and applies them to a command function.
+
     Args:
         in_fn_deco: The command function to decorate.
 
@@ -196,5 +218,9 @@ opt_debug_ssh = click.option("--debug-ssh", help="enable SSH debugging", type=cl
 @click.group()
 @click.version_option(version=VERSION)
 def cli() -> None:
-    """The main entry point for the CLI application."""
+    """The main entry point for the CLI application.
+
+    This function defines the root command group for the application's
+    command-line interface. All subcommands are attached to this group.
+    """
     pass  # pragma: no cover

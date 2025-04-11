@@ -1,4 +1,8 @@
-"""This module provides common utility functions for the CLI."""
+"""This module provides common utility functions for the CLI.
+
+This module contains shared functions used by various CLI commands for processing
+tasks, handling exceptions, and executing commands against network devices.
+"""
 
 import asyncio
 import errno
@@ -19,12 +23,18 @@ log = get_logger()
 async def handle_exception(exc, rec, done_msg, report, cli_command) -> None:
     """Handles exceptions during task execution and logs the error.
 
+    Maps common exceptions to more user-friendly messages and updates the report
+    with failure information.
+
     Args:
-        exc: The exception that occurred.
-        rec: The inventory record associated with the task.
-        done_msg: The message indicating task completion status.
-        report: The Report object to store task results.
-        cli_command:  The cli command run by netcfgbu.
+        exc: The exception that occurred during task execution.
+        rec: The inventory record associated with the task that failed.
+        done_msg: The message indicating task completion status to be displayed in logs.
+        report: The Report object to store task results and statistics.
+        cli_command: The CLI command being executed by netcfgbu.
+
+    Returns:
+        None
     """
     exception_map = {
         asyncssh.PermissionDenied: "All credentials failed",
@@ -50,13 +60,20 @@ async def process_tasks(
 ):
     """Processes tasks in the provided task list, handling both login and generic tasks.
 
+    Executes the tasks asynchronously and manages the results, including setting up
+    jump hosts if configured. Tracks task completion and delegates processing to
+    specialized functions based on the command type.
+
     Args:
-        tasks: A list of tasks to process.
-        app_cfg: The application configuration object.
-        report: The Report object to store task results.
-        cli_command: The CLI command being executed.
-        success_callback: Optional callback for successful tasks.
-        failure_callback: Optional callback for failed tasks.
+        tasks: A dictionary mapping coroutines to their associated inventory records.
+        app_cfg: The application configuration object containing settings like jumphost config.
+        report: The Report object to store task results and statistics.
+        cli_command: The CLI command being executed (e.g., 'login', 'backup').
+        success_callback: Optional callback function to be called for successful tasks.
+        failure_callback: Optional callback function to be called for failed tasks.
+
+    Returns:
+        None
     """
     done = 0
     total = len(tasks)
@@ -87,12 +104,19 @@ async def process_tasks(
 async def process_login_task(task, report, done_msg, rec, failure_callback):
     """Processes a login task, handling the results and exceptions.
 
+    Attempts to retrieve the login result from the completed task and updates
+    the report accordingly. Handles login success by recording the username,
+    and failures by recording the reason.
+
     Args:
-        task: The task to process.
-        report: The Report object to store task results.
-        done_msg: The message indicating task completion status.
-        rec: The inventory record associated with the task.
-        failure_callback: Optional callback for failed tasks.
+        task: The completed asyncio task containing the login attempt result.
+        report: The Report object to store task results and statistics.
+        done_msg: The message indicating task completion status to be displayed in logs.
+        rec: The inventory record associated with the login task.
+        failure_callback: Optional callback function to be called if login fails.
+
+    Returns:
+        None
     """
     try:
         if login_user := task.result():
@@ -117,14 +141,20 @@ async def process_generic_task(
 ):
     """Processes a generic task, handling the results and exceptions.
 
+    Extracts the result from the completed task and updates the report based on success
+    or failure. Invokes the appropriate callback function based on the outcome.
+
     Args:
-        task: The task to process.
-        report: The Report object to store task results.
-        cli_command: The CLI command being executed.
-        done_msg: The message indicating task completion status.
+        task: The completed asyncio task containing the operation result.
+        report: The Report object to store task results and statistics.
+        cli_command: The CLI command being executed (e.g., 'backup', 'probe').
+        done_msg: The message indicating task completion status to be displayed in logs.
         rec: The inventory record associated with the task.
-        success_callback: Optional callback for successful tasks.
-        failure_callback: Optional callback for failed tasks.
+        success_callback: Optional callback function to be called for successful tasks.
+        failure_callback: Optional callback function to be called for failed tasks.
+
+    Returns:
+        None
     """
     try:
         result = task.result()
@@ -155,14 +185,21 @@ def execute_command(
 ):
     """Executes the specified CLI command on the provided inventory records.
 
+    Sets up the asynchronous execution environment, creates tasks for each inventory
+    record, and manages the execution flow. Handles task batching for login commands
+    and tracks performance metrics through a Report object.
+
     Args:
         inventory_recs: List of inventory records to process.
-        app_cfg: The application configuration object.
-        cli_command: The CLI command to execute.
-        task_creator: Function to create tasks for each inventory record.
-        cli_opts: Optional CLI options.
-        success_callback: Optional callback for successful tasks.
-        failure_callback: Optional callback for failed tasks.
+        app_cfg: The application config object containing settings like credentials & jumphost.
+        cli_command: The CLI command to execute (e.g., 'login', 'backup', 'probe').
+        task_creator: Function that creates a coroutine task for each inventory record.
+        cli_opts: Optional dictionary of CLI options that modify command behavior.
+        success_callback: Optional callback function to be called for successful tasks.
+        failure_callback: Optional callback function to be called for failed tasks.
+
+    Returns:
+        None
     """
     device_count = len(inventory_recs)
     log.info("%s %d devices ...", cli_command.capitalize(), device_count)
