@@ -8,21 +8,17 @@ Note:
     This module serves as the implementation for the 'backup' CLI command.
 """
 
-import click
+from pathlib import Path
+from typing import Annotated, Optional
+
+import typer
 
 from netcfgbu.cli.common import execute_command
 from netcfgbu.config_model import AppConfig
 from netcfgbu.os_specs import make_host_connector
 from netcfgbu.plugins import Plugin, load_plugins
 
-from .root import (
-    WithInventoryCommand,
-    cli,
-    opt_batch,
-    opt_config_file,
-    opt_debug_ssh,
-    opts_inventory,
-)
+from .root import WithInventoryCommand, cli
 
 CLI_COMMAND = "backup"
 
@@ -87,24 +83,76 @@ def exec_backup(inventory_recs: list, app_cfg: AppConfig) -> None:
     )
 
 
-@cli.command(name=CLI_COMMAND, cls=WithInventoryCommand)
-@opt_config_file
-@opts_inventory
-@opt_debug_ssh
-@opt_batch
-@click.pass_context
-def cli_backup(ctx: click.Context, **_cli_opts) -> None:
+@cli.command(name=CLI_COMMAND, cls=WithInventoryCommand, help="Backup network configurations.")
+def cli_backup(
+    ctx: typer.Context,
+    config: Annotated[
+        Optional[Path],
+        typer.Option(
+            "-C",
+            "--config",
+            envvar="NETCFGBU_CONFIG",
+            help="Configuration file path.",
+            exists=False,  # Allow specifying non-existent for default creation
+            resolve_path=True,
+        ),
+    ] = None,
+    inventory: Annotated[
+        Optional[Path],
+        typer.Option(
+            "--inventory",
+            "-i",
+            help="Inventory file-name.",
+            envvar="NETCFGBU_INVENTORY",
+            exists=True,
+            resolve_path=True,
+        ),
+    ] = None,
+    limit: Annotated[
+        Optional[list[str]],
+        typer.Option(
+            "--limit",
+            "-l",
+            "--include",
+            help="Limit/include in inventory (can be used multiple times).",
+        ),
+    ] = None,
+    exclude: Annotated[
+        Optional[list[str]],
+        typer.Option(
+            "--exclude",
+            "-e",
+            help="Exclude from inventory (can be used multiple times).",
+        ),
+    ] = None,
+    debug_ssh: Annotated[
+        Optional[int],
+        typer.Option(
+            "--debug-ssh",
+            help="Enable SSH debugging (level 1-3).",
+            min=1,
+            max=3,
+        ),
+    ] = None,
+    batch: Annotated[
+        Optional[int],
+        typer.Option(
+            "--batch",
+            "-b",
+            help="Inventory record processing batch size.",
+            min=1,
+            max=500,
+        ),
+    ] = None,
+) -> None:
     """Backup network configurations.
 
     This command initiates the backup process for network device configurations
     based on the provided inventory and configuration.
-
-    Args:
-        ctx (click.Context): The Click context object containing application state.
-        **_cli_opts: Additional CLI options passed to the command.
-
-    Returns:
-        None
     """
-    load_plugins(ctx.obj["app_cfg"].defaults.plugins_dir)
-    exec_backup(inventory_recs=ctx.obj["inventory_recs"], app_cfg=ctx.obj["app_cfg"])
+    # Config and inventory loading is handled by WithInventoryCommand
+    app_cfg = ctx.obj["app_cfg"]
+    inventory_recs = ctx.obj["inventory_recs"]
+
+    load_plugins(app_cfg.defaults.plugins_dir)
+    exec_backup(inventory_recs=inventory_recs, app_cfg=app_cfg)

@@ -5,13 +5,15 @@ It interacts with the inventory system to document info about available devices
 & their operating systems, as well as to build inventory files from config.
 """
 
+from pathlib import Path
 from textwrap import indent
+from typing import Annotated, Optional
 
-import click
+import typer
 from tabulate import tabulate
 
 from netcfgbu.config_model import AppConfig
-from netcfgbu.inventory import build
+from netcfgbu.inventory import build as build_inventory_file
 
 from .report import LN_SEP, SPACES_4
 from .root import (
@@ -19,40 +21,71 @@ from .root import (
     WithInventoryCommand,
     cli,
     get_spec_nameorfirst,
-    opt_config_file,
-    opts_inventory,
 )
+
+# Create a new Typer app for the 'inventory' subcommand
+inventory_cli = typer.Typer(
+    name="inventory", help="Group of commands for managing device inventory."
+)
+cli.add_typer(inventory_cli)
 
 # -----------------------------------------------------------------------------
 #                                Inventory Commands
 # -----------------------------------------------------------------------------
 
 
-@cli.group(name="inventory")
-def cli_inventory() -> None:
-    """Group of commands for managing device inventory.
-
-    This command group provides various subcommands that allow users to view,
-    build, and manage the network device inventory.
-    """
-    pass  # pragma: no cover
-
-
-@cli_inventory.command("list", cls=WithInventoryCommand)
-@opt_config_file
-@opts_inventory
-@click.option("--brief", "-b", is_flag=True)
-@click.pass_context
-def cli_inventory_list(ctx: click.Context, **cli_opts):
+@inventory_cli.command(
+    "list", cls=WithInventoryCommand, help="List network devices in the inventory."
+)
+def cli_inventory_list(
+    ctx: typer.Context,
+    config: Annotated[
+        Optional[Path],
+        typer.Option(
+            "-C",
+            "--config",
+            envvar="NETCFGBU_CONFIG",
+            help="Configuration file path.",
+            exists=False,
+            resolve_path=True,
+        ),
+    ] = None,
+    inventory: Annotated[
+        Optional[Path],
+        typer.Option(
+            "--inventory",
+            "-i",
+            help="Inventory file-name.",
+            envvar="NETCFGBU_INVENTORY",
+            exists=True,
+            resolve_path=True,
+        ),
+    ] = None,
+    limit: Annotated[
+        Optional[list[str]],
+        typer.Option(
+            "--limit",
+            "-l",
+            "--include",
+            help="Limit/include in inventory (can be used multiple times).",
+        ),
+    ] = None,
+    exclude: Annotated[
+        Optional[list[str]],
+        typer.Option(
+            "--exclude",
+            "-e",
+            help="Exclude from inventory (can be used multiple times).",
+        ),
+    ] = None,
+    brief: Annotated[
+        bool, typer.Option("--brief", "-b", help="Show brief output (summary only).")
+    ] = False,
+):
     """List network devices in the inventory.
 
     This command displays a summary of devices in the inventory, grouped by
     operating system, & optionally shows detailed information for each device.
-
-    Args:
-        ctx: Click context object containing inventory records and other shared data.
-        **cli_opts: Command line options including:
-            brief: If True, only shows the summary & not detailed device information.
     """
     inventory_recs = ctx.obj["inventory_recs"]
     inventory_tabular_data = []
@@ -75,16 +108,21 @@ def cli_inventory_list(ctx: click.Context, **cli_opts):
         SPACES_4,
     )
 
-    print(LN_SEP)
-    print("SUMMARY:")
-    print(os_name_table)
+    typer.echo(LN_SEP)
+    typer.echo("SUMMARY:")
+    typer.echo(os_name_table)
 
-    if cli_opts["brief"] is True:
-        return  # pragma: no cover
+    if brief:
+        return
+
+    if not inventory_recs:  # handle case where inventory is empty after filtering
+        typer.echo("No devices found in inventory matching criteria.")
+        typer.echo(LN_SEP)
+        return
 
     field_names = inventory_recs[0].keys()
 
-    print(
+    typer.echo(
         tabulate(
             headers=field_names,
             tabular_data=[rec.values() for rec in inventory_recs],
@@ -92,42 +130,62 @@ def cli_inventory_list(ctx: click.Context, **cli_opts):
         )
     )
 
-    print(LN_SEP)
+    typer.echo(LN_SEP)
 
 
-@cli_inventory.command("build", cls=WithConfigCommand)
-@opt_config_file
-@click.option("--name", "-n", help="inventory name as defined in config file")
-@click.option("--brief", is_flag=True)
-@click.pass_context
-def cli_inventory_build(ctx: click.Context, **cli_opts) -> None:
+@inventory_cli.command(
+    "build", cls=WithConfigCommand, help="Build the inventory file from configuration."
+)
+def cli_inventory_build(
+    ctx: typer.Context,
+    config: Annotated[
+        Path,
+        typer.Option(
+            "-C",
+            "--config",
+            envvar="NETCFGBU_CONFIG",
+            help="Configuration file path (required for build).",
+            exists=True,  # Must exist for build
+            dir_okay=False,
+            readable=True,
+            resolve_path=True,
+        ),
+    ],  # Default config is handled by WithConfigCommand if not provided by user
+    name: Annotated[
+        Optional[str],
+        typer.Option(
+            "--name",
+            "-n",
+            help="Inventory name as defined in config file (uses first if not specified).",
+        ),
+    ] = None,
+    # brief is not used by this command but kept for consistency if it were a shared option group
+    # brief: Annotated[bool, typer.Option("--brief", help="Brief output (not applicable to build).")] = False,
+) -> None:
     """Build the inventory file from configuration.
 
     Creates an inventory file based on definitions in the netcfgbu configuration file.
     If multiple inventory definitions exist, a specific inventory can be selected using
     the --name option.
-
-    Args:
-        ctx: Click context object containing application configuration.
-        **cli_opts: Command line options including:
-            name: Name of the inventory section defined in the config file.
-            brief: Flag for brief output format.
-
-    Raises:
-        RuntimeError: If the specified inventory is not defined in the configuration file
-                     or if no configuration file is provided.
     """
     app_cfg: AppConfig = ctx.obj["app_cfg"]
 
-    if not (spec := get_spec_nameorfirst(app_cfg.inventory, cli_opts["name"])):
-        cfg_opt = ctx.params["config"]
-        inv_name = cli_opts["name"]
-        inv_name = f"'{inv_name}'" if inv_name else ""
-        err_msg = (
-            f"Inventory section {inv_name} not defined in configuration file: {cfg_opt.name}"
-            if cfg_opt
-            else "Configuration file required for use with build subcommand"
-        )
-        raise RuntimeError(err_msg)
+    if not app_cfg.inventory:
+        raise typer.BadParameter(f"No inventory sections defined in configuration file: {config}")
 
-    build(spec)
+    spec = get_spec_nameorfirst(app_cfg.inventory, name)
+
+    if not spec:
+        inv_name_msg = f"'{name}' " if name else ""
+        raise typer.BadParameter(
+            f"Inventory section {inv_name_msg}not defined in configuration file: {config}"
+        )
+
+    try:
+        build_inventory_file(spec)
+        typer.echo(
+            f"Inventory file '{spec.file}' built successfully from config section '{spec.name}'."
+        )
+    except Exception as e:
+        typer.echo(f"Error building inventory: {e}", err=True)
+        raise typer.Exit(code=1) from e

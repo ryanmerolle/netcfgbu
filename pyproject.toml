@@ -24,7 +24,7 @@ dependencies = [
     "toml",
     "pydantic-settings",
     "tabulate",
-    "click",
+    "typer[standard]>=0.9.0",
     "first",
     "pexpect",
     "types-tabulate",

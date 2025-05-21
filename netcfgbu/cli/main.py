@@ -10,17 +10,16 @@ from .example import cli_example  # noqa # pylint: disable=W0611
 from .inventory import cli_inventory  # noqa # pylint: disable=W0611
 from .login import cli_login  # noqa # pylint: disable=W0611
 from .probe import cli_check  # noqa # pylint: disable=W0611
-from .root import cli
+from .root import cli  # This will be the Typer app
 from .vcs import cli_vcs  # noqa # pylint: disable=W0611
 
 
 def run() -> None:
     """Entry point for the CLI application.
 
-    This function initializes and runs the command-line interface (CLI)
-    with an empty context object.
+    This function initializes and runs the command-line interface (CLI).
 
     Returns:
         None: This function doesn't return anything.
     """
-    cli(obj={})
+    cli()

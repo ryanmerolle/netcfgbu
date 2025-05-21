@@ -5,136 +5,178 @@ version control system, specifically Git. It allows users to prepare, save, and 
 the status of configuration backups in a Git repository.
 """
 
-import click
+from pathlib import Path
+from typing import Annotated, Optional
+
+import typer
 
 from netcfgbu import config as _config
+from netcfgbu.config_model import AppConfig, GitSpec
 from netcfgbu.logger import stop_aiologging
 from netcfgbu.plugins import load_plugins
 from netcfgbu.vcs import git
 
-from .root import cli, get_spec_nameorfirst, opt_config_file
+from .root import cli, get_spec_nameorfirst
 
-opt_vcs_name = click.option("--name", help="VCS name as defined in config file")
+# Create a new Typer app for the 'vcs' subcommand
+vcs_cli = typer.Typer(name="vcs", help="Version Control System subcommands.")
+cli.add_typer(vcs_cli)
 
 
-@cli.group(name="vcs")
-def cli_vcs() -> None:
-    """Version Control System subcommands.
+def get_vcs_spec_from_config(
+    app_cfg: AppConfig, vcs_name: Optional[str], config_path: Path
+) -> GitSpec:
+    """Helper to load VCS spec from config or raise error."""
+    if not app_cfg.git:
+        raise typer.BadParameter(f"No VCS (git) configurations found in {config_path}")
 
-    This function creates a command group for all VCS-related operations.
+    spec = get_spec_nameorfirst(app_cfg.git, vcs_name)
+    if not spec:
+        name_msg = f" named '{vcs_name}'" if vcs_name else ""
+        raise typer.BadParameter(f"VCS configuration{name_msg} not found in {config_path}")
+    return spec
+
+
+# Instead of a custom VCSCommand class, we'll use callbacks or direct logic
+# in each command function to load config and vcs_spec.
+# A common function can be used for this setup part.
+
+
+def vcs_command_callback(ctx: typer.Context, config_path_obj: Optional[Path], name: Optional[str]):
+    """Callback to load app_cfg and vcs_spec into context.
+
+    This replaces the invoke method of the old VCSCommand class.
     """
-    pass  # pragma: no cover
+    if ctx.resilient_parsing:
+        return  # Do not run callback during completion
 
+    try:
+        # Ensure ctx.obj is initialized if coming from a direct command call not via root
+        if not hasattr(ctx, "obj") or ctx.obj is None:
+            ctx.obj = {}
 
-class VCSCommand(click.Command):
-    """A custom Click command that handles version control system (VCS) operations.
-
-    This class extends `click.Command` and is used to invoke VCS-related commands
-    within a CLI application. It loads the application configuration, selects the
-    appropriate VCS specification, and then invokes the command.
-
-    Example usage:
-        @click.command(cls=VCSCommand)
-        def my_command():
-            # Command implementation
-    """
-
-    def invoke(self, ctx) -> None:
-        """Execute the VCS command with the given context.
-
-        Args:
-            ctx: The Click context object containing command parameters and options.
-
-        Raises:
-            RuntimeError: If no configuration file is provided or if no VCS configuration
-                section is found in the configuration file.
-        """
-        cfg_fileopt = ctx.params["config"]
-
-        try:
-            app_cfgs = ctx.obj["app_cfg"] = _config.load(fileio=cfg_fileopt)
-            if not (spec := get_spec_nameorfirst(app_cfgs.git, ctx.params["name"])):
-                err_msg = (
-                    "No configuration file provided, required for vcs support"
-                    if not cfg_fileopt
-                    else f"No vcs config section found in configuration file: {cfg_fileopt.name}"
+        # If app_cfg is already loaded (e.g. by a global callback or previous command), use it.
+        # Otherwise, load it.
+        if "app_cfg" not in ctx.obj or not ctx.obj["app_cfg"]:
+            effective_config_path = config_path_obj or Path("netcfgbu.toml")
+            if (
+                not effective_config_path.exists() and config_path_obj
+            ):  # only error if user specified a non-existent file
+                raise typer.BadParameter(
+                    f"Configuration file not found: {effective_config_path}", param_hint="--config"
                 )
-                raise RuntimeError(err_msg)
+            ctx.obj["app_cfg"] = _config.load(
+                fileio=effective_config_path if effective_config_path.exists() else None
+            )
 
-            ctx.obj["vcs_spec"] = spec
-            super().invoke(ctx)
-            stop_aiologging()
+        app_cfg = ctx.obj["app_cfg"]
 
-        except Exception as exc:
-            ctx.fail(exc.args[0])
+        if not app_cfg:  # Should not happen if load is correct
+            raise typer.Exit("Failed to load application configuration.", code=1)
+
+        vcs_spec = get_vcs_spec_from_config(app_cfg, name, config_path_obj or Path("netcfgbu.toml"))
+        ctx.obj["vcs_spec"] = vcs_spec
+    except Exception as e:
+        typer.echo(f"Error: {e}", err=True)
+        raise typer.Exit(code=1) from e
 
 
-@cli_vcs.command(name="prepare", cls=VCSCommand)
-@opt_config_file
-@opt_vcs_name
-@click.pass_context
-def cli_vcs_prepare(ctx: click.Context, **_cli_opts) -> None:
+common_vcs_options = [
+    typer.Option(
+        None,
+        "-C",
+        "--config",
+        envvar="NETCFGBU_CONFIG",
+        help="Configuration file path.",
+        exists=False,  # Allow default creation logic
+        resolve_path=True,
+        show_default=False,  # Handled by our logic or default file name
+    ),
+    typer.Option(None, "--name", help="VCS name as defined in config file."),
+]
+
+
+@vcs_cli.command(name="prepare", help="Prepare your system with the VCS repo.")
+def cli_vcs_prepare(
+    ctx: typer.Context,
+    config: Annotated[Optional[Path], common_vcs_options[0]] = None,
+    name: Annotated[Optional[str], common_vcs_options[1]] = None,
+) -> None:
     """Prepare your system with the VCS repo.
 
-    This command sets up your `configs_dir` as the VCS repository
-    so that when you execute the backup process the resulting backup files
-    can be stored in the VCS system.
-
-    Args:
-        ctx: The Click context object containing command parameters and options.
-        **_cli_opts: Additional command line options.
+    This command sets up your `configs_dir` as the VCS repository.
     """
-    git.vcs_prepare(spec=ctx.obj["vcs_spec"], repo_dir=ctx.obj["app_cfg"].defaults.configs_dir)
+    vcs_command_callback(ctx, config, name)  # Load app_cfg and vcs_spec
+    app_cfg = ctx.obj["app_cfg"]
+    vcs_spec = ctx.obj["vcs_spec"]
+
+    try:
+        git.vcs_prepare(spec=vcs_spec, repo_dir=app_cfg.defaults.configs_dir)
+        typer.echo(
+            f"VCS repository prepared at {app_cfg.defaults.configs_dir} using '{vcs_spec.name}' config."
+        )
+    except Exception as e:
+        typer.echo(f"Error preparing VCS: {e}", err=True)
+        raise typer.Exit(code=1) from e
+    finally:
+        stop_aiologging()
 
 
-@cli_vcs.command(name="save", cls=VCSCommand)
-@opt_config_file
-@opt_vcs_name
-@click.option("--add-tag", is_flag=True, default=False, help="If set, create a git tag")
-@click.option("--message", help="Set commit message / tag name")
-@click.pass_context
-def cli_vcs_save(ctx: click.Context, **cli_opts) -> None:
-    """Save changes into VCS repository.
+@vcs_cli.command(name="save", help="Save changes into VCS repository.")
+def cli_vcs_save(
+    ctx: typer.Context,
+    config: Annotated[Optional[Path], common_vcs_options[0]] = None,
+    name: Annotated[Optional[str], common_vcs_options[1]] = None,
+    add_tag: Annotated[bool, typer.Option(help="If set, create a git tag.")] = False,
+    message: Annotated[Optional[str], typer.Option(help="Set commit message / tag name.")] = None,
+) -> None:
+    """Save changes into VCS repository."""
+    vcs_command_callback(ctx, config, name)  # Load app_cfg and vcs_spec
+    app_cfg = ctx.obj["app_cfg"]
+    vcs_spec = ctx.obj["vcs_spec"]
 
-    After you have run the config backup process you will need to push those
-    changes into the VCS repository. This command performs the necessary
-    steps to add changes to the repository and set a git tag. The release
-    tag by default is the timestamp in the form of
-    "<year><month><day>_<hour><minute><second>".
+    try:
+        load_plugins(app_cfg.defaults.plugins_dir)
+        git.vcs_save(
+            vcs_spec,
+            repo_dir=app_cfg.defaults.configs_dir,
+            add_tag=add_tag,
+            message=message,
+        )
+        typer.echo(
+            f"Changes saved to VCS repository at {app_cfg.defaults.configs_dir} using '{vcs_spec.name}' config."
+        )
+        if add_tag:
+            tag_name = message or typer.prompt(
+                "Enter tag name (leave empty for default timestamp tag):",
+                default="",
+                show_default=False,
+            )
+            # Actual tagging logic is within git.vcs_save, this is just for echo
+            typer.echo(f"Tag '{tag_name if tag_name else '<timestamp>'}' added.")
+    except Exception as e:
+        typer.echo(f"Error saving to VCS: {e}", err=True)
+        raise typer.Exit(code=1) from e
+    finally:
+        stop_aiologging()
 
-    Args:
-        ctx: The Click context object containing command parameters and options.
-        **cli_opts: Additional command line options including:
-            add_tag: Boolean flag to create a git tag.
-            message: String to set as commit message or tag name.
-    """
-    load_plugins(ctx.obj["app_cfg"].defaults.plugins_dir)
-    git.vcs_save(
-        ctx.obj["vcs_spec"],
-        repo_dir=ctx.obj["app_cfg"].defaults.configs_dir,
-        add_tag=cli_opts["add_tag"],
-        message=cli_opts["message"],
-    )
 
+@vcs_cli.command(name="status", help="Show VCS repository status.")
+def cli_vcs_status(
+    ctx: typer.Context,
+    config: Annotated[Optional[Path], common_vcs_options[0]] = None,
+    name: Annotated[Optional[str], common_vcs_options[1]] = None,
+) -> None:
+    """Show VCS repository status."""
+    vcs_command_callback(ctx, config, name)  # Load app_cfg and vcs_spec
+    app_cfg = ctx.obj["app_cfg"]
+    vcs_spec = ctx.obj["vcs_spec"]
 
-@cli_vcs.command(name="status", cls=VCSCommand)
-@opt_config_file
-@opt_vcs_name
-@click.pass_context
-def cli_vcs_status(ctx: click.Context, **_cli_opts) -> None:
-    """Show VCS repository status.
-
-    This command will show the status of the `configs_dir` contents so that you
-    will know what will be changed before you run the `vcs save` command.
-
-    Args:
-        ctx: The Click context object containing command parameters and options.
-        **_cli_opts: Additional command line options.
-
-    Returns:
-        None. Prints the repository status to standard output.
-    """
-    output = git.vcs_status(
-        spec=ctx.obj["vcs_spec"], repo_dir=ctx.obj["app_cfg"].defaults.configs_dir
-    )
-    print(output)
+    try:
+        output = git.vcs_status(spec=vcs_spec, repo_dir=app_cfg.defaults.configs_dir)
+        typer.echo(output)
+    except Exception as e:
+        typer.echo(f"Error getting VCS status: {e}", err=True)
+        raise typer.Exit(code=1) from e
+    finally:
+        stop_aiologging()
