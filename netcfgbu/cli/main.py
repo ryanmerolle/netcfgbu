@@ -7,11 +7,11 @@ start the application.
 
 from .backup import cli_backup  # noqa # pylint: disable=W0611
 from .example import cli_example  # noqa # pylint: disable=W0611
-from .inventory import cli_inventory  # noqa # pylint: disable=W0611
+from . import inventory  # noqa # pylint: disable=W0611
 from .login import cli_login  # noqa # pylint: disable=W0611
 from .probe import cli_check  # noqa # pylint: disable=W0611
 from .root import cli  # This will be the Typer app
-from .vcs import cli_vcs  # noqa # pylint: disable=W0611
+from . import vcs  # noqa # pylint: disable=W0611
 
 
 def run() -> None:

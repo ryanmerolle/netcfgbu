@@ -39,10 +39,11 @@ def copy_example_files() -> None:
     ]
     if existing_files:
         existing_files_names = ", ".join(file_path.name for file_path in existing_files)
-        typer.echo(
-            f"ERROR: No files were copied. The following file(s) already exist in the current directory: {existing_files_names}",
-            err=True,
+        error_msg = (
+            "ERROR: No files were copied. The following file(s) already exist "
+            f"in the current directory: {existing_files_names}"
         )
+        typer.echo(error_msg, err=True)
         raise typer.Exit(code=1)
 
     # If no existing files were found, proceed to copy
