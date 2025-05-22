@@ -99,7 +99,18 @@ common_vcs_options = [
 @vcs_cli.command(name="prepare", help="Prepare your system with the VCS repo.")
 def cli_vcs_prepare(
     ctx: typer.Context,
-    config: Annotated[Optional[Path], common_vcs_options[0]] = None,
+    config: Annotated[
+        Optional[Path],
+        typer.Option(
+            "-C",
+            "--config",
+            envvar="NETCFGBU_CONFIG",
+            help="Configuration file path.",
+            exists=False,
+            resolve_path=True,
+            show_default=False,
+        ),
+    ] = None,
     name: Annotated[Optional[str], common_vcs_options[1]] = None,
 ) -> None:
     """Prepare your system with the VCS repo.
